@@ -1,0 +1,115 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,amsthm,amsopn,array,natbib,titling}
+\usepackage[utf8]{inputenc}
+\usepackage{authblk}
+\usepackage{hyperref}
+\usepackage[english]{babel}
+\usepackage[scaled=0.9]{helvet}
+\usepackage[sc]{mathpazo}
+\usepackage{Sweave}
+\usepackage{color}
+\definecolor{link}{rgb}{0.45,0.51,0.67}
+\hypersetup{
+  colorlinks,%
+  citecolor=link,%
+  filecolor=link,%
+  linkcolor=link,%
+  urlcolor=link
+}
+
+
+
+%% load any required packages here
+\renewcommand{\today}{\begingroup
+\number \day\space  \ifcase \month \or January\or February\or March\or
+April\or May\or June\or July\or August\or September\or October\or
+November\or December\fi
+\space  \number \year \endgroup}
+\def\rth{r^{th}}
+\let\code=\texttt
+\let\proglang=\texttt
+\let\pkg=\texttt
+\newcommand{\CRANpkg}[1]{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}%
+\newcommand{\email}[1]{\href{mailto:#1}{\normalfont\texttt{#1}}}
+\let\cpkg=\CRANpkg
+\bibliographystyle{plainnat}
+
+%\VignetteIndexEntry{Introduction to kedd}
+%\VignettePackage{kedd}
+
+
+\begin{document}
+
+\title{\bfseries Introduction to \pkg{kedd}}
+\author{by Arsalane Chouaib Guidoum\thanks{Department of Probabilities \& Statistics.\\Faculty of Mathematics. \\University of Science and Technology Houari Boumediene.\\ BP 32 El-Alia, U.S.T.H.B, Algeria.\\
+\email{acguidoum@usthb.dz}}}
+\date{\today}
+
+\maketitle
+
+\section{Introduction}
+
+\pkg{kedd} \citep{kedd} is a package providing additional smoothing techniques to the \texttt{R} statistical system. Although various packages on the Comprehensive \texttt{R} Archive Network (CRAN) provide functions useful to nonparametric statistics, \pkg{kedd} aims to serve as a central location for more specifically of a nonparametric functions and data sets. The project was officially launched in December 2012 and is under active development.
+
+The current feature set of the package can be split in four main categories: compute the convolutions and derivatives of a kernel function, compute the kernel estimators for a density of probability and its derivatives, computing the bandwidth selectors with different methods, displaying the kernel estimators and selection functions of the bandwidth.
+
+Moreover, the package follows the general \texttt{R} philosophy of working with model objects. This means that instead of merely returning, say, a kernel estimator of $\rth$ derivative of a density, many functions will return an object containing, it's functions are S3 classes (\code{S3method}). The object can then be manipulated at one’s will using various extraction, summary or plotting functions. Whenever possible, we develop a graphical user interface of the various functions of a coherent whole, to facilitate the use of this package.
+
+\section{Documentation}
+
+It is a requirement of the \texttt{R} packaging system that every
+function and data set in a package has a help page. The \pkg{kedd}
+package follows this requirement strictly. In addition to the help
+pages, the package includes vignettes and demonstration scripts;
+running
+<<echo=TRUE, eval=FALSE>>=
+vignette(package = "kedd")
+@
+and
+<<eval=FALSE>>=
+demo(package = "kedd")
+@
+at the \texttt{R} prompt will give the list of each.
+
+\section{Requirements}
+\texttt{R} version >= 2.15.0.
+
+\section{Licence}
+This package and its documentation are usable under the terms of the "GNU General Public License", a copy of which is distributed with the package.
+
+\section{Collaboration and citation}
+
+Obviously, the package leaves many other fields of nonparametric statistics untouched. For this situation to change, we hope that experts in their field will join their efforts to ours and contribute code to the \pkg{kedd} project. The project will continue to grow and to improve by and for the community of developers and users.
+
+If you use \pkg{kedd} for smoothing techniques and computing bandwidth selectors of the $\rth$ derivative of a probability density, please cite the software in publications. Use
+<<eval=FALSE>>=
+citation()
+@
+or
+<<eval=FALSE>>=
+citation("kedd")
+@
+for information on how to cite the software.
+
+\section*{Note}
+
+Please send comments, error reports, etc. to the author via the addresses email.
+
+
+\begin{thebibliography}{1}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{{\tt #1}}\fi
+  
+\bibitem[Guidoum, 2013]{kedd}
+Guidoum, A. C. (2013).
+\newblock \pkg{kedd}: Kernel estimator and bandwidth selection for density and its derivatives.
+\newblock \texttt{R} package version 1.0.0.
+\newblock \url{http://CRAN.R-project.org/package=kedd}
+
+\end{thebibliography}
+
+
+\end{document}
+

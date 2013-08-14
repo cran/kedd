@@ -1,0 +1,46 @@
+export(kernel.fun,kernel.fun.default,kernel.conv,kernel.conv.default,plot.kernel.fun,plot.kernel.conv,
+       dkde,dkde.default,print.dkde,plot.dkde,lines.dkde,
+	   h.bcv,h.bcv.default,print.h.bcv,plot.h.bcv,lines.h.bcv,
+	   h.ucv,h.ucv.default,print.h.ucv,plot.h.ucv,lines.h.ucv,
+	   h.ccv,h.ccv.default,print.h.ccv,plot.h.ccv,lines.h.ccv,
+	   h.amise,h.amise.default,print.h.amise,plot.h.amise,lines.h.amise,
+	   h.mcv,h.mcv.default,print.h.mcv,plot.h.mcv,lines.h.mcv,
+	   h.mlcv,h.mlcv.default,print.h.mlcv,plot.h.mlcv,lines.h.mlcv,
+	   h.tcv,h.tcv.default,print.h.tcv,plot.h.tcv,lines.h.tcv)
+	   
+S3method(kernel.fun, default)
+S3method(kernel.conv, default)
+S3method(dkde, default)
+S3method(h.bcv, default)
+S3method(h.ucv, default)
+S3method(h.ccv, default)
+S3method(h.amise, default)
+S3method(h.mcv, default)
+S3method(h.mlcv, default)
+S3method(h.tcv, default)
+S3method(plot, kernel.fun)
+S3method(plot, kernel.conv)
+S3method(plot, dkde)
+S3method(plot, h.bcv)
+S3method(plot, h.ucv)
+S3method(plot, h.ccv)
+S3method(plot, h.amise)
+S3method(plot, h.mcv)
+S3method(plot, h.mlcv)
+S3method(plot, h.tcv)
+S3method(lines, dkde)
+S3method(lines, h.bcv)
+S3method(lines, h.ucv)
+S3method(lines, h.ccv)
+S3method(lines, h.amise)
+S3method(lines, h.mcv)
+S3method(lines, h.mlcv)
+S3method(lines, h.tcv)
+S3method(print, dkde )
+S3method(print, h.bcv)
+S3method(print, h.ucv)
+S3method(print, h.ccv)
+S3method(print, h.amise)
+S3method(print, h.mcv)
+S3method(print, h.mlcv)
+S3method(print, h.tcv)
