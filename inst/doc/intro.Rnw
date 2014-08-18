@@ -105,7 +105,7 @@ Please send comments, error reports, etc. to the author via the addresses email.
 \bibitem[Guidoum, 2013]{kedd}
 Guidoum, A. C. (2013).
 \newblock \pkg{kedd}: Kernel estimator and bandwidth selection for density and its derivatives.
-\newblock \texttt{R} package version 1.0.0.
+\newblock \texttt{R} package version 1.0.1.
 \newblock \url{http://CRAN.R-project.org/package=kedd}
 
 \end{thebibliography}

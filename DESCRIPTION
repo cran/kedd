@@ -2,10 +2,8 @@ Package: kedd
 Type: Package
 Title: Kernel Estimator and Bandwidth Selection for Density and its
         Derivatives
-Version: 1.0.0
-Date: 2013-08-14
-Authors@R: c(person("Arsalane Chouaib", "Guidoum", role = c("aut", "cre"),
-        email = "acguidoum@usthb.dz"))
+Version: 1.0.1
+Date: 2014-08-18
 Author: Arsalane Chouaib Guidoum 
 Maintainer: Arsalane Chouaib Guidoum <acguidoum@usthb.dz>
 Depends: R (>= 2.15.0)
@@ -14,6 +12,6 @@ License: GPL (>= 2)
 LazyLoad: yes
 LazyData: yes
 Repository: CRAN
-Packaged: 2013-08-14 08:32:38 UTC; arsalane
+Packaged: 2014-08-18 12:06:31 UTC; arsalane
 NeedsCompilation: no
-Date/Publication: 2013-08-14 16:35:44
+Date/Publication: 2014-08-18 16:46:50

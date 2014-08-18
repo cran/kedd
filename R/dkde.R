@@ -35,6 +35,7 @@ dkde.default <- function(x,y=NULL,deriv.order=0,h,
     if (missing(r))           r <- 0
     if (missing(kernel)) kernel <- "gaussian"
     if (missing(h))      h <- h.ucv(x,deriv.order=r,kernel=kernel)$h
+	x <- x[!is.na(x)]
     if (is.null(y)){ 
                #from <- min(x) - 3 * h
                #to   <- max(x) + 3 * h

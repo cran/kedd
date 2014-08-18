@@ -97,6 +97,59 @@ legend("topright", legend = c(TRUE,kernels), col = c("black",seq(kernels)),
 
 ############################################################################
 #                             Example 5                                    #
+#                    Show the bandwidth selection                          #       
+#               kernel = "gaussian" ; derivative order = 0                 #
+############################################################################		  
+
+############################################################################
+#                 KDE of f (bimodal gaussian density)                      #
+############################################################################
+
+hbcv1  <- h.bcv(x=bimodal,whichbcv = 1,deriv.order = 0)$h
+hbcv2  <- h.bcv(x=bimodal,whichbcv = 2,deriv.order = 0)$h
+hucv   <- h.ucv(x=bimodal,deriv.order = 0)$h
+htcv   <- h.tcv(x=bimodal,deriv.order = 0)$h
+hccv   <- h.ccv(x=bimodal,deriv.order = 0)$h
+hmcv   <- h.mcv(x=bimodal,deriv.order = 0)$h
+h0 <- c(hbcv1,hbcv2,hucv,htcv,hccv,hmcv)
+h0
+dev.new()
+plot(dkde(x=bimodal,deriv.order = 0,h=h0[1]),ylim=c(0,0.5),
+      sub=paste("Kernel Gaussian",";","Derivative order = 0"),
+	  main="Bimodal Gaussian density")
+for(i in 1:length(h0)) lines(dkde(x=bimodal,deriv.order = 0,h=h0[i]), col = i)
+curve(fx,lty=8,add=TRUE)
+legend("topright",title="Bandwidth", c("True",expression(h[bcv1]),
+       expression(h[bcv2]),expression(h[ucv]),expression(h[tcv]),
+       expression(h[ccv]),expression(h[mcv])),
+       lty=c(8,rep(1,length(h0))),col= c("black",seq(h0)),inset = .015)
+
+############################################################################
+#             KDDE of d/dx f (bimodal gaussian density)                    #
+############################################################################
+
+hbcv1  <- h.bcv(x=bimodal,whichbcv = 1,deriv.order = 1,upper=0.5)$h
+hbcv2  <- h.bcv(x=bimodal,whichbcv = 2,deriv.order = 1,upper=0.5)$h
+hucv   <- h.ucv(x=bimodal,deriv.order = 1)$h
+htcv   <- h.tcv(x=bimodal,deriv.order = 1)$h
+hccv   <- h.ccv(x=bimodal,deriv.order = 1)$h
+hmcv   <- h.mcv(x=bimodal,deriv.order = 1,upper=0.5)$h
+h1 <- c(hbcv1,hbcv2,hucv,htcv,hccv,hmcv)
+h1
+dev.new()
+plot(dkde(x=bimodal,deriv.order = 1,h=h1[1]),ylim=c(-0.7,0.7),
+          sub=paste("Kernel Gaussian",";","Derivative order = 1"),
+          main="Bimodal Gaussian density derivative")
+for(i in 1:length(h1)) lines(dkde(x=bimodal,deriv.order = 1,h=h1[i]), col = i)
+curve(fx1,lty=8,add=TRUE)
+legend("topright",title="Bandwidth", c("True",expression(h[bcv1]),
+       expression(h[bcv2]),expression(h[ucv]),expression(h[tcv]),
+       expression(h[ccv]),expression(h[mcv])),
+       lty=c(8,rep(1,length(h1))),col= c("black",seq(h1)),inset = .015)		  
+		  
+
+############################################################################
+#                             Example 6                                    #
 #                   Bimodal Gaussian density derivative                    #
 #                         CCV and MCV plot                                 #
 #                        derivative order = 0                              #

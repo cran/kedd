@@ -537,7 +537,3 @@ Hermite <-function (x, n, prob = TRUE)
     scale * mapply(H, x, n)
 }
 
-
-.onLoad <- function(libname, pkgname)
-   packageStartupMessage("kedd 1.0.0 loaded\nCopyright A. C. Guidoum 2013\n")
-

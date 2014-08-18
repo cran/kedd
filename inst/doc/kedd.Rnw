@@ -1,7 +1,7 @@
 \documentclass[a4paper,11pt]{article}
 \usepackage{a4wide}
 \usepackage{graphicx}
-\usepackage{amsmath,amssymb,amsthm,amsopn,array,natbib,titling}
+\usepackage{amsmath,amssymb,amsopn,natbib}
 \usepackage[left=2.5cm,top=2cm,right=2cm,bottom=2cm]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage{authblk}
@@ -64,10 +64,11 @@ November\or December\fi
 %\VignetteIndexEntry{Kernel estimator and bandwidth selection for density and its derivatives}
 %\VignettePackage{kedd}
 
+
 \begin{document}
 
 \title{\bfseries{ Kernel Estimator and Bandwidth Selection for Density and its Derivatives}\\
-      \vskip3pt \large The \CRANpkg{kedd} Package \\Version 1.0.0}
+      \vskip3pt \large The \CRANpkg{kedd} Package \\Version 1.0.1}
 \author{by Arsalane Chouaib Guidoum\thanks{Department of Probabilities \& Statistics.\\Faculty of Mathematics. \\University of Science and Technology Houari Boumediene.\\ BP 32 El-Alia, U.S.T.H.B, Algeria.\\
 \email{acguidoum@usthb.dz}}}
 \date{\today}
@@ -646,7 +647,7 @@ plot(h.mcv(bimodal, deriv.order = 3),seq.bws=seq(0.1,0.5,length=50),sub="",main=
     \TCV(h,r) =  \frac{\RK}{nh^{2r+1}} + \frac{(-1)^r}{n(n-1) h^{2r+1}} \Sum2 \varphi^{(r)} \Z
 \end{equation}
 where$$ \varphi^{(r)} (c) = \left[\ConvKr - 2 K^{(2r)} 1\left(|c| > \frac{c_{n}}{h}\right) \right](c)$$
-$1(.)$ denotes the indicator function and $c_{n}$ is a sequence of positive constants, as $\lim_{n \to \infty} c_{n}/h \rightarrow 0$, here we take $c_{n} = 1/n$, for assure the convergence.
+$1(.)$ denotes the indicator function and $c_{n}$ is a sequence of positive constants, as $\lim_{n \to \infty} c_{n}/h^{2r+1} \rightarrow 0$, here we take $c_{n} = 1/n$, for assure the convergence.
 The function \code{h.tcv} computes the trimmed cross-validation for bandwidth selection. We enumerate the arguments and results of this function in Table \ref{Sec3:Tab7}.
 \begin{table}[!ht]
 {\renewcommand{\arraystretch}{1}
@@ -811,7 +812,7 @@ Feluch, W. and Koronacki, J. (1992).
 \bibitem[Guidoum, 2013]{kedd}
 Guidoum, A. C. (2013).
 \newblock \pkg{kedd}: Kernel estimator and bandwidth selection for density and its derivatives.
-\newblock \texttt{R} package version 1.0.0.
+\newblock \texttt{R} package version 1.0.1.
 \newblock \url{http://CRAN.R-project.org/package=kedd}
 
 \bibitem[Habbema, Hermans and Van den Broek (1974)]{Habbema1974}
@@ -896,8 +897,9 @@ Silverman, B. W. (1986).
 \newblock Chapman \& Hall/CRC. London.
 
 \bibitem[Singh, 1977]{Singh1977}
-Singh, R. S. (1990).
-\newblock  Applications of estimators of a density and its derivatives\textbf{39}(3), 357--363.
+Singh, R. S. (1977).
+\newblock  Applications of estimators of a density and its derivatives
+\newblock  \emph{Journal of the Royal Statistical Society, Series B}, \textbf{39}(3), 357--363.
 
 \bibitem[Stoker, 1993]{Stoker1993}
 Stoker, T. M. (1993).
