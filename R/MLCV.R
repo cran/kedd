@@ -1,8 +1,8 @@
 ## Mon Apr 15 04:04:20 2013
-## Original file Copyright © 2013 A.C. Guidoum
+## Original file Copyright 2013 A.C. Guidoum
 ## This file is part of the R package kedd.
 ## Arsalane Chouaib GUIDOUM <acguidoum@usthb.dz> and <starsalane@gmail.com> 
-## Department of Probabilities & Statistics
+## Department of Probabilities-Statistics
 ## Faculty of Mathematics
 ## University of Science and Technology Houari Boumediene
 ## BP 32 El-Alia, U.S.T.H.B, Algeris

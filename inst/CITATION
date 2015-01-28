@@ -7,13 +7,12 @@ citHeader("To cite package 'kedd' in publications use:")
  
  citEntry(entry="Manual",
 		  title = "kedd: Kernel estimator and bandwidth selection for density and its derivatives.",
-		  author = personList(as.person("A. C. Guidoum")),
+		  author = personList(as.person("A.C. Guidoum")),
 		  year = year,
 		  note = vers,
-		  url  = paste("URL http://CRAN.R-project.org/package=kedd"),
+		  url  = paste("http://CRAN.R-project.org/package=kedd"),
 		  textVersion =
-		  paste("A. C. Guidoum (",
+		  paste("A.C. Guidoum (",
 				year,
-				"). kedd: Kernel estimator and bandwidth selection for density and its derivatives.", vers, ".", "URL http://CRAN.R-project.org/package=kedd"
+				"). kedd: Kernel estimator and bandwidth selection for density and its derivatives.", vers, ".", "http://CRAN.R-project.org/package=kedd"
 				, sep=""))
-				

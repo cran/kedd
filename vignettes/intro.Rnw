@@ -102,10 +102,10 @@ Please send comments, error reports, etc. to the author via the addresses email.
 \expandafter\ifx\csname url\endcsname\relax
   \def\url#1{{\tt #1}}\fi
   
-\bibitem[Guidoum, 2013]{kedd}
-Guidoum, A. C. (2013).
+\bibitem[Guidoum, 2015]{kedd}
+Guidoum, A. C. (2015).
 \newblock \pkg{kedd}: Kernel estimator and bandwidth selection for density and its derivatives.
-\newblock \texttt{R} package version 1.0.1.
+\newblock \texttt{R} package version 1.0.2.
 \newblock \url{http://CRAN.R-project.org/package=kedd}
 
 \end{thebibliography}

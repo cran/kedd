@@ -2,39 +2,39 @@
 ### Encoding: ISO8859-1
 
 ###################################################
-### code chunk number 1: kedd.Rnw:131-132
+### code chunk number 1: kedd.Rnw:132-133
 ###################################################
 library(kedd)
 
 
 ###################################################
-### code chunk number 2: kedd.Rnw:134-136
+### code chunk number 2: kedd.Rnw:135-137
 ###################################################
 kernel.fun(x = seq(-0.02,0.02,by=0.01), deriv.order = 1, kernel = "gaussian")$kx
 kernel.conv(x = seq(-0.02,0.02,by=0.01), deriv.order = 1, kernel = "gaussian")$kx
 
 
 ###################################################
-### code chunk number 3: kedd.Rnw:138-140
+### code chunk number 3: kedd.Rnw:139-141
 ###################################################
 plot(kernel.fun(deriv.order = 1, kernel = "gaussian"))
 plot(kernel.conv(deriv.order = 1, kernel = "gaussian"))
 
 
 ###################################################
-### code chunk number 4: kedd.Rnw:145-146
+### code chunk number 4: kedd.Rnw:146-147
 ###################################################
 plot(kernel.fun(deriv.order = 1, kernel = "gaussian"),main = "", sub = "")
 
 
 ###################################################
-### code chunk number 5: kedd.Rnw:148-149
+### code chunk number 5: kedd.Rnw:149-150
 ###################################################
 plot(kernel.conv(deriv.order = 1, kernel = "gaussian"),main = "", sub = "")
 
 
 ###################################################
-### code chunk number 6: kedd.Rnw:175-181
+### code chunk number 6: kedd.Rnw:176-182
 ###################################################
 fx <- function(x) 0.5 *(-4*x-6)* dnorm(x,-1.5,0.5) + 0.5 *(-4*x+6) * dnorm(x,1.5,0.5)
 kernels <- c("gaussian","biweight","triweight","tricube")
@@ -45,7 +45,7 @@ legend("topright", legend = c(TRUE,kernels), col = c("black",seq(kernels)),lty =
 
 
 ###################################################
-### code chunk number 7: kedd.Rnw:183-188
+### code chunk number 7: kedd.Rnw:184-189
 ###################################################
 h <- c(0.14,0.3,0.6,1.2)                                                                                                               
 plot(dkde(x = bimodal, deriv.order = 1, h = h[1], kernel = kernels[1]),col = 1,ylim=c(-0.6,1) ,sub="", main="")                   
@@ -55,7 +55,7 @@ legend("topright", legend = c("TRUE",paste("h =",bquote(.(h)))), col = c("black"
 
 
 ###################################################
-### code chunk number 8: kedd.Rnw:228-232
+### code chunk number 8: kedd.Rnw:229-233
 ###################################################
 hatf  <- dkde(bimodal, deriv.order = 0)
 hatf1 <- dkde(bimodal, deriv.order = 1)
@@ -64,7 +64,7 @@ hatf3 <- dkde(bimodal, deriv.order = 3)
 
 
 ###################################################
-### code chunk number 9: kedd.Rnw:236-247
+### code chunk number 9: kedd.Rnw:237-248
 ###################################################
 fx  <- function(x) 0.5 * dnorm(x,-1.5,0.5) + 0.5 * dnorm(x,1.5,0.5)
 fx1 <- function(x) 0.5 *(-4*x-6)* dnorm(x,-1.5,0.5) + 0.5 *(-4*x+6) * 
@@ -80,31 +80,31 @@ plot(hatf3,fx = fx3)
 
 
 ###################################################
-### code chunk number 10: kedd.Rnw:252-253
+### code chunk number 10: kedd.Rnw:253-254
 ###################################################
 plot(hatf,fx = fx,lwd=2,sub="",main="")
 
 
 ###################################################
-### code chunk number 11: kedd.Rnw:255-256
+### code chunk number 11: kedd.Rnw:256-257
 ###################################################
 plot(hatf1,fx = fx1,lwd=2,sub="",main="")
 
 
 ###################################################
-### code chunk number 12: kedd.Rnw:258-259
+### code chunk number 12: kedd.Rnw:259-260
 ###################################################
 plot(hatf2,fx = fx2,lwd=2,sub="",main="")
 
 
 ###################################################
-### code chunk number 13: kedd.Rnw:261-262
+### code chunk number 13: kedd.Rnw:262-263
 ###################################################
 plot(hatf3,fx = fx3,lwd=2,sub="",main="")
 
 
 ###################################################
-### code chunk number 14: kedd.Rnw:311-315
+### code chunk number 14: kedd.Rnw:312-316
 ###################################################
 h.amise(bimodal, deriv.order = 0)
 h.amise(bimodal, deriv.order = 1)
@@ -113,7 +113,7 @@ h.amise(bimodal, deriv.order = 3)
 
 
 ###################################################
-### code chunk number 15: kedd.Rnw:351-355
+### code chunk number 15: kedd.Rnw:352-356
 ###################################################
 kernels <- eval(formals(h.mlcv.default)$kernel)
 hmlcv <- numeric()
@@ -122,32 +122,32 @@ for(i in 1:length(kernels))
 
 
 ###################################################
-### code chunk number 16: kedd.Rnw:357-358
+### code chunk number 16: kedd.Rnw:358-359
 ###################################################
 data.frame(kernels,hmlcv)
 
 
 ###################################################
-### code chunk number 17: kedd.Rnw:361-363
+### code chunk number 17: kedd.Rnw:362-364
 ###################################################
 plot(h.mlcv(bimodal, kernel =  kernels[1]), seq.bws = seq(0.1,1,length=50))
 plot(h.mlcv(bimodal, kernel =  kernels[2]), seq.bws = seq(0.1,1,length=50))
 
 
 ###################################################
-### code chunk number 18: kedd.Rnw:368-369
+### code chunk number 18: kedd.Rnw:369-370
 ###################################################
 plot(h.mlcv(bimodal, kernel =  kernels[1]), seq.bws = seq(0.1,1,length=50),sub="",main="")
 
 
 ###################################################
-### code chunk number 19: kedd.Rnw:371-372
+### code chunk number 19: kedd.Rnw:372-373
 ###################################################
 plot(h.mlcv(bimodal, kernel =  kernels[2]), seq.bws = seq(0.1,1,length=50),sub="",main="")
 
 
 ###################################################
-### code chunk number 20: kedd.Rnw:411-415
+### code chunk number 20: kedd.Rnw:412-416
 ###################################################
 h.ucv(bimodal, deriv.order = 0)
 h.ucv(bimodal, deriv.order = 1)
@@ -156,37 +156,37 @@ h.ucv(bimodal, deriv.order = 3)
 
 
 ###################################################
-### code chunk number 21: kedd.Rnw:418-419
+### code chunk number 21: kedd.Rnw:419-420
 ###################################################
 for (i in 0:3) plot(h.ucv(bimodal, deriv.order = i))
 
 
 ###################################################
-### code chunk number 22: kedd.Rnw:424-425
+### code chunk number 22: kedd.Rnw:425-426
 ###################################################
 plot(h.ucv(bimodal, deriv.order = 0),sub="",main="")
 
 
 ###################################################
-### code chunk number 23: kedd.Rnw:427-428
+### code chunk number 23: kedd.Rnw:428-429
 ###################################################
 plot(h.ucv(bimodal, deriv.order = 1),sub="",main="")
 
 
 ###################################################
-### code chunk number 24: kedd.Rnw:430-431
+### code chunk number 24: kedd.Rnw:431-432
 ###################################################
 plot(h.ucv(bimodal, deriv.order = 2),sub="",main="")
 
 
 ###################################################
-### code chunk number 25: kedd.Rnw:433-434
+### code chunk number 25: kedd.Rnw:434-435
 ###################################################
 plot(h.ucv(bimodal, deriv.order = 3),sub="",main="")
 
 
 ###################################################
-### code chunk number 26: kedd.Rnw:480-484
+### code chunk number 26: kedd.Rnw:481-485
 ###################################################
 h.bcv(bimodal, whichbcv = 1, deriv.order = 0)
 h.bcv(bimodal, whichbcv = 2, deriv.order = 0)
@@ -195,7 +195,7 @@ h.bcv(bimodal, whichbcv = 2, deriv.order = 1, lower=0.1, upper=0.8)
 
 
 ###################################################
-### code chunk number 27: kedd.Rnw:487-498
+### code chunk number 27: kedd.Rnw:488-499
 ###################################################
 ## deriv.order = 0
 plot(h.bcv(bimodal, whichbcv = 2, deriv.order = 0))
@@ -211,7 +211,7 @@ legend("topright", c("BCV1","BCV2"),lty=1,col=c("red","black"),
 
 
 ###################################################
-### code chunk number 28: kedd.Rnw:503-506
+### code chunk number 28: kedd.Rnw:504-507
 ###################################################
 plot(h.bcv(bimodal, whichbcv = 2, deriv.order = 0),sub="",main="")
 lines(h.bcv(bimodal, whichbcv = 1, deriv.order = 0),col="red")
@@ -219,7 +219,7 @@ legend("topright", c("BCV1","BCV2"),lty=1,col=c("red","black"),inset = .015)
 
 
 ###################################################
-### code chunk number 29: kedd.Rnw:508-511
+### code chunk number 29: kedd.Rnw:509-512
 ###################################################
 plot(h.bcv(bimodal, whichbcv = 2, deriv.order = 1),seq.bws=seq(0.1,0.8,length=50),sub="",main="")
 lines(h.bcv(bimodal, whichbcv = 1, deriv.order = 1),col="red")
@@ -227,7 +227,7 @@ legend("topright", c("BCV1","BCV2"),lty=1,col=c("red","black"),inset = .015)
 
 
 ###################################################
-### code chunk number 30: kedd.Rnw:552-556
+### code chunk number 30: kedd.Rnw:553-557
 ###################################################
 h.ccv(bimodal, deriv.order = 0, upper = 0.5)
 h.ccv(bimodal, deriv.order = 1, upper = 0.5)
@@ -236,38 +236,38 @@ h.ccv(bimodal, deriv.order = 3, upper = 0.5)
 
 
 ###################################################
-### code chunk number 31: kedd.Rnw:559-561
+### code chunk number 31: kedd.Rnw:560-562
 ###################################################
 for (i in 0:3) 
  plot(h.ccv(bimodal, deriv.order = i), seq.bws=seq(0.1,0.5,length=50))
 
 
 ###################################################
-### code chunk number 32: kedd.Rnw:566-567
+### code chunk number 32: kedd.Rnw:567-568
 ###################################################
 plot(h.ccv(bimodal, deriv.order = 0),seq.bws=seq(0.1,0.5,length=50),sub="",main="")
 
 
 ###################################################
-### code chunk number 33: kedd.Rnw:569-570
+### code chunk number 33: kedd.Rnw:570-571
 ###################################################
 plot(h.ccv(bimodal, deriv.order = 1),seq.bws=seq(0.1,0.5,length=50),sub="",main="")
 
 
 ###################################################
-### code chunk number 34: kedd.Rnw:572-573
+### code chunk number 34: kedd.Rnw:573-574
 ###################################################
 plot(h.ccv(bimodal, deriv.order = 2),seq.bws=seq(0.1,0.5,length=50),sub="",main="")
 
 
 ###################################################
-### code chunk number 35: kedd.Rnw:575-576
+### code chunk number 35: kedd.Rnw:576-577
 ###################################################
 plot(h.ccv(bimodal, deriv.order = 3),seq.bws=seq(0.1,0.5,length=50),sub="",main="")
 
 
 ###################################################
-### code chunk number 36: kedd.Rnw:613-617
+### code chunk number 36: kedd.Rnw:614-618
 ###################################################
 h.mcv(bimodal, deriv.order = 0, upper = 0.5)
 h.mcv(bimodal, deriv.order = 1, upper = 0.5)
@@ -276,38 +276,38 @@ h.mcv(bimodal, deriv.order = 3, upper = 0.5)
 
 
 ###################################################
-### code chunk number 37: kedd.Rnw:620-622
+### code chunk number 37: kedd.Rnw:621-623
 ###################################################
 for (i in 0:3)
  plot(h.mcv(bimodal, deriv.order = i), seq.bws=seq(0.1,0.5,length=50))
 
 
 ###################################################
-### code chunk number 38: kedd.Rnw:627-628
+### code chunk number 38: kedd.Rnw:628-629
 ###################################################
 plot(h.mcv(bimodal, deriv.order = 0),seq.bws=seq(0.1,0.5,length=50),sub="",main="")
 
 
 ###################################################
-### code chunk number 39: kedd.Rnw:630-631
+### code chunk number 39: kedd.Rnw:631-632
 ###################################################
 plot(h.mcv(bimodal, deriv.order = 1),seq.bws=seq(0.1,0.5,length=50),sub="",main="")
 
 
 ###################################################
-### code chunk number 40: kedd.Rnw:633-634
+### code chunk number 40: kedd.Rnw:634-635
 ###################################################
 plot(h.mcv(bimodal, deriv.order = 2),seq.bws=seq(0.1,0.5,length=50),sub="",main="")
 
 
 ###################################################
-### code chunk number 41: kedd.Rnw:636-637
+### code chunk number 41: kedd.Rnw:637-638
 ###################################################
 plot(h.mcv(bimodal, deriv.order = 3),seq.bws=seq(0.1,0.5,length=50),sub="",main="")
 
 
 ###################################################
-### code chunk number 42: kedd.Rnw:675-679
+### code chunk number 42: kedd.Rnw:676-680
 ###################################################
 h.tcv(bimodal, deriv.order = 0)
 h.tcv(bimodal, deriv.order = 1)
@@ -316,31 +316,31 @@ h.tcv(bimodal, deriv.order = 3)
 
 
 ###################################################
-### code chunk number 43: kedd.Rnw:682-683
+### code chunk number 43: kedd.Rnw:683-684
 ###################################################
 for (i in 0:3) plot(h.tcv(bimodal, deriv.order = i))
 
 
 ###################################################
-### code chunk number 44: kedd.Rnw:688-689
+### code chunk number 44: kedd.Rnw:689-690
 ###################################################
 plot(h.tcv(bimodal, deriv.order = 0),seq.bws=seq(0.1,1.5,length=50),sub="",main="")
 
 
 ###################################################
-### code chunk number 45: kedd.Rnw:691-692
+### code chunk number 45: kedd.Rnw:692-693
 ###################################################
 plot(h.tcv(bimodal, deriv.order = 1),seq.bws=seq(0.3,1.5,length=50),sub="",main="")
 
 
 ###################################################
-### code chunk number 46: kedd.Rnw:694-695
+### code chunk number 46: kedd.Rnw:695-696
 ###################################################
 plot(h.tcv(bimodal, deriv.order = 2),seq.bws=seq(0.5,1.5,length=50),sub="",main="")
 
 
 ###################################################
-### code chunk number 47: kedd.Rnw:697-698
+### code chunk number 47: kedd.Rnw:698-699
 ###################################################
 plot(h.tcv(bimodal, deriv.order = 3),seq.bws=seq(0.5,1.5,length=50),sub="",main="")
 

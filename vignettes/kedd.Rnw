@@ -1,10 +1,12 @@
 \documentclass[a4paper,11pt]{article}
 \usepackage{a4wide}
 \usepackage{graphicx}
-\usepackage{amsmath,amssymb,amsopn,natbib}
+\usepackage{amsmath,amssymb,amsthm,amsopn,array,natbib,titling}
+\usepackage{amsmath,amssymb,amsthm,amsopn,array,natbib,titling}
 \usepackage[left=2.5cm,top=2cm,right=2cm,bottom=2cm]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage{authblk}
+\usepackage[english]{babel}
 \usepackage{hyperref}
 \usepackage{Sweave}
 \usepackage{color}
@@ -64,14 +66,13 @@ November\or December\fi
 %\VignetteIndexEntry{Kernel estimator and bandwidth selection for density and its derivatives}
 %\VignettePackage{kedd}
 
-
 \begin{document}
 
 \title{\bfseries{ Kernel Estimator and Bandwidth Selection for Density and its Derivatives}\\
-      \vskip3pt \large The \CRANpkg{kedd} Package \\Version 1.0.1}
+      \vskip3pt \large The \CRANpkg{kedd} Package \\Version 1.0.2}
 \author{by Arsalane Chouaib Guidoum\thanks{Department of Probabilities \& Statistics.\\Faculty of Mathematics. \\University of Science and Technology Houari Boumediene.\\ BP 32 El-Alia, U.S.T.H.B, Algeria.\\
 \email{acguidoum@usthb.dz}}}
-\date{\today}
+\date{Revised \today}
 
 
 \maketitle
@@ -646,8 +647,8 @@ plot(h.mcv(bimodal, deriv.order = 3),seq.bws=seq(0.1,0.5,length=50),sub="",main=
 \begin{equation}\label{Sec3:eq12}
     \TCV(h,r) =  \frac{\RK}{nh^{2r+1}} + \frac{(-1)^r}{n(n-1) h^{2r+1}} \Sum2 \varphi^{(r)} \Z
 \end{equation}
-where$$ \varphi^{(r)} (c) = \left[\ConvKr - 2 K^{(2r)} 1\left(|c| > \frac{c_{n}}{h}\right) \right](c)$$
-$1(.)$ denotes the indicator function and $c_{n}$ is a sequence of positive constants, as $\lim_{n \to \infty} c_{n}/h^{2r+1} \rightarrow 0$, here we take $c_{n} = 1/n$, for assure the convergence.
+where$$ \varphi^{(r)} (c) = \left[\ConvKr - 2 K^{(2r)} 1\left(|c| > \frac{c_{n}}{h^{2r+1}}\right) \right](c)$$
+$1(.)$ denotes the indicator function and $c_{n}$ is a sequence of positive constants, as $\lim_{n \to \infty} c_{n}/h \rightarrow 0$, here we take $c_{n} = 1/n$, for assure the convergence.
 The function \code{h.tcv} computes the trimmed cross-validation for bandwidth selection. We enumerate the arguments and results of this function in Table \ref{Sec3:Tab7}.
 \begin{table}[!ht]
 {\renewcommand{\arraystretch}{1}
@@ -705,7 +706,7 @@ plot(h.tcv(bimodal, deriv.order = 3),seq.bws=seq(0.5,1.5,length=50),sub="",main=
 
 We have implemented in \texttt{R} the estimators of the defined functions and the bandwidth selection procedures of the above sections. The package \pkg{kedd} contains seven functions, in Table \ref{Sec4:Tab1} we can find a summary of the contents of the package. 
 
-The current feature set of the package can be split in four main categories: compute the convolutions and derivatives of a kernel function, compute the kernel estimators for a density of probability and its derivatives, computing the bandwidth selectors with different methods, displaying the kernel estimators and selection functions of the bandwidth. Moreover, the package follows the general \texttt{R} philosophy of working with model objects. This means that instead of merely returning, say, a kernel estimator of $\rth$ derivative of a density, many functions will return an object containing, it's functions are S3 classes (\code{S3method}). The object can then be manipulated at one’s will using various extraction, summary or plotting functions. Whenever possible, we develop a graphical user interface of the various functions of a coherent whole, to facilitate the use of this package.
+The current feature set of the package can be split in four main categories: compute the convolutions and derivatives of a kernel function, compute the kernel estimators for a density of probability and its derivatives, computing the bandwidth selectors with different methods, displaying the kernel estimators and selection functions of the bandwidth. Moreover, the package follows the general \texttt{R} philosophy of working with model objects. This means that instead of merely returning, say, a kernel estimator of $\rth$ derivative of a density, many functions will return an object containing, it's functions are S3 classes (\code{S3method}). The object can then be manipulated at oneâ€™s will using various extraction, summary or plotting functions. Whenever possible, we develop a graphical user interface of the various functions of a coherent whole, to facilitate the use of this package.
 \begin{table}[!ht]
 \begin{center}
 {\renewcommand{\arraystretch}{1}
@@ -809,10 +810,10 @@ Feluch, W. and Koronacki, J. (1992).
 \newblock  A note on modified cross-validation in density estimation.
 \newblock  \emph{Computational Statistics and Data Analysis}, \textbf{13}, 143--151.
 
-\bibitem[Guidoum, 2013]{kedd}
-Guidoum, A. C. (2013).
+\bibitem[Guidoum, 2015]{kedd}
+Guidoum, A. C. (2015).
 \newblock \pkg{kedd}: Kernel estimator and bandwidth selection for density and its derivatives.
-\newblock \texttt{R} package version 1.0.1.
+\newblock \texttt{R} package version 1.0.2.
 \newblock \url{http://CRAN.R-project.org/package=kedd}
 
 \bibitem[Habbema, Hermans and Van den Broek (1974)]{Habbema1974}
@@ -897,9 +898,8 @@ Silverman, B. W. (1986).
 \newblock Chapman \& Hall/CRC. London.
 
 \bibitem[Singh, 1977]{Singh1977}
-Singh, R. S. (1977).
-\newblock  Applications of estimators of a density and its derivatives
-\newblock  \emph{Journal of the Royal Statistical Society, Series B}, \textbf{39}(3), 357--363.
+Singh, R. S. (1990).
+\newblock  Applications of estimators of a density and its derivatives\textbf{39}(3), 357--363.
 
 \bibitem[Stoker, 1993]{Stoker1993}
 Stoker, T. M. (1993).
