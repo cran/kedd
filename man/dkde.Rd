@@ -152,7 +152,7 @@ dkde(x, \dots)
 for Gaussian kernel only if \code{0 <= deriv.order <= 10}.
 }
 \seealso{
-\code{\link{plot.dkde}}, see \code{\link[stats]{density}} in package \CRANpkg{stats} if \code{deriv.order = 0}, and \code{\link[ks]{kdde}} in package \CRANpkg{ks}.
+\code{\link{plot.dkde}}, see \code{\link[stats]{density}} in package "stats" if \code{deriv.order = 0}, and \code{\link[ks]{kdde}} in package \CRANpkg{ks}.
 }
 \examples{
 ## EXAMPLE 1:  Simple example of a Gaussian density derivative

@@ -6,7 +6,7 @@
 \alias{kedd}
 \docType{package}
 \title{
-Kernel Estimator and Bandwidth Selection for Density and its Derivatives
+Kernel Estimator and Bandwidth Selection for Density and Its Derivatives
 }
 \description{
 Smoothing techniques and computing bandwidth selectors of the 
@@ -16,8 +16,8 @@ r'th derivative of a probability density for one-dimensional data.
 \tabular{ll}{
 Package: \tab kedd\cr
 Type: \tab Package\cr
-Version: \tab 1.0.2\cr
-Date: \tab 2015-01-28\cr
+Version: \tab 1.0.3\cr
+Date: \tab 2015-10-30\cr
 License: \tab GPL (>= 2) \cr
 }
   There are four main types of functions in this package:

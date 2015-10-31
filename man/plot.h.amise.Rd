@@ -20,7 +20,7 @@ squared error function for 1-dimensional data.
   \item{seq.bws}{the sequence of bandwidths in which to compute the AMISE function. 
   By default, the procedure defines a sequence of 50 points, from \code{0.15*hos} 
   to \code{2*hos} (Over-smoothing).}
-  \item{\dots}{other graphics parameters, see \code{\link[graphics]{par}} in package \CRANpkg{graphics}.}
+  \item{\dots}{other graphics parameters, see \code{\link[graphics]{par}} in package "graphics".}
 }
 \value{
   Plot of 1-d AMISE function are sent to graphics window.\cr

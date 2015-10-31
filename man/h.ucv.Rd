@@ -119,7 +119,7 @@ h.ucv(x, \dots)
 \author{Arsalane Chouaib Guidoum \email{acguidoum@usthb.dz}
 }
 \seealso{
-\code{\link{plot.h.ucv}}, see \code{\link[stats]{bw.ucv}} in package \CRANpkg{stats} and 
+\code{\link{plot.h.ucv}}, see \code{\link[stats]{bw.ucv}} in package "stats" and 
 \code{\link[MASS]{ucv}} in package \CRANpkg{MASS} for Gaussian kernel only if \code{deriv.order = 0},
 \code{\link[ks]{hlscv}} in package \CRANpkg{ks} for Gaussian kernel only if \code{0 <= deriv.order <= 5}, 
 \code{\link[locfit]{kdeb}} in package \CRANpkg{locfit} if \code{deriv.order = 0}. 

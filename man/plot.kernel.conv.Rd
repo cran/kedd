@@ -15,7 +15,7 @@ r'th derivative kernel function one-dimensional.
 }
 \arguments{
   \item{x}{object of class \code{kernel.conv} (output from \code{\link{kernel.conv}}).}
-  \item{\dots}{other graphics parameters, see \code{\link[graphics]{par}} in package \CRANpkg{graphics}.}
+  \item{\dots}{other graphics parameters, see \code{\link[graphics]{par}} in package "graphics".}
 }
 \value{
   Plot of 1-d for convolution of r'th derivative kernel function are sent to graphics window.

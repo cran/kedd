@@ -1,3 +1,7 @@
+importFrom("graphics", "curve", "legend", "lines.default","plot.default")
+importFrom("stats", "D", "dnorm", "integrate", "optimize", "sd")
+
+
 export(kernel.fun,kernel.fun.default,kernel.conv,kernel.conv.default,plot.kernel.fun,plot.kernel.conv,
        dkde,dkde.default,print.dkde,plot.dkde,lines.dkde,
 	   h.bcv,h.bcv.default,print.h.bcv,plot.h.bcv,lines.h.bcv,

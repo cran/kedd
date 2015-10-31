@@ -15,7 +15,7 @@ kernel function one-dimensional.
 }
 \arguments{
   \item{x}{object of class \code{kernel.fun} (output from \code{\link{kernel.fun}}).}
-  \item{\dots}{other graphics parameters, see \code{\link[graphics]{par}} in package \CRANpkg{graphics}.}
+  \item{\dots}{other graphics parameters, see \code{\link[graphics]{par}} in package "graphics".}
 }
 \value{
   Plot of 1-d for r'th derivative kernel function are sent to graphics window.

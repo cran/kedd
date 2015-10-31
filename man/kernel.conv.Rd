@@ -64,7 +64,7 @@ kernel.conv(x, \dots)
   Springer-Verlag, New York.
 }
 \seealso{
-\code{\link{plot.kernel.conv}}, \code{\link[stats]{kernapply}} in package \CRANpkg{stats} 
+\code{\link{plot.kernel.conv}}, \code{\link[stats]{kernapply}} in package "stats"
 for computes the convolution between an input sequence, and \code{\link[stats]{convolve}}
 use the Fast Fourier Transform (\code{\link[stats]{fft}}) to compute the several kinds of 
 convolutions of two sequences.

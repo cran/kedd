@@ -69,7 +69,7 @@ November\or December\fi
 \begin{document}
 
 \title{\bfseries{ Kernel Estimator and Bandwidth Selection for Density and its Derivatives}\\
-      \vskip3pt \large The \CRANpkg{kedd} Package \\Version 1.0.2}
+      \vskip3pt \large The \CRANpkg{kedd} Package \\Version 1.0.3}
 \author{by Arsalane Chouaib Guidoum\thanks{Department of Probabilities \& Statistics.\\Faculty of Mathematics. \\University of Science and Technology Houari Boumediene.\\ BP 32 El-Alia, U.S.T.H.B, Algeria.\\
 \email{acguidoum@usthb.dz}}}
 \date{Revised \today}
@@ -813,7 +813,7 @@ Feluch, W. and Koronacki, J. (1992).
 \bibitem[Guidoum, 2015]{kedd}
 Guidoum, A. C. (2015).
 \newblock \pkg{kedd}: Kernel estimator and bandwidth selection for density and its derivatives.
-\newblock \texttt{R} package version 1.0.2.
+\newblock \texttt{R} package version 1.0.3.
 \newblock \url{http://CRAN.R-project.org/package=kedd}
 
 \bibitem[Habbema, Hermans and Van den Broek (1974)]{Habbema1974}
@@ -856,8 +856,8 @@ Peter, H. and Marron, J.S. (1991).
 \newblock  Local minima in cross-validation functions.
 \newblock  \emph{Journal of the Royal Statistical Society, Series B}, \textbf{53}, 245--252.
 
-\bibitem[\texttt{R} Development Core Team (2013)]{R}
-R Development Core Team (2013).
+\bibitem[\texttt{R} Development Core Team (2015)]{R}
+R Development Core Team (2015).
 \newblock {\em \texttt{R}: A Language and Environment for Statistical Computing}.
 \newblock Vienna, Austria.
 \newblock \url{http://www.R-project.org/}

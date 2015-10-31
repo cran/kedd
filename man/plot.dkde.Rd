@@ -19,7 +19,7 @@ derivative estimate for 1-dimensional data.
   \item{x}{object of class \code{dkde} (output from \code{\link{dkde}}).}
   \item{fx}{add to graphics the true density derivative (class :\code{\link{function}}), 
   to compare it by the density derivative to estimate.}
-  \item{\dots}{other graphics parameters, see \code{\link[graphics]{par}} in package \CRANpkg{graphics}.}
+  \item{\dots}{other graphics parameters, see \code{\link[graphics]{par}} in package "graphics".}
 }
 \details{
   The 1-d plot is a standard plot of a 1-d curve. If
@@ -31,7 +31,7 @@ derivative estimate for 1-dimensional data.
 \author{Arsalane Chouaib Guidoum \email{acguidoum@usthb.dz}
 }
 \seealso{
-\code{\link{dkde}}, \code{\link[stats]{plot.density}} in package \CRANpkg{stats} if \code{deriv.order = 0}.
+\code{\link{dkde}}, \code{\link[stats]{plot.density}} in package "stats" if \code{deriv.order = 0}.
 }
 \examples{
 plot(dkde(kurtotic,deriv.order=0,kernel="gaussian"),sub="")

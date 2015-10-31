@@ -69,7 +69,7 @@ kernel.fun(x, \dots)
 }
 \seealso{
 \code{\link{plot.kernel.fun}}, \code{\link[stats]{deriv}} and \code{\link[stats]{D}} in 
-package \CRANpkg{stats} for symbolic and algorithmic derivatives of simple expressions. 
+package "stats" for symbolic and algorithmic derivatives of simple expressions. 
 }
 \examples{
 kernels <- eval(formals(kernel.fun.default)$kernel)

@@ -102,7 +102,7 @@ h.bcv(x, \dots)
 \author{Arsalane Chouaib Guidoum \email{acguidoum@usthb.dz}
 }
 \seealso{
-\code{\link{plot.h.bcv}}, see \code{\link[stats]{bw.bcv}} in package \CRANpkg{stats} and 
+\code{\link{plot.h.bcv}}, see \code{\link[stats]{bw.bcv}} in package "stats" and 
 \code{\link[MASS]{bcv}} in package \CRANpkg{MASS} for Gaussian kernel only if \code{deriv.order = 0},
 \code{\link[ks]{Hbcv}} for bivariate data in package \CRANpkg{ks} for Gaussian kernel 
 only if \code{deriv.order = 0}, \code{\link[locfit]{kdeb}} in package \CRANpkg{locfit} 
