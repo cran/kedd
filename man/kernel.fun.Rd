@@ -1,5 +1,3 @@
-\newcommand{\CRANpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
-
 \name{kernel.fun}
 \alias{kernel.fun}
 \alias{kernel.fun.default}
@@ -34,7 +32,7 @@ kernel.fun(x, \dots)
     \item tricube: \eqn{K(x;9)=\frac{70}{81}(1-|x|^{3})^{3} 1_{(|x| \leq 1)}}{K(x;9) = 70/81 (1-abs(x)^3)^3 (abs(x) <= 1)}
     \item biweight: \eqn{K(x;4)=\frac{15}{16}(1-x^{2})^{2} 1_{(|x| \leq 1)}}{K(x;4) = 15/16 (1-x^2)^2 (abs(x) <= 1)}
     \item cosine: \eqn{K(x;\infty)=\frac{\pi}{4}\cos\left(\frac{\pi}{2}x\right) 1_{(|x| \leq 1)}}{0.25 pi cos(0.5 pi x) (abs(x) <= 1)}
-    \item Silverman: \eqn{K(x;r \%\% 8)\footnote{\%\% indicates x mod y}=\frac{1}{2}\exp\left(-\frac{|x|}{\sqrt{2}}\right)\sin\left(\frac{|x|}{\sqrt{2}}+\frac{\pi}{4}\right)1_{]-\infty,+\infty[}}{K(x;r mod 8)= 0.5 exp(-abs(x)/sqrt(2)) sin(abs(x)/sqrt(2) + 0.25 pi)}	
+    \item Silverman: \eqn{K(x;r \bmod 8)=\frac{1}{2}\exp\left(-\frac{|x|}{\sqrt{2}}\right)\sin\left(\frac{|x|}{\sqrt{2}}+\frac{\pi}{4}\right)1_{]-\infty,+\infty[}}{K(x;r mod 8)= 0.5 exp(-abs(x)/sqrt(2)) sin(abs(x)/sqrt(2) + 0.25 pi)}	
   }
   The r'th derivative for kernel function \eqn{K(x)} is written:
   \deqn{K^{(r)}(x) = \frac{d^{r}}{d x^{r}} K(x)}{K(x;r) = d^r / dx^r K(x)}

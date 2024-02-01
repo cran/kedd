@@ -27,7 +27,7 @@ kernel function one-dimensional.
 }
 \examples{
 ## Gaussian kernel
-
+oldpar <- par(no.readonly = TRUE)
 dev.new()
 par(mfrow=c(2,2))
 plot(kernel.fun(kernel="gaussian",deriv.order=0))
@@ -43,5 +43,7 @@ plot(kernel.fun(kernel="silverman",deriv.order=0))
 plot(kernel.fun(kernel="silverman",deriv.order=1))
 plot(kernel.fun(kernel="silverman",deriv.order=2))
 plot(kernel.fun(kernel="silverman",deriv.order=3))
+
+par(oldpar)
 }
 \keyword{plot}

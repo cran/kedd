@@ -1,6 +1,3 @@
-\newcommand{\CRANpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
-
-
 \name{dkde}
 \alias{dkde}
 \alias{dkde.default}
@@ -43,9 +40,9 @@ dkde(x, \dots)
   
   The following assumptions on the density \eqn{f^{(r)}(x)}{f(x;r)}, the bandwidth \eqn{h}, and the kernel \eqn{K(x)}:
   \enumerate{
-  \item{}{The \eqn{(r+2)} derivative \eqn{f^{(r+2)}(x)}{f(x;r+2)} is continuous, square integrable and ultimately monotone.}
-  \item{}{\eqn{\lim_{n \to \infty} h = 0}{lim_(n -- > Inf) h = 0} and \eqn{\lim_{n \to \infty}n h^{2r+1} = \infty}{lim_(n --> Inf) nh^(2r+1) = Inf} i.e., as the number of samples \eqn{n} is increased \eqn{h} approaches zero at a rate slower than \eqn{1/n^{2r+1}}.}
-  \item{}{\eqn{K(x) \geq 0}{K(x) >= 0} and \eqn{\int_{R} K(x) dx = 1}{int K(x) dx = 1}. The kernel function is assumed to be symmetric about the origin i.e., \eqn{\int_{R} xK^{(r)}(x) dx = 0}{int x k(x;r) dx = 0} for even \eqn{r} and has finite second moment i.e., \eqn{\mu_{2}(K)=\int_{R}x^{2} K(x) dx < \infty}{mu(K(x)) = int x^2 K(x) dx < Inf}.}
+  \item The \eqn{(r+2)} derivative \eqn{f^{(r+2)}(x)}{f(x;r+2)} is continuous, square integrable and ultimately monotone.
+  \item \eqn{\lim_{n \to \infty} h = 0}{lim_(n -- > Inf) h = 0} and \eqn{\lim_{n \to \infty}n h^{2r+1} = \infty}{lim_(n --> Inf) nh^(2r+1) = Inf} i.e., as the number of samples \eqn{n} is increased \eqn{h} approaches zero at a rate slower than \eqn{1/n^{2r+1}}.
+  \item \eqn{K(x) \geq 0}{K(x) >= 0} and \eqn{\int_{R} K(x) dx = 1}{int K(x) dx = 1}. The kernel function is assumed to be symmetric about the origin i.e., \eqn{\int_{R} xK^{(r)}(x) dx = 0}{int x k(x;r) dx = 0} for even \eqn{r} and has finite second moment i.e., \eqn{\mu_{2}(K)=\int_{R}x^{2} K(x) dx < \infty}{mu(K(x)) = int x^2 K(x) dx < Inf}.
   }
   
   Some theoretical properties of the estimator \eqn{\hat{f}^{(r)}_{h}}{hat(f)(x;r)} have been investigated, among others, by Bhattacharya (1967), Schuster (1969). Let us now turn to the statistical properties of estimator. We are interested in the mean squared error since it combines squared bias and variance.  
@@ -162,12 +159,14 @@ dkde(x,deriv.order=0)  ## KDE of f
 dkde(x,deriv.order=1)  ## KDDE of d/dx f
 dkde(x,deriv.order=2)  ## KDDE of d^2/x^2 f
 dkde(x,deriv.order=3)  ## KDDE of d^3/x^3 f
+oldpar <- par(no.readonly = TRUE)
 dev.new()
 par(mfrow=c(2,2))
 plot(dkde(x,deriv.order=0))
 plot(dkde(x,deriv.order=1))
 plot(dkde(x,deriv.order=2))
 plot(dkde(x,deriv.order=3))
+par(oldpar)
 
 ## EXAMPLE 2: Bimodal Gaussian density derivative
 ## show the kernels in the dkde parametrization

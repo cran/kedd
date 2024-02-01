@@ -1,5 +1,3 @@
-\newcommand{\CRANpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
-
 \name{Claw, Bimodal, Kurtotic, Outlier, Trimodal}
 \alias{claw}
 \alias{bimodal}

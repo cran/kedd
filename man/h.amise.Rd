@@ -1,5 +1,3 @@
-\newcommand{\CRANpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
-
 \name{h.amise}
 \alias{h.amise}
 \alias{h.amise.default}

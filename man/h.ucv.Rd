@@ -1,6 +1,3 @@
-\newcommand{\CRANpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
-
-
 \name{h.ucv}
 \alias{h.ucv}
 \alias{h.ucv.default}

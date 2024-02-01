@@ -35,8 +35,10 @@ function for 1-dimensional data.
 \code{\link{h.mcv}}.
 }
 \examples{
+oldpar <- par(no.readonly = TRUE)
 par(mfrow=c(2,1))
 plot(h.mcv(trimodal,deriv.order=0),main="")
 plot(h.mcv(trimodal,deriv.order=1),main="")
+par(oldpar)
 }
 \keyword{plot}

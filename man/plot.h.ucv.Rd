@@ -35,8 +35,10 @@ function for 1-dimensional data.
 \code{\link{h.ucv}}.
 }
 \examples{
+oldpar <- par(no.readonly = TRUE)
 par(mfrow=c(2,1))
 plot(h.ucv(trimodal,deriv.order=0),seq.bws=seq(0.06,0.2,length=50))
 plot(h.ucv(trimodal,deriv.order=1),seq.bws=seq(0.06,0.2,length=50))
+par(oldpar)
 }
 \keyword{plot}

@@ -1,5 +1,4 @@
 ### R code from vignette source 'kedd.Rnw'
-### Encoding: ISO8859-1
 
 ###################################################
 ### code chunk number 1: kedd.Rnw:132-133

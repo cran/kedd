@@ -69,9 +69,9 @@ November\or December\fi
 \begin{document}
 
 \title{\bfseries{ Kernel Estimator and Bandwidth Selection for Density and its Derivatives}\\
-      \vskip3pt \large The \CRANpkg{kedd} Package \\Version 1.0.3}
-\author{by Arsalane Chouaib Guidoum\thanks{Department of Probabilities \& Statistics.\\Faculty of Mathematics. \\University of Science and Technology Houari Boumediene.\\ BP 32 El-Alia, U.S.T.H.B, Algeria.\\
-\email{acguidoum@usthb.dz}}}
+      \vskip3pt \large The \CRANpkg{kedd} Package}
+
+\author{by Arsalane Chouaib Guidoum\thanks{Department of Probabilities \& Statistics.\\Faculty of Mathematics. \\University of Science and Technology Houari Boumediene.\\ BP 32 El-Alia, U.S.T.H.B, Algeria.}}
 \date{Revised \today}
 
 

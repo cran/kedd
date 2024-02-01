@@ -42,8 +42,7 @@ November\or December\fi
 \begin{document}
 
 \title{\bfseries Introduction to \pkg{kedd}}
-\author{by Arsalane Chouaib Guidoum\thanks{Department of Probabilities \& Statistics.\\Faculty of Mathematics. \\University of Science and Technology Houari Boumediene.\\ BP 32 El-Alia, U.S.T.H.B, Algeria.\\
-\email{acguidoum@usthb.dz}}}
+\author{by Arsalane Chouaib Guidoum\thanks{Department of Probabilities \& Statistics.\\Faculty of Mathematics. \\University of Science and Technology Houari Boumediene.\\ BP 32 El-Alia, U.S.T.H.B, Algeria.}}
 \date{\today}
 
 \maketitle
@@ -94,7 +93,6 @@ for information on how to cite the software.
 
 \section*{Note}
 
-Please send comments, error reports, etc. to the author via the addresses email.
 
 
 \begin{thebibliography}{1}
@@ -103,9 +101,9 @@ Please send comments, error reports, etc. to the author via the addresses email.
   \def\url#1{{\tt #1}}\fi
   
 \bibitem[Guidoum, 2015]{kedd}
-Guidoum, A. C. (2015).
+Guidoum, A. C. and Giné-Vázquez I. (2024).
 \newblock \pkg{kedd}: Kernel estimator and bandwidth selection for density and its derivatives.
-\newblock \texttt{R} package version 1.0.3.
+\newblock \texttt{R} package version 1.0.4.
 \newblock \url{http://CRAN.R-project.org/package=kedd}
 
 \end{thebibliography}

@@ -1,3 +1,6 @@
+oldpar <- par(no.readonly = TRUE)
+
+
 ############################################################################
 #                              EXAMPLE 1:                                  # 
 #            Simple example for a Gaussian density derivative              #
@@ -180,3 +183,8 @@ plot(h.ccv(bimodal,deriv.order=2,upper=0.5),seq.bws=seq(0.1,0.6,length=50),
      main="CCV vs MCV",ylab="")
 lines(h.ucv(bimodal,deriv.order=2),col="red")
 legend("topright", c("CCV","UCV"),lty=c(1,1),col=c("black","red"), inset = .015)
+
+
+
+
+par(oldpar)

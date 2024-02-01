@@ -25,12 +25,12 @@ dkde.default <- function(x,y=NULL,deriv.order=0,h,
     if (any(deriv.order < 0 || deriv.order != round(deriv.order))) 
              stop("argument 'deriv.order' is non-negative integers")
     r <- deriv.order
-    if (kernel=="epanechnikov" && r >= 3) stop(" 'epanechnikov kernel derivative = 0' for 'order >= 3' ")
-    if (kernel=="uniform" && r >= 1)      stop(" 'uniform kernel derivative = 0' for 'order >= 1' ")
-    if (kernel=="triweight" && r >= 7)    stop(" 'triweight kernel derivative = 0' for 'order >= 7' ")
-    if (kernel=="biweight" && r >= 5)     stop(" 'biweight kernel derivative = 0' for 'order >= 5' ")
-    if (kernel=="triangular" && r >= 2)   stop(" 'triangular kernel derivative = 0' for 'order >= 2' ")
-    if (kernel=="tricube" && r >= 10)     stop(" 'tricube kernel derivative = 0' for 'order >= 10' ")
+    if (identical(kernel, "epanechnikov") && r >= 3) stop(" 'epanechnikov kernel derivative = 0' for 'order >= 3' ")
+    if (identical(kernel, "uniform") && r >= 1)      stop(" 'uniform kernel derivative = 0' for 'order >= 1' ")
+    if (identical(kernel, "triweight") && r >= 7)    stop(" 'triweight kernel derivative = 0' for 'order >= 7' ")
+    if (identical(kernel, "biweight") && r >= 5)     stop(" 'biweight kernel derivative = 0' for 'order >= 5' ")
+    if (identical(kernel, "triangular") && r >= 2)   stop(" 'triangular kernel derivative = 0' for 'order >= 2' ")
+    if (identical(kernel, "tricube") && r >= 10)     stop(" 'tricube kernel derivative = 0' for 'order >= 10' ")
     name <- deparse(substitute(x))
     if (missing(r))           r <- 0
     if (missing(kernel)) kernel <- "gaussian"

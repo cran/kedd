@@ -35,8 +35,10 @@ function for 1-dimensional data.
 \code{\link{h.tcv}}.
 }
 \examples{
+oldpar <- par(no.readonly = TRUE)
 par(mfrow=c(2,1))
 plot(h.tcv(trimodal,deriv.order=0),main="")
 plot(h.tcv(trimodal,deriv.order=1),seq.bws=seq(0.1,0.5,length.out=50),main="")
+par(oldpar)
 }
 \keyword{plot}

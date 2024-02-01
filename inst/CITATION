@@ -5,14 +5,9 @@ citHeader("To cite package 'kedd' in publications use:")
  year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date, perl = TRUE)
  vers <- paste("R package version", meta$Version)
  
- citEntry(entry="Manual",
+ bibentry(bibtype="Manual",
 		  title = "kedd: Kernel estimator and bandwidth selection for density and its derivatives.",
-		  author = personList(as.person("A.C. Guidoum")),
+		  author = c(person(given = c("Arsalane", "Chouaib"), family = "Guidoum", role = "aut"), person(given = "Iago", family = "Giné-Vázquez", role = "cre")),
 		  year = year,
 		  note = vers,
-		  url  = paste("http://CRAN.R-project.org/package=kedd"),
-		  textVersion =
-		  paste("A.C. Guidoum (",
-				year,
-				"). kedd: Kernel estimator and bandwidth selection for density and its derivatives.", vers, ".", "http://CRAN.R-project.org/package=kedd"
-				, sep=""))
+		  url  = paste("https://CRAN.R-project.org/package=kedd"))
