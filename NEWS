@@ -1,4 +1,26 @@
-Version 1.0.4: 2024-01-27    o Version 1.0.4 released.
+Version 2.0.0: 2026-11-01    o Version 2.0.0 released.
+                             o New bandwidth selector h.scv(): Smoothed
+                               Cross-Validation (Hall, Marron & Park 1992) with
+                               fully analytical closed-form criterion for the
+                               Gaussian kernel.
+                             o New logistic kernel K(x) = e^{-x}/(1+e^{-x})^2,
+                               derivatives up to order 20 and exact constants
+                               R(K^(r)), in all selectors, dkde(), kernel.fun()
+                               and kernel.conv().
+                             o New power kernel family Pow(s,t):
+                               K(x) = c(1-|x|^s)^t on [-1,1], given as
+                               kernel = "pow(s,t)" or kernel.pow(s, t), for any
+                               s > 0, t >= 0, in all selectors, dkde(),
+                               kernel.fun() and kernel.conv(). It reproduces
+                               uniform, triangular, Epanechnikov, biweight,
+                               triweight and tricube exactly.
+                             o nthreads: 0 now always means all cores (capped
+                               by OMP_THREAD_LIMIT) and a call no longer
+                               changes the threads of later calls; h.ucv()
+                               with 0 used a single thread. dkde() and h.mlcv()
+                               now use nthreads. New Cpp_omp_threads().
+                             o Added second author: Amel Henider.
+Version 1.0.4: 2026-01-27    o Version 1.0.4 released.
                              o Other minor bug fixes: R (>= 4.3.2).
 Version 1.0.3: 2015-10-30    o Version 1.0.3 released.
                              o Other minor bug fixes: R (>= 3.2.2).

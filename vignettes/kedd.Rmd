@@ -1,0 +1,405 @@
+---
+title: "kedd: kernel estimation of a density and its derivatives"
+author: "Arsalane Chouaib Guidoum and Amel Henider"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{kedd: kernel estimation of a density and its derivatives}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6,
+                      fig.height = 3.8, fig.align = "center", dpi = 96)
+library(kedd)
+## plot() methods print their figure; quiet() keeps the returned ggplot without
+## drawing it, so that layers can be added before display.
+quiet <- function(expr) { grDevices::pdf(NULL); on.exit(grDevices::dev.off()); expr }
+```
+
+<img src="logo.png" align="right" width="120" alt="kedd logo" style="margin-left: 12px;" />
+
+## 1. Introduction
+
+Given an i.i.d. sample $X_1, \dots, X_n$ from a density $f$, the kernel estimator
+of the $r$-th derivative $f^{(r)}$ is
+$$
+\hat f_h^{(r)}(x) \;=\; \frac{1}{n\,h^{r+1}} \sum_{i=1}^{n} K^{(r)}\!\left(\frac{x - X_i}{h}\right),
+\qquad r = 0, 1, 2, \dots
+$$
+where $K$ is a kernel and $h > 0$ the bandwidth. Its asymptotic mean integrated
+squared error is
+$$
+\mathrm{AMISE}(h; r) \;=\; \frac{R\big(K^{(r)}\big)}{n\,h^{2r+1}} + \frac{\mu_2(K)^2}{4}\, h^4\, R\big(f^{(r+2)}\big),
+\qquad R(g) = \int g^2,\quad \mu_2(K) = \int x^2 K(x)\,dx,
+$$
+so the optimal bandwidth is of order $n^{-1/(2r+5)}$: estimating a derivative
+requires a **larger** bandwidth than estimating the density itself. The whole
+difficulty is the choice of $h$, which is what the package is about.
+
+**kedd** provides
+
+* `kernel.fun()`, `kernel.conv()` — the kernels $K^{(r)}$ and their convolutions
+  $K^{(r)} * K^{(r)}$, for ten named kernels and the power family Pow(s,t);
+* `dkde()` — the estimator $\hat f_h^{(r)}$;
+* eight data-driven bandwidth selectors: `h.amise()`, `h.ucv()`, `h.bcv()`,
+  `h.ccv()`, `h.mcv()`, `h.tcv()`, `h.scv()`, `h.mlcv()`.
+
+All results are S4 objects with `show()` and **ggplot2** `plot()` methods, and the
+$O(n^2)$ criteria run in C++ (Rcpp) in parallel (OpenMP).
+
+## 2. Kernels
+
+### 2.1 The kernels
+
+Ten named kernels and the power family Pow(s,t) (section 2.2) are available in
+every function through the argument `kernel`. "r max" is the highest derivative
+order that is not identically zero.
+
+| kernel | $K(x)$ | support | r max |
+|---|---|---|:---:|
+| `gaussian` | $\phi(x) = \frac{1}{\sqrt{2\pi}} e^{-x^2/2}$ | $\mathbb{R}$ | any |
+| `epanechnikov` | $\frac34 (1-x^2)$ | $[-1,1]$ | 2 |
+| `uniform` | $\frac12$ | $[-1,1]$ | 0 |
+| `triangular` | $1-\lvert x\rvert$ | $[-1,1]$ | 1 |
+| `biweight` | $\frac{15}{16}(1-x^2)^2$ | $[-1,1]$ | 4 |
+| `triweight` | $\frac{35}{32}(1-x^2)^3$ | $[-1,1]$ | 6 |
+| `tricube` | $\frac{70}{81}(1-\lvert x\rvert^3)^3$ | $[-1,1]$ | 9 |
+| `cosine` | $\frac{\pi}{4}\cos\frac{\pi x}{2}$ | $[-1,1]$ | any |
+| `silverman` | $\frac12 e^{-\lvert x\rvert/\sqrt2}\sin\!\big(\frac{\lvert x\rvert}{\sqrt2}+\frac{\pi}{4}\big)$ | $\mathbb{R}$ | any |
+| `logistic` | $\frac{e^{-x}}{(1+e^{-x})^2}$ | $\mathbb{R}$ | 20 |
+| `pow(s,t)` | $c_{s,t}(1-\lvert x\rvert^s)^t$, $c_{s,t} = \frac{s}{2B(1/s,\,t+1)}$ | $[-1,1]$ | $\min(st,16)$ |
+
+For `pow(s,t)`, $\min(st, 16)$ applies when $s$ and $t$ are integers (16
+otherwise). The bandwidth selectors need $R(K^{(r)}) < \infty$ (and MCV, CCV
+use $K^{(r+1)}$, $K^{(r+2)}$), so their maximum order is lower. Above it they
+return `h = NA` with a warning; "—" means not available even at $r = 0$:
+
+| kernel | `h.ucv`, `h.bcv`, `h.tcv`, `h.amise` | `h.mcv` | `h.ccv` |
+|---|:---:|:---:|:---:|
+| `gaussian`, `silverman` | any | any | any |
+| `cosine` | 1 | 0 | — |
+| `logistic` | 8 | 8 | 8 |
+| `epanechnikov` | 1 | 0 | — |
+| `uniform` | 0 | — | — |
+| `triangular` | 0 | — | — |
+| `biweight` | 2 | 1 | 0 |
+| `triweight` | 3 | 2 | 1 |
+| `tricube` | 3 | 2 | 1 |
+| `pow(s,t)` | $\min(r^\ast, 6)$ | $\min(r^\ast-1, 6)$ | $\min(r^\ast-2, 6)$ |
+
+Here $r^\ast$ is the largest integer $r < t + \frac12$ (with $2r \le st$ when $s$
+and $t$ are integers, and $r < s + \frac12$ when $s$ is not an even integer); e.g. `pow(2,3)`: 3, 2, 1. `h.scv` (Gaussian
+kernel) has no limit and `h.mlcv` is for $r = 0$ only.
+
+`kernel.fun()` evaluates $K^{(r)}$ on a grid (or at given points) and returns an
+object of class `kfun`:
+
+```{r kfun}
+kf <- kernel.fun(kernel = "biweight", deriv.order = 1L)
+kf
+plot(kf)
+```
+
+`kernel.conv()` returns $K^{(r)} * K^{(r)}$ (class `kconv`), the building block of
+the cross-validation criteria. At $0$ it equals $(-1)^r R(K^{(r)})$:
+
+```{r kconv}
+kc <- kernel.conv(kernel = "logistic", deriv.order = 1L)
+plot(kc)
+kernel.conv(x = 0, kernel = "logistic", deriv.order = 1L)@y   # -R(K') = -1/30
+```
+
+The constants used by the selectors, $\mu_2(K)$, $\mu_4(K)$ and $R(K^{(r)})$, are
+available from the low-level routine `Cpp_kernel_constants()`:
+
+```{r constants}
+kers <- c("gaussian", "epanechnikov", "uniform", "triangular", "biweight",
+          "triweight", "tricube", "cosine", "silverman", "logistic",
+          "pow(2,4)", "pow(1.5,2.5)")
+round(t(sapply(kers, function(k) Cpp_kernel_constants(k, 0L)[c("mu2", "mu4", "R")])), 5)
+```
+
+The Silverman kernel is of order 4 ($\mu_2 = 0$, $\mu_4 < 0$); all the others are
+second-order kernels.
+
+### 2.2 The power family Pow(s,t)
+
+For $s > 0$ and $t \ge 0$,
+$$
+K_{s,t}(x) = c_{s,t}\,(1 - \lvert x\rvert^s)^t\, \mathbf 1_{\lvert x\rvert \le 1},
+\qquad c_{s,t} = \frac{s}{2\,B(1/s,\, t+1)},
+$$
+is passed as the string `"pow(s,t)"`, or built with `kernel.pow(s, t)`. It contains
+uniform (`pow(s,0)`), triangular (`pow(1,1)`), Epanechnikov (`pow(2,1)`), biweight
+(`pow(2,2)`), triweight (`pow(2,3)`) and tricube (`pow(3,3)`). Its constants are
+exact: $\mu_k(K) = B\big(\tfrac{k+1}{s}, t+1\big) / B\big(\tfrac1s, t+1\big)$ and
+$R(K) = s\,B(1/s, 2t+1) / \big(2\,B(1/s, t+1)^2\big)$.
+
+```{r pow}
+kernel.pow(2, 3)
+all.equal(kernel.fun(kernel = "pow(2,2)")@y, kernel.fun(kernel = "biweight")@y)
+Cpp_kernel_constants(kernel.pow(1.5, 2.5), 0L)
+plot(kernel.fun(kernel = kernel.pow(1.5, 2.5)))
+```
+
+Increasing $t$ (or decreasing $s$) concentrates the kernel around $0$:
+
+```{r pow-shapes, fig.height = 3.4}
+grid <- seq(-1, 1, length.out = 201)
+shapes <- do.call(rbind, lapply(c("pow(2,1)", "pow(2,4)", "pow(4,1)", "pow(1,2)"),
+  function(k) data.frame(x = grid, K = Cpp_kernel_deriv(k, grid, 0L), kernel = k)))
+ggplot2::ggplot(shapes, ggplot2::aes(x, K, colour = kernel)) +
+  ggplot2::geom_line(linewidth = 0.9) + ggplot2::theme_minimal()
+```
+
+## 3. Estimating a density and its derivatives
+
+We use a bimodal sample whose true density is known,
+$f = 0.6\,N(-1, 0.5^2) + 0.4\,N(1.5, 0.7^2)$:
+
+```{r data}
+set.seed(2027)
+n <- 300
+x <- c(rnorm(0.6 * n, -1, 0.5), rnorm(0.4 * n, 1.5, 0.7))
+f_true <- function(t, r = 0L) {
+  comp <- function(m, s) {
+    z  <- (t - m) / s
+    He <- switch(r + 1L, 1, z, z^2 - 1)        # Hermite polynomials
+    (-1)^r * He * dnorm(z) / s^(r + 1)
+  }
+  0.6 * comp(-1, 0.5) + 0.4 * comp(1.5, 0.7)
+}
+```
+
+`dkde()` computes $\hat f_h^{(r)}$ (class `dkde`). When `h` is missing, the UCV
+bandwidth is used.
+
+```{r dkde}
+f0 <- dkde(data = x)
+f0
+p <- quiet(plot(f0))
+p + ggplot2::stat_function(fun = f_true, linetype = "dashed")
+```
+
+The first derivative, estimated with its own (SCV) bandwidth (dashed: true $f'$):
+
+```{r dkde-r1}
+h1 <- h.scv(x, deriv.order = 1L)
+p1 <- quiet(plot(dkde(data = x, h = h1@h, deriv.order = 1L)))
+p1 + ggplot2::stat_function(fun = f_true, args = list(r = 1L), linetype = "dashed")
+```
+
+Compare with the density bandwidth, which is too small for $f'$:
+
+```{r dkde-r1-small}
+c(h_density = f0@h, h_derivative = h1@h)
+plot(dkde(data = x, h = f0@h, deriv.order = 1L), band = FALSE)
+```
+
+Every kernel can be used, each with its own bandwidth. Here the Gaussian,
+logistic and power `pow(2,4)` kernels with UCV bandwidths, against the true
+density (dashed):
+
+```{r dkde-kernels}
+grid <- seq(-3, 4, length.out = 300)
+est <- do.call(rbind, lapply(c("gaussian", "logistic", "pow(2,4)"), function(k) {
+  d <- dkde(x = grid, data = x, h = h.ucv(x, kernel = k)@h, kernel = k)
+  data.frame(x = d@x, y = d@y, kernel = k)
+}))
+ggplot2::ggplot(est, ggplot2::aes(x, y, colour = kernel)) +
+  ggplot2::geom_line(linewidth = 0.8) +
+  ggplot2::stat_function(fun = f_true, colour = "black", linetype = "dashed") +
+  ggplot2::theme_minimal()
+```
+
+## 4. Bandwidth selectors
+
+All selectors return an object of class `bandwidth` (slots `h`, `min.obj`,
+`hos`, `method`, ...). Writing $\psi_h(u) = u/h$ for the scaled differences
+$X_j - X_i$, the criteria minimised are:
+
+* **AMISE** (`h.amise`) — closed-form rule with a normal reference
+  $\hat h = \hat\sigma\,\Big[\frac{243(2r+1)R(K^{(r)})}{35\,\mu_2(K)^2\,n}\Big]^{1/(2r+5)}$
+  (the over-smoothing bandwidth $h_{os}$ used to bound all searches).
+* **UCV** (`h.ucv`) — unbiased / least-squares cross-validation,
+  $\mathrm{UCV}(h) = \frac{R(K^{(r)})}{nh^{2r+1}} + \frac{(-1)^r}{n(n-1)h^{2r+1}}
+  \sum_{i\ne j}\big(K^{(r)}*K^{(r)} - 2K^{(2r)}\big)\Big(\frac{X_j-X_i}{h}\Big)$.
+* **BCV** (`h.bcv`) — biased cross-validation, which estimates
+  $R(f^{(r+2)})$ in the AMISE either with $K^{(r+2)}*K^{(r+2)}$ (BCV1) or with
+  $K^{(2r+4)}$ (BCV2).
+* **CCV** (`h.ccv`) — complete cross-validation (higher-order bias correction).
+* **MCV** (`h.mcv`) — modified cross-validation.
+* **TCV** (`h.tcv`) — trimmed cross-validation (pairs closer than $1/(nh^{2r+1})$
+  are discarded in the $K^{(2r)}$ term).
+* **SCV** (`h.scv`) — smoothed cross-validation (Gaussian kernel): the squared
+  bias is estimated from a Gaussian pilot $\tilde f_g$, which gives a closed form
+  in terms of $\phi^{(2r)}$ for any $r$.
+* **MLCV** (`h.mlcv`) — maximum-likelihood (leave-one-out) cross-validation,
+  density only.
+
+```{r ucv}
+bw <- h.ucv(x)
+bw
+plot(bw)
+```
+
+`lines()` returns a ggplot2 layer, so several criteria can be drawn together:
+
+```{r overlay}
+p <- quiet(plot(h.ucv(x)))
+p$plot +
+  lines(h.bcv(x), color = "darkred") +
+  lines(h.ccv(x), color = "darkorange") +
+  lines(h.mcv(x), color = "purple")
+```
+
+### 4.1 Comparison on the bimodal sample
+
+The integrated squared error $\mathrm{ISE}(h) = \int (\hat f_h^{(r)} - f^{(r)})^2$
+measures the quality of each selected bandwidth:
+
+```{r compare}
+ise <- function(h, r) {
+  d <- dkde(x = seq(-4, 5, length.out = 400), data = x, h = h, deriv.order = r)
+  sum((d@y - f_true(d@x, r))^2) * diff(d@x[1:2])
+}
+sel <- list(AMISE = h.amise, UCV = h.ucv, BCV1 = h.bcv,
+            BCV2 = function(x, ...) h.bcv(x, whichbcv = 2, ...),
+            CCV = h.ccv, MCV = h.mcv, TCV = h.tcv, SCV = h.scv)
+tab <- sapply(0:1, function(r) {
+  h <- sapply(sel, function(f) f(x, deriv.order = r)@h)
+  c(rbind(h = h, ISE = sapply(h, ise, r = r)))
+})
+dimnames(tab) <- list(paste(rep(names(sel), each = 2), c("h", "ISE")),
+                      c("r = 0", "r = 1"))
+round(tab, 4)
+c(MLCV = h.mlcv(x)@h)   # density only
+```
+
+Two well-known behaviours show up in such comparisons:
+
+* **UCV** is unbiased but highly variable, and tends to undersmooth, all the more
+  as $r$ grows (Härdle, Marron and Wand, 1990); its selected bandwidth may even
+  decrease with $r$ on a given sample.
+* **BCV, CCV and MCV** are much more stable but biased towards large bandwidths. On
+  multimodal samples, especially for $r \ge 1$, their criterion can be decreasing
+  on the whole search interval $[0.01\,h_{os},\, 2\,h_{os}]$: the selector then
+  returns the upper bound and warns that *"minimum occurred at one end of the
+  range"*. Plotting the criterion (`plot()`) is the simplest diagnostic; the
+  interval can be changed with `lower` and `upper`.
+
+### 4.2 Same criterion, different kernels
+
+Bandwidths are not comparable across kernels: each kernel has its own scale
+($\mu_2(K)$, $R(K)$). The selectors take this into account:
+
+```{r kernels}
+ks <- c("gaussian", "epanechnikov", "uniform", "triangular", "biweight", "triweight",
+        "tricube", "cosine", "silverman", "logistic", "pow(2,4)", "pow(1.5,2.5)")
+round(sapply(ks, function(k) h.ucv(x, kernel = k)@h), 4)
+```
+
+## 5. Example datasets
+
+The package contains five samples of size 200 from the Marron and Wand (1992)
+normal mixtures (`?"kedd-data"`): `kurtotic` (#4), `outlier` (#5), `bimodal`
+(#7, separated bimodal), `trimodal` (#9) and `claw` (#10). Their true densities
+are known, which makes them convenient benchmarks. The claw density, for
+instance, is hard to estimate: the five narrow peaks need a small bandwidth.
+
+```{r claw}
+f_claw <- function(x) 0.5 * dnorm(x) +
+  rowSums(sapply(0:4, function(l) 0.1 * dnorm(x, l / 2 - 1, 0.1)))
+bw_claw <- sapply(list(UCV = h.ucv, BCV1 = h.bcv, MCV = h.mcv, SCV = h.scv,
+                       AMISE = h.amise), function(f) suppressWarnings(f(claw))@h)
+round(bw_claw, 4)
+p <- quiet(plot(dkde(data = claw, h = bw_claw[["UCV"]])))
+p + ggplot2::stat_function(fun = f_claw, linetype = "dashed")
+```
+
+The same selectors on the five samples:
+
+```{r datasets}
+samples <- list(kurtotic = kurtotic, outlier = outlier, bimodal = bimodal,
+                trimodal = trimodal, claw = claw)
+round(sapply(samples, function(s)
+  sapply(list(AMISE = h.amise, UCV = h.ucv, BCV1 = h.bcv, MCV = h.mcv, SCV = h.scv),
+         function(f) suppressWarnings(f(s))@h)), 4)
+```
+
+## 6. Parallel computation
+
+The $O(n^2)$ criteria (sums over all pairs $X_i, X_j$) are computed in C++ and
+split between the processor cores with OpenMP. The argument `nthreads` of every
+selector and of `dkde()` sets the number of threads **of that call**:
+
+* `nthreads = 0` (default): all processors;
+* `nthreads = k > 0`: `k` threads (`1` = sequential);
+* both are capped by the environment variable `OMP_THREAD_LIMIT`, and a call
+  never changes the threads used by later calls.
+
+`Cpp_omp_threads()` reports how many threads a call actually gets. The results do
+not depend on `nthreads`, only the computing time does:
+
+```{r threads}
+c(all = Cpp_omp_threads(0L), two = Cpp_omp_threads(2L))
+y <- rnorm(1500)
+system.time(h_seq <- h.ucv(y, nthreads = 1L)@h)
+system.time(h_par <- h.ucv(y, nthreads = 0L)@h)
+all.equal(h_seq, h_par)
+```
+
+## 7. Summary of functions
+
+| function | purpose | returns |
+|---|---|---|
+| `kernel.fun(x, deriv.order, kernel, n.grid)` | $K^{(r)}(x)$ | `kfun` |
+| `kernel.conv(x, deriv.order, kernel, n.grid)` | $(K^{(r)} * K^{(r)})(x)$ | `kconv` |
+| `kernel.pow(s, t)` | name of a Pow(s,t) kernel | character |
+| `dkde(x, data, h, deriv.order, kernel, nthreads)` | $\hat f_h^{(r)}(x)$ | `dkde` |
+| `h.amise(x, deriv.order, kernel)` | AMISE rule | `bandwidth` |
+| `h.ucv`, `h.bcv`, `h.ccv`, `h.mcv`, `h.tcv`, `h.scv` `(x, deriv.order, kernel, lower, upper, tol, nthreads)` | cross-validation selectors | `bandwidth` |
+| `h.mlcv(x, kernel, lower, upper, tol, nthreads)` | likelihood CV (density) | `bandwidth` |
+| `show()`, `plot()` | print / ggplot2 figure | — |
+| `lines(<bandwidth>)` | criterion curve as a ggplot2 layer | layer |
+| `kurtotic`, `outlier`, `bimodal`, `trimodal`, `claw` | example samples | numeric |
+| `Cpp_kernel_constants()`, `Cpp_omp_threads()`, `Cpp_*()` | low-level C++ routines (`?"kedd-lowlevel"`) | numeric |
+
+## 8. Resources
+
+* Demonstrations: `demo(package = "kedd")` (`kedd`, `kernels`, `bandwidths`).
+* Two-page cheatsheet and source code: <https://github.com/ac-guidoum/kedd>.
+* Bug reports and suggestions: <https://github.com/ac-guidoum/kedd/issues>.
+* Citation: `citation("kedd")`.
+
+## References
+
+* Bowman, A. (1984). An alternative method of cross-validation for the smoothing
+  of kernel density estimates. *Biometrika*, 71, 353–360.
+* Duin, R. P. W. (1976). On the choice of smoothing parameters of Parzen
+  estimators of probability density functions. *IEEE Transactions on Computers*,
+  C-25, 1175–1179.
+* Feluch, W. and Koronacki, J. (1992). A note on modified cross-validation in
+  density estimation. *Computational Statistics and Data Analysis*, 13, 143–151.
+* Guidoum, A. C. (2020). Kernel estimator and bandwidth selection for density and
+  its derivatives: the kedd package. arXiv:2012.06102.
+* Habbema, J. D. F., Hermans, J. and Van den Broek, K. (1974). A stepwise
+  discrimination analysis program using density estimation. *Compstat 1974*,
+  Physica Verlag, Vienna.
+* Hall, P., Marron, J. S. and Park, B. U. (1992). Smoothed cross-validation.
+  *Probability Theory and Related Fields*, 92, 1–20.
+* Jones, M. C. and Kappenman, R. F. (1991). On a class of kernel density estimate
+  bandwidth selectors. *Scandinavian Journal of Statistics*, 19, 337–349.
+* Marron, J. S. and Wand, M. P. (1992). Exact mean integrated squared error.
+  *The Annals of Statistics*, 20, 712–736.
+* Rudemo, M. (1982). Empirical choice of histograms and kernel density
+  estimators. *Scandinavian Journal of Statistics*, 9, 65–78.
+* Scott, D. W. and Terrell, G. R. (1987). Biased and unbiased cross-validation in
+  density estimation. *JASA*, 82, 1131–1146.
+* Stute, W. (1992). Modified cross-validation in density estimation. *Journal of
+  Statistical Planning and Inference*, 30, 293–305.
+* Wand, M. P. and Jones, M. C. (1995). *Kernel Smoothing*. Chapman & Hall.
+* Härdle, W., Marron, J. S. and Wand, M. P. (1990). Bandwidth choice for density
+  derivatives. *JRSS B*, 52, 223–232.

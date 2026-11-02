@@ -1,80 +1,106 @@
 \name{h.tcv}
 \alias{h.tcv}
-\alias{h.tcv.default}
-\alias{print.h.tcv}
-\title{
-Trimmed Cross-Validation for Bandwidth Selection
-}
+\title{Trimmed Cross-Validation for Bandwidth Selection}
 \description{
-  The (S3) generic function \code{h.tcv} computes the trimmed 
-  cross-validation bandwidth selector of r'th derivative of 
-  kernel density estimator one-dimensional.
+  Computes the trimmed cross-validation bandwidth selector of the r'th
+  derivative of a kernel density estimator (one-dimensional).
+  Returns an S4 object of class \code{\linkS4class{bandwidth}}.
 }
 \usage{
-h.tcv(x, \dots)
-\method{h.tcv}{default}(x, deriv.order = 0, lower = 0.1 * hos, upper = 2 * hos, 
-         tol = 0.1 * lower, kernel = c("gaussian", "epanechnikov", "uniform", 
-         "triangular", "triweight", "tricube", "biweight", "cosine"), \dots)
+h.tcv(x, deriv.order = 0L, kernel = "gaussian",
+      lower, upper, tol, nthreads = 0L)
 }
 \arguments{
-  \item{x}{vector of data values.}
-  \item{deriv.order}{derivative order (scalar).}
-  \item{lower, upper}{range over which to minimize. The default is
-    almost always satisfactory. \code{hos} (Over-smoothing) is calculated internally
-    from an \code{kernel}, see details.}
-  \item{tol}{the convergence tolerance for \code{\link{optimize}}.}
-  \item{kernel}{a character string giving the smoothing kernel to be used, with default
-    \code{"gaussian"}.}
-  \item{\dots}{further arguments for (non-default) methods.}
+  \item{x}{numeric vector of data values.}
+  \item{deriv.order}{non-negative integer: derivative order \eqn{r}. Maximum
+    \eqn{r} for this selector: any for Gaussian and Silverman; cosine 1;
+    logistic 8; Epanechnikov 1; uniform 0; triangular 0; biweight 2;
+    triweight 3; tricube 3; \code{pow(s,t)} \eqn{\min(r^*, 6)}{min(r*, 6)}, where
+    \eqn{r^*}{r*} is the largest integer \eqn{r < t + 1/2} (and
+    \eqn{r < s + 1/2} if \eqn{s} is not an even integer, and \eqn{2r \le st}{2r <= st}
+    if \eqn{s} and \eqn{t} are integers). Above it \code{h = NA}
+    is returned with a warning. See \code{\link{kedd-package}}, section
+    \sQuote{Maximum derivative order}.}
+  \item{kernel}{character string giving the kernel; one of
+    \code{"gaussian"} (default), \code{"epanechnikov"}, \code{"uniform"},
+    \code{"triangular"}, \code{"biweight"}, \code{"triweight"},
+    \code{"tricube"}, \code{"cosine"}, \code{"silverman"}, \code{"logistic"},
+    or a power kernel \code{"pow(s,t)"} (see \code{\link{kernel.pow}}).}
+  \item{lower, upper}{bounds of the search interval.  Defaults to
+    \code{[0.01 * hos, 2 * hos]}.}
+  \item{tol}{convergence tolerance for \code{\link{optimize}}.
+    Default \code{0.01 * lower} (after validation of \code{lower}).}
+  \item{nthreads}{number of OpenMP threads for this call: \code{0} (default)
+    = all processors, \code{k > 0} = \code{k} threads, both capped by the
+    environment variable \code{OMP_THREAD_LIMIT}. The result does not depend on
+    it, and it never changes the threads used by later calls.}
 }
 \details{
-  \code{h.tcv} trimmed cross-validation implements for choosing the bandwidth \eqn{h} 
-  of a r'th derivative kernel density estimator.\cr
-  
-  Feluch and Koronacki (1992) proposed a so-called trimmed cross-validation (TCV) in kernel 
-  density estimator, a simple modification of the unbiased (least-squares)  cross-validation 
-  criterion. We consider the following "trimmed" version of "unbiased", to be minimized with 
-  respect to \eqn{h}:
-  \deqn{\int \left(\hat{f}_{h}^{(r)}(x)\right)^{2} - 2 \frac{(-1)^{r}}{n(n-1) h^{2r+1}} \sum_{i=1}^{n}\sum_{j=1; j \neq i} K^{(2r)} \left(\frac{X_{j}-X_{i}}{h}\right)\chi\left(|X_{i}-X_{j}| > c_{n}\right)}{int (hat(f)(x;r))^2 - 2 (-1)^r / n (n-1)h^(2r+1) sum(sum(K(x(j)-x(i)/h;2r)),i=1...n,j=1...n, j!=i) chi(|X(i)-X(j)| > c(n))}
-  where \eqn{\chi(.)}{chi(.)} denotes the indicator function and \eqn{c_{n}}{c(n)} is a sequence of positive 
-  constants, \eqn{c_{n}/ h^{2r+1} \rightarrow 0}{c(n)/h^(2r+1) --> 0} as \eqn{n \rightarrow \infty}{n --> Inf}, and 
-  \deqn{\int \left(\hat{f}_{h}^{(r)}(x)\right)^{2} = \frac{R\left(K^{(r)}\right)}{nh^{2r+1}} + \frac{(-1)^{r}}{n (n-1) h^{2r+1}} \sum_{i=1}^{n}\sum_{j=1;j \neq i}^{n} K^{(r)} \ast K^{(r)} \left(\frac{X_{j}-X_{i}}{h}\right)}{int (hat(f)(x;r))^2 dx = R(k(x;r))/n h^(2r+1) +  (-1)^r / n (n-1) h^(2r+1) sum(sum(K(.;r)*K(.;r)(x(j)-x(i)/h)), i=1...n, j=1...n, j != i)}
-  the trimmed cross-validation function is defined by:
-  \deqn{TCV(h;r) = \frac{R\left(K^{(r)}\right)}{nh^{2r+1}} + \frac{(-1)^{r}}{n(n-1)h^{2r+1}}\sum_{i=1}^{n} \sum_{j=1;j \neq i}^{n} \varphi^{(r)} \left(\frac{X_{j}-X_{i}}{h}\right)}{TCV(h;r) =  R(K(x;r))/ n h^(2r+1) +  (-1)^r / n (n-1) h^(2r+1) sum( sum(varphi(x(j)-x(i)/h;r) ),i=1...n,j=1...n,j != i) }
-  whit \deqn{\varphi^{(r)}(c) = \left(K^{(r)} \ast K^{(r)} - 2 K^{(2r)} \chi\left(|c| > c_{n}/h^{2r+1}\right) \right)(c)}{varphi(c;r)= K(c;r)*K(c;r) - 2 K(c;2r) chi( |c| > c(n)/h^(2r+1) )}
-  here we take \eqn{c_{n} = 1/n}{c(n) = 1/n}, for assure the convergence. Where \eqn{K^{(r)} \ast K^{(r)} (x)}{K(x;r)*K(x;r)} is the convolution of the r'th derivative kernel function \eqn{K^{(r)}(x)}{K(x;r)}
-  (see \code{\link{kernel.conv}} and \code{\link{kernel.fun}}).\cr
-  
-  The range over which to minimize is \code{hos} Oversmoothing bandwidth, the default is almost always 
-  satisfactory. See George and Scott (1985), George (1990), Scott (1992, pp 165), Wand and Jones (1995, pp 61). 
+  Feluch and Koronacki (1992) proposed \emph{trimmed cross-validation}
+  (TCV), a modification of unbiased cross-validation that trims small
+  pairwise distances.  \eqn{\hat{h}_{TCV}^{(r)}}{h_TCV(r)} minimises:
+  \deqn{TCV(h;r) = \frac{R(K^{(r)})}{nh^{2r+1}} +
+    \frac{(-1)^r}{n(n-1)h^{2r+1}}
+    \sum_i\sum_{j \neq i}
+    \varphi^{(r)}\!\left(\frac{X_j-X_i}{h}\right)}{%
+    TCV(h;r) = R(K(r))/(n*h^(2r+1)) +
+    (-1)^r/(n*(n-1)*h^(2r+1)) *
+    sum_i sum_{j!=i} phi(r)((Xj-Xi)/h)}
+  where
+  \deqn{\varphi^{(r)}(c) =
+    \Bigl(K^{(r)}\ast K^{(r)} -
+          2\,K^{(2r)}\chi\!\bigl(|c|>c_n/h^{2r+1}\bigr)\Bigr)(c)}{%
+    phi(r)(c) = K(r)*K(r)(c) - 2*K(2r)(c)*chi(|c| > cn/h^(2r+1))}
+  with \eqn{c_n=1/n}{cn=1/n} (ensuring convergence),
+  \eqn{\chi(.)}{chi(.)} the indicator function,
+  and \eqn{K^{(r)}\ast K^{(r)}}{K(r)*K(r)} the convolution of the
+  r'th kernel derivative (see \code{\link{kernel.conv}},
+  \code{\link{kernel.fun}}).\cr
+
+  The search is bounded by the over-smoothing bandwidth \code{hos}
+  (Scott 1992, p.\,165; Wand and Jones 1995, p.\,61).
 }
 \value{
-  \item{x}{data points - same as input.}
-  \item{data.name}{the deparsed name of the \code{x} argument.}
-  \item{n}{the sample size after elimination of missing values.}
-  \item{kernel}{name of kernel to use}
-  \item{deriv.order}{the derivative order to use.}
-  \item{h}{value of bandwidth parameter.}
-  \item{min.tcv}{the minimal TCV value.}
+  An S4 object of class \code{\linkS4class{bandwidth}} with slots:
+  \describe{
+    \item{\code{data}}{the (cleaned) data vector.}
+    \item{\code{kernel}}{name of the kernel used.}
+    \item{\code{deriv.order}}{derivative order \eqn{r}.}
+    \item{\code{h}}{selected bandwidth.}
+    \item{\code{min.obj}}{minimum TCV value.}
+    \item{\code{hos}}{over-smoothing bandwidth (upper bound).}
+    \item{\code{method}}{\code{"TCV"}.}
+  }
 }
 \references{
   Feluch, W. and Koronacki, J. (1992).
   A note on modified cross-validation in density estimation.
   \emph{Computational Statistics and Data Analysis}, \bold{13}, 143--151.
+
+  Wand, M. P. and Jones, M. C. (1995).
+  \emph{Kernel Smoothing}.
+  Chapman and Hall, London.
 }
-\author{Arsalane Chouaib Guidoum \email{acguidoum@usthb.dz}
-}
+\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz}}
 \seealso{
-\code{\link{plot.h.tcv}}.
+  \code{\linkS4class{bandwidth}}, \code{\link{h.ucv}}, \code{\link{h.bcv}},
+  \code{\link{h.ccv}}, \code{\link{h.mcv}}, \code{\link{h.amise}}, \code{\link{h.scv}},
+  \code{\link{kernel.conv}}, \code{\link{kernel.fun}}.
 }
 \examples{
-## Derivative order = 0
+x <- rnorm(100)
 
-h.tcv(kurtotic,deriv.order = 0)
+## density (r = 0)
+bw0 <- h.tcv(x, deriv.order = 0)
+show(bw0)
+plot(bw0)
 
-## Derivative order = 1
-
-h.tcv(kurtotic,deriv.order = 1)
+## first derivative (r = 1)
+bw1 <- h.tcv(x, deriv.order = 1)
+show(bw1)
+## other kernels on a Marron-Wand sample
+h.tcv(kurtotic, kernel = "logistic")
+h.tcv(kurtotic, kernel = "pow(2,3)")
 }
 \keyword{smooth}
 \keyword{bandwidth selection}

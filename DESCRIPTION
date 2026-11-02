@@ -1,27 +1,54 @@
 Package: kedd
-Version: 1.0.4
-License: GPL (>= 2)
-Description: Smoothing techniques and computing bandwidth selectors of the nth derivative of a probability density for one-dimensional data (described in Arsalane Chouaib Guidoum (2020) <arXiv:2012.06102> [stat.CO]).
+Type: Package
 Title: Kernel Estimator and Bandwidth Selection for Density and Its
         Derivatives
+Version: 2.0.0
+Date: 2026-11-01
 Authors@R: c(
-  person("Iago", "Giné-Vázquez", role = c("cre"), 
-                                 email = "iago.gin-vaz@protonmail.com", 
-                                 comment = c(ORCID = "0000-0002-6725-2638")),
-  person("Arsalane Chouaib", "Guidoum", role = "aut"))
-Date: 2024-01-27
-Depends: R (>= 2.15.0)
-Suggests: nor1mix, ks, sm, locfit, orthopolynom
-URL: https://gitlab.com/iagogv/kedd
-BugReports: https://gitlab.com/iagogv/kedd/-/issues
+    person("Arsalane Chouaib", "Guidoum",
+           email   = "acguidoum@univ-tam.dz",
+           role    = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-3781-2160")),
+    person("Amel", "Henider",
+           email   = "amel.henider@univ-tam.dz",
+           role    = "aut"),
+    person("Iago", "Giné-Vázquez",
+           email   = "iago.gin-vaz@protonmail.com",
+           role    = "ctb",
+           comment = c(ORCID = "0000-0002-6725-2638")))
+Maintainer: Arsalane Chouaib Guidoum <acguidoum@univ-tam.dz>
+Description: Kernel estimation of a univariate probability density and of its
+    derivatives of any order r, with data-driven bandwidth selection. Provides the
+    kernel estimator of the derivative of order r, the kernels, their derivatives and
+    convolutions, and eight bandwidth selectors: the asymptotic MISE rule (AMISE),
+    and unbiased (UCV), biased (BCV1, BCV2), complete (CCV), modified (MCV),
+    trimmed (TCV), smoothed (SCV) and maximum-likelihood (MLCV) cross-validation.
+    Supports ten named kernels (Gaussian, Epanechnikov, uniform, triangular,
+    biweight, triweight, tricube, cosine, Silverman, logistic) and the power
+    family Pow(s,t), c(1-|x|^s)^t on [-1,1]. Results are S4 objects with 'ggplot2'
+    graphics; the O(n^2) criteria are computed in C++ ('Rcpp') with 'OpenMP'
+    parallelism. Includes five example samples from Marron and Wand (1992)
+    normal mixtures, a vignette and demos. Companion to Guidoum (2020)
+    <doi:10.48550/arXiv.2012.06102>.
+License: GPL (>= 2)
+URL: https://github.com/ac-guidoum/kedd,
+        https://arxiv.org/abs/2012.06102
+BugReports: https://github.com/ac-guidoum/kedd/issues
+Depends: R (>= 3.5.0)
+Imports: Rcpp (>= 1.0.0), methods, stats, graphics, ggplot2 (>= 3.4.0),
+        tools, utils
+LinkingTo: Rcpp
+Suggests: knitr, rmarkdown, testthat, covr
+VignetteBuilder: knitr
+NeedsCompilation: yes
+LazyData: true
 Encoding: UTF-8
-LazyData: yes
-NeedsCompilation: no
-Type: Package
-Classification/MSC: 62G05, 62G07, 65D10, 68N15
-Packaged: 2024-01-30 23:24:45 UTC; iago
-Author: Iago Giné-Vázquez [cre] (<https://orcid.org/0000-0002-6725-2638>),
-  Arsalane Chouaib Guidoum [aut]
-Maintainer: Iago Giné-Vázquez <iago.gin-vaz@protonmail.com>
+Config/roxygen2/version: 8.1.1
+Packaged: 2026-11-02 06:23:52 UTC; stars
+Author: Arsalane Chouaib Guidoum [aut, cre] (ORCID:
+    <https://orcid.org/0000-0003-3781-2160>),
+  Amel Henider [aut],
+  Iago Giné-Vázquez [ctb] (ORCID:
+    <https://orcid.org/0000-0002-6725-2638>)
 Repository: CRAN
-Date/Publication: 2024-02-01 11:00:02 UTC
+Date/Publication: 2026-11-02 08:20:02 UTC

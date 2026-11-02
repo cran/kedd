@@ -1,1 +1,3 @@
-kedd                      More examples on kedd-package
+kedd        Quick tour: kernels, density derivative estimation and bandwidth selection
+kernels     Gallery of the kernels, their derivatives and convolutions (incl. logistic and Pow(s,t))
+bandwidths  Comparison of the bandwidth selectors (r = 0, 1, 2) and on the five Marron-Wand samples

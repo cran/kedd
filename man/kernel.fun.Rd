@@ -1,86 +1,99 @@
 \name{kernel.fun}
 \alias{kernel.fun}
-\alias{kernel.fun.default}
-\title{
-Derivatives of Kernel Function
-}
+\title{Evaluate Kernel Function and Its Derivatives}
 \description{
-  The (S3) generic function \code{kernel.fun} computes the 
-  r'th derivative for kernel density.}
+  Evaluates the \eqn{r}-th derivative \eqn{K^{(r)}(x)} of a kernel function
+  \eqn{K} and returns an S4 object of class \code{\linkS4class{kfun}}.
+}
 \usage{
-kernel.fun(x, \dots)
-\method{kernel.fun}{default}(x = NULL, deriv.order = 0, kernel = c("gaussian","epanechnikov", 
-            "uniform", "triangular", "triweight", "tricube", 
-            "biweight", "cosine", "silverman"), \dots)
+kernel.fun(x = NULL, deriv.order = 0L, kernel = "gaussian", n.grid = 512L)
 }
 \arguments{
-  \item{x}{points at which the derivative of kernel function 
-           is to be evaluated.}
-  \item{deriv.order}{derivative order (scalar).}
-  \item{kernel}{a character string giving the smoothing kernel to be used, 
-  with default \code{"gaussian"}.}
-  \item{\dots}{further arguments for (non-default) methods.}
+  \item{x}{numeric vector of evaluation points. If \code{NULL} (default), a
+    uniform grid of \code{n.grid} points over \eqn{[-8, 8]} (Gaussian,
+    Silverman, logistic) or \eqn{[-1.1, 1.1]} (compact-support kernels)
+    is used.}
+  \item{deriv.order}{non-negative integer: derivative order \eqn{r \ge 0}.
+    Maximum \eqn{r} with \eqn{K^{(r)} \ne 0}: any for Gaussian, cosine and
+    Silverman; logistic 20; Epanechnikov 2; uniform 0; triangular 1;
+    biweight 4; triweight 6; tricube 9; \code{pow(s,t)} \eqn{\min(st, 16)}{min(st, 16)}
+    (16 if \eqn{s} or \eqn{t} is not an integer). Above it, zero is returned
+    (with a warning for logistic and pow). See
+    \code{\link{kedd-package}}, section \sQuote{Maximum derivative order}.}
+  \item{kernel}{character string giving the kernel; one of
+    \code{"gaussian"} (default), \code{"epanechnikov"}, \code{"uniform"},
+    \code{"triangular"}, \code{"biweight"}, \code{"triweight"},
+    \code{"tricube"}, \code{"cosine"}, \code{"silverman"}, \code{"logistic"},
+    or a power kernel \code{"pow(s,t)"} (see \code{\link{kernel.pow}}).}
+  \item{n.grid}{number of grid points when \code{x} is \code{NULL}
+    (default 512).}
 }
 \details{
-  We give a short survey of some kernels functions \eqn{K(x;r)}{K(x;r)}; where \eqn{r} is derivative order,
+  The supported kernels at order \eqn{r = 0}:
   \itemize{
-    \item Gaussian:  \eqn{K(x;\infty) =\frac{1}{\sqrt{2\pi}}\exp\left(-\frac{x^{2}}{2}\right)1_{]-\infty,+\infty[}}{K(x;Inf) = 1/sqrt(2pi) exp(-0.5 x^2)}
-    \item Epanechnikov: \eqn{K(x;2)=\frac{3}{4}(1-x^{2})1_{(|x| \leq 1)}}{K(x;2) = 0.75 (1-x^2) (abs(x) <= 1)}
-    \item uniform (rectangular): \eqn{K(x;0)=\frac{1}{2}1_{(|x| \leq 1)}}{K(x;0) = 0.5 (abs(x) <= 1)}
-    \item triangular: \eqn{K(x;1)=(1-|x|)1_{(|x| \leq 1)}}{K(x;1) = (1-abs(x)) (abs(x) <= 1)}
-    \item triweight: \eqn{K(x;6)=\frac{35}{32}(1-x^{2})^{3} 1_{(|x| \leq 1)}}{K(x;6) = 35/36 (1-x^2)^3 (abs(x) <= 1)}
-    \item tricube: \eqn{K(x;9)=\frac{70}{81}(1-|x|^{3})^{3} 1_{(|x| \leq 1)}}{K(x;9) = 70/81 (1-abs(x)^3)^3 (abs(x) <= 1)}
-    \item biweight: \eqn{K(x;4)=\frac{15}{16}(1-x^{2})^{2} 1_{(|x| \leq 1)}}{K(x;4) = 15/16 (1-x^2)^2 (abs(x) <= 1)}
-    \item cosine: \eqn{K(x;\infty)=\frac{\pi}{4}\cos\left(\frac{\pi}{2}x\right) 1_{(|x| \leq 1)}}{0.25 pi cos(0.5 pi x) (abs(x) <= 1)}
-    \item Silverman: \eqn{K(x;r \bmod 8)=\frac{1}{2}\exp\left(-\frac{|x|}{\sqrt{2}}\right)\sin\left(\frac{|x|}{\sqrt{2}}+\frac{\pi}{4}\right)1_{]-\infty,+\infty[}}{K(x;r mod 8)= 0.5 exp(-abs(x)/sqrt(2)) sin(abs(x)/sqrt(2) + 0.25 pi)}	
+    \item \bold{Gaussian}: \eqn{K(x)=\frac{1}{\sqrt{2\pi}}e^{-x^2/2}},
+          support \eqn{(-\infty,+\infty)}.
+    \item \bold{Epanechnikov}: \eqn{K(x)=\frac{3}{4}(1-x^2)\mathbf{1}_{|x|\le 1}}.
+    \item \bold{Uniform}: \eqn{K(x)=\frac{1}{2}\mathbf{1}_{|x|\le 1}}.
+    \item \bold{Triangular}: \eqn{K(x)=(1-|x|)\mathbf{1}_{|x|\le 1}}.
+    \item \bold{Biweight}: \eqn{K(x)=\frac{15}{16}(1-x^2)^2\mathbf{1}_{|x|\le 1}}.
+    \item \bold{Triweight}: \eqn{K(x)=\frac{35}{32}(1-x^2)^3\mathbf{1}_{|x|\le 1}}.
+    \item \bold{Tricube}: \eqn{K(x)=\frac{70}{81}(1-|x|^3)^3\mathbf{1}_{|x|\le 1}}.
+    \item \bold{Cosine}: \eqn{K(x)=\frac{\pi}{4}\cos\!\left(\frac{\pi x}{2}\right)\mathbf{1}_{|x|\le 1}}.
+    \item \bold{Silverman}: \eqn{K(x)=\frac{1}{2}e^{-|x|/\sqrt{2}}\sin\!\left(\frac{|x|}{\sqrt{2}}+\frac{\pi}{4}\right)},
+          support \eqn{(-\infty,+\infty)}.
+    \item \bold{Logistic}: \eqn{K(x)=\frac{e^{-x}}{(1+e^{-x})^2}=\frac{1}{4}\mathrm{sech}^2(x/2)},
+          support \eqn{(-\infty,+\infty)}.
+    \item \bold{Pow(s,t)}: \eqn{K(x)=c_{s,t}(1-|x|^s)^t\mathbf{1}_{|x|\le 1}},
+          \eqn{c_{s,t}=s/(2B(1/s,t+1))}, given as \code{"pow(s,t)"}
+          (see \code{\link{kernel.pow}}).
   }
-  The r'th derivative for kernel function \eqn{K(x)} is written:
-  \deqn{K^{(r)}(x) = \frac{d^{r}}{d x^{r}} K(x)}{K(x;r) = d^r / dx^r K(x)}
-  for \eqn{r = 0, 1, 2, \dots}\cr
-  The r'th derivative of the \bold{Gaussian kernel} \eqn{K(x)} is given by:
-  \deqn{K^{(r)}(x) = (-1)^{r} H_{r}(x) K(x)}{K(x;r) = (-1)^r H(x;r) K(x)}
-  where \eqn{H_{r}(x)}{H(x;r)} is the r'th \bold{Hermite polynomial}. This polynomials 
-  are set of orthogonal polynomials, for more details see, \code{\link[orthopolynom]{hermite.h.polynomials}} 
-  in package \CRANpkg{orthopolynom}.
+  Derivatives are computed analytically via Hermite polynomials (Gaussian,
+  Silverman), Guidoum polynomials (finite-support kernels), the identity
+  \eqn{K^{(r)}=\sigma(1-\sigma)Q_{r+1}(\sigma)} with \eqn{\sigma(x)=1/(1+e^{-x})}
+  (logistic, \eqn{r \le 20}) and exact power expansions (Pow, \eqn{r \le 16}).
 }
 \value{
-  \item{kernel }{name of kernel to use.}
-  \item{deriv.order }{the derivative order to use.}
-  \item{x }{the n coordinates of the points where the derivative of kernel 
-            function is evaluated.}
-  \item{kx }{the kernel derivative values.}
-}
-\author{Arsalane Chouaib Guidoum \email{acguidoum@usthb.dz}
+  An S4 object of class \code{\linkS4class{kfun}} with slots:
+  \describe{
+    \item{\code{x}}{numeric evaluation grid.}
+    \item{\code{y}}{\eqn{K^{(r)}(x)} values.}
+    \item{\code{kernel}}{kernel name.}
+    \item{\code{deriv.order}}{derivative order \eqn{r}.}
+    \item{\code{call}}{the matched call.}
+  }
+  Use \code{show()} for a text summary and \code{plot()} for a ggplot2 graphic.
 }
 \references{
-  Jones, M. C. (1992).
-  Differences and derivatives in kernel estimation. 
-  \emph{Metrika}, \bold{39}, 335--340.
-  
-  Olver, F. W., Lozier, D. W., Boisvert, R. F. and Clark, C. W. (2010).
-  \emph{NIST Handbook of Mathematical Functions}.
-  Cambridge University Press, New York, USA.
-  
+  Wand, M. P. and Jones, M. C. (1995).
+  \emph{Kernel Smoothing}. Chapman and Hall, London.
+
   Silverman, B. W. (1986).
   \emph{Density Estimation for Statistics and Data Analysis}.
-  Chapman & Hall/CRC. London.
+  Chapman & Hall/CRC, London.
 }
+\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz}}
 \seealso{
-\code{\link{plot.kernel.fun}}, \code{\link[stats]{deriv}} and \code{\link[stats]{D}} in 
-package "stats" for symbolic and algorithmic derivatives of simple expressions. 
+  \code{\link{kernel.conv}}, \code{\linkS4class{kfun}},
+  \code{\link{dkde}}, \code{\link{h.ucv}}.
 }
 \examples{
-kernels <- eval(formals(kernel.fun.default)$kernel)
-kernels
+## Gaussian kernel (r = 0)
+kf <- kernel.fun(kernel = "gaussian", deriv.order = 0L)
+show(kf)
+plot(kf)
 
-## gaussian
-kernel.fun(x = 0,kernel=kernels[1],deriv.order=0)
-kernel.fun(x = 0,kernel=kernels[1],deriv.order=1)
+## First derivative of Epanechnikov kernel
+kf2 <- kernel.fun(kernel = "epanechnikov", deriv.order = 1L)
+plot(kf2)
 
-## silverman
-kernel.fun(x = 0,kernel=kernels[9],deriv.order=0)
-kernel.fun(x = 0,kernel=kernels[9],deriv.order=1)
+## Evaluate at specific points
+kf3 <- kernel.fun(x = seq(-2, 2, by = 0.1),
+                  kernel = "biweight", deriv.order = 2L)
+
+## Logistic and Pow(s,t) kernels
+plot(kernel.fun(kernel = "logistic", deriv.order = 2L))
+plot(kernel.fun(kernel = kernel.pow(1.5, 2.5)))
 }
 \keyword{nonparametric}
 \keyword{kernel}
-

@@ -1,13 +1,29 @@
-citHeader("To cite package 'kedd' in publications use:")
-     
-	 
- if(!exists("meta") || is.null(meta)) meta <- packageDescription("kedd")
- year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date, perl = TRUE)
- vers <- paste("R package version", meta$Version)
- 
- bibentry(bibtype="Manual",
-		  title = "kedd: Kernel estimator and bandwidth selection for density and its derivatives.",
-		  author = c(person(given = c("Arsalane", "Chouaib"), family = "Guidoum", role = "aut"), person(given = "Iago", family = "Giné-Vázquez", role = "cre")),
-		  year = year,
-		  note = vers,
-		  url  = paste("https://CRAN.R-project.org/package=kedd"))
+citHeader("To cite kedd in publications use:")
+
+bibentry(
+  bibtype = "Misc",
+  title   = "Kernel Estimator and Bandwidth Selection for Density and Its Derivatives: The kedd Package",
+  author  = person("Arsalane Chouaib", "Guidoum"),
+  year    = "2020",
+  eprint  = "2012.06102",
+  archivePrefix = "arXiv",
+  doi     = "10.48550/arXiv.2012.06102",
+  url     = "https://arxiv.org/abs/2012.06102",
+  textVersion = paste(
+    "Guidoum, A. C. (2020). Kernel estimator and bandwidth selection for density",
+    "and its derivatives: the kedd package. arXiv:2012.06102.",
+    "doi:10.48550/arXiv.2012.06102")
+)
+
+bibentry(
+  bibtype = "Manual",
+  title   = "kedd: Kernel Estimator and Bandwidth Selection for Density and Its Derivatives",
+  author  = c(person("Arsalane Chouaib", "Guidoum"), person("Amel", "Henider")),
+  year    = "2026",
+  note    = "R package version 2.0.0",
+  url     = "https://github.com/ac-guidoum/kedd",
+  textVersion = paste(
+    "Guidoum, A. C. and Henider, A. (2026). kedd: Kernel Estimator and",
+    "Bandwidth Selection for Density and Its Derivatives. R package version 2.0.0,",
+    "https://github.com/ac-guidoum/kedd")
+)

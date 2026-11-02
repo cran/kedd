@@ -1,111 +1,173 @@
-## Tue Feb 26 00:39:10 2013
-## Original file Copyright 2013 A.C. Guidoum
-## This file is part of the R package kedd.
-## Arsalane Chouaib GUIDOUM <acguidoum@usthb.dz> and <starsalane@gmail.com> 
-## Department of Probabilities-Statistics
-## Faculty of Mathematics
-## University of Science and Technology Houari Boumediene
-## BP 32 El-Alia, U.S.T.H.B, Algeris
-## Algeria
-##############################################################################
+## S4 class: dkde
+## Returned by dkde() — kernel density (derivative) estimator.
 
+setClass("dkde",
+  representation(
+    x           = "numeric",   # evaluation grid
+    y           = "numeric",   # estimated values hat{f}^{(r)}(x)
+    h           = "numeric",   # bandwidth used
+    kernel      = "character",
+    deriv.order = "integer",
+    n           = "integer",   # sample size
+    data        = "numeric",   # raw observations
+    call        = "call"
+  )
+)
 
-## Derivatives of Kernel Density Estimator (dkde)
+setValidity("dkde", function(object) {
+  if (length(object@h) != 1L || object@h <= 0)
+    return("'h' must be a single positive number.")
+  if (length(object@kernel) != 1L)
+    return("'kernel' must be a single character string.")
+  if (length(object@deriv.order) != 1L || object@deriv.order < 0L)
+    return("'deriv.order' must be a non-negative integer.")
+  if (length(object@x) != length(object@y))
+    return("'x' and 'y' must have the same length.")
+  TRUE
+})
 
+## show method
+setMethod("show", "dkde", function(object) {
+  r_label <- if (object@deriv.order == 0L) "density" else
+             paste0("derivative of order ", object@deriv.order)
+  cat("\nKernel ", r_label, " estimate\n", sep = "")
+  cat("Kernel     :", object@kernel, "\n")
+  cat("Bandwidth h:", format(object@h, digits = 6), "\n")
+  cat("n          :", object@n, "\n")
+  cat("Grid points:", length(object@x), "\n")
+  invisible(object)
+})
 
-dkde <- function(x, ...)  UseMethod("dkde")
-
-
-dkde.default <- function(x,y=NULL,deriv.order=0,h,
-                  kernel=c("gaussian","epanechnikov","uniform","triangular",
-                  "triweight","tricube", "biweight","cosine"),...)
-       {
-    if (!is.numeric(x) || length(dim(x)) >=1 || length(x) < 3L) 
-           stop("argument 'x' must be numeric and need at least 3 data points") 
-    if (any(deriv.order < 0 || deriv.order != round(deriv.order))) 
-             stop("argument 'deriv.order' is non-negative integers")
-    r <- deriv.order
-    if (identical(kernel, "epanechnikov") && r >= 3) stop(" 'epanechnikov kernel derivative = 0' for 'order >= 3' ")
-    if (identical(kernel, "uniform") && r >= 1)      stop(" 'uniform kernel derivative = 0' for 'order >= 1' ")
-    if (identical(kernel, "triweight") && r >= 7)    stop(" 'triweight kernel derivative = 0' for 'order >= 7' ")
-    if (identical(kernel, "biweight") && r >= 5)     stop(" 'biweight kernel derivative = 0' for 'order >= 5' ")
-    if (identical(kernel, "triangular") && r >= 2)   stop(" 'triangular kernel derivative = 0' for 'order >= 2' ")
-    if (identical(kernel, "tricube") && r >= 10)     stop(" 'tricube kernel derivative = 0' for 'order >= 10' ")
-    name <- deparse(substitute(x))
-    if (missing(r))           r <- 0
-    if (missing(kernel)) kernel <- "gaussian"
-    if (missing(h))      h <- h.ucv(x,deriv.order=r,kernel=kernel)$h
-	x <- x[!is.na(x)]
-    if (is.null(y)){ 
-               #from <- min(x) - 3 * h
-               #to   <- max(x) + 3 * h
-               #y <- seq(from - 4 * h, to + 4 * h,length.out=512L)	
-               #tau <- if (kernel == "gaussian") 4 else 1
-               tau <- 4			   
-               range.x <- c(min(x) - tau * h, max(x) + tau * h)
-               y <- seq(range.x[1L], range.x[2L],length.out=512L)
-                  }
-    aux <- outer(y,x,"-")/h
-    fn <- kernel_fun_der(kernel, aux,r)/h^(r+1)
-    fn <- apply(fn,1,mean)
-    structure(list(x=x, data.name=name, n=length(x), kernel=kernel, deriv.order=r, h = h, 
-                  eval.points=y, est.fx = fn),class="dkde")
-         }
-		 
-###### 
-
-print.dkde <- function(x, digits=NULL, ...)
-           {
-    class(x) <- "dkde"
-    cat("\nData: ",x$data.name," (",x$n," obs.);", "\tKernel: ",x$kernel,"\n",
-	    "\nDerivative order: ",x$deriv.order,";","\tBandwidth 'h' = ",formatC(x$h,digits=digits), "\n\n",sep="")
-    print(summary(as.data.frame(x[c("eval.points","est.fx")])), digits=digits, ...)
-    invisible(x)
+##' Kernel density derivative estimator
+##'
+##' Computes  hat{f}^{(r)}(x) = (1 / (n * h^{r+1})) * sum_i K^{(r)}((x - X_i)/h)
+##'
+##' @param x        numeric vector of evaluation points (or NULL to use a grid)
+##' @param data     numeric vector of observations
+##' @param h        bandwidth (scalar); if missing, uses UCV
+##' @param deriv.order  derivative order r (0 = density)
+##' @param kernel   kernel name (default "gaussian")
+##' @param nthreads OpenMP threads
+##' @return  an object of class \code{"dkde"}
+##' @export
+dkde <- function(x = NULL, data, h, deriv.order = 0L,
+                 kernel = "gaussian", nthreads = 0L) {
+  kernel <- .normalize_kernel(kernel)
+  nthreads <- .check_nthreads(nthreads)
+  r <- as.integer(deriv.order)
+  data <- data[!is.na(data)]
+  n    <- as.integer(length(data))
+  if (n < 2L) stop("'data' must have at least 2 observations.")
+  if (missing(h) || is.null(h)) {
+    bw <- h.ucv(data, deriv.order = r, kernel = kernel, nthreads = nthreads)
+    h  <- bw@h
+  }
+  if (!is.numeric(h) || length(h) != 1L || h <= 0)
+    stop("'h' must be a positive scalar.")
+  if (is.null(x))
+    x <- seq(min(data) - 3 * h, max(data) + 3 * h, length.out = 512L)
+  diffs_mat <- outer(x, data, "-") / h
+  K_vals    <- matrix(Cpp_kernel_deriv(kernel, as.numeric(diffs_mat), r, nthreads),
+                      nrow = length(x))
+  y <- rowSums(K_vals) / (n * h^(r + 1L))
+  new("dkde",
+      x = as.numeric(x), y = as.numeric(y),
+      h = h, kernel = kernel, deriv.order = r,
+      n = n, data = as.numeric(data),
+      call = match.call())
 }
 
-######
+## plot method for dkde using ggplot2
+setMethod("plot", "dkde",
+  function(x,
+           rug        = TRUE,
+           band       = TRUE,
+           zero.line  = (x@deriv.order > 0L),
+           type       = "l",
+           main.title, x.title, y.title,
+           colors     = list(line = "#2166AC", fill = "#DEEBF7",
+                             rug  = "#555555", zero = "#999999"),
+           title.size = 11, title.face = "bold",
+           axis.size  = 10,
+           theme      = ggplot2::theme_minimal(),
+           ...) {
 
-plot.dkde1d <- function(f,fx=NULL,main=NULL,sub = NULL, xlab=NULL, ylab=NULL,
-                      type="l",las=1,lwd=1,col="red",lty=1,...)
-                    {
-    class(f) <- "dkde"
-	#if(!is.function(fx)) stop("fx must be a function.")
-    if(is.null(xlab)) xlab <- "x"
-    if(is.null(ylab)){
-	     if(f$deriv.order !=0){ylab <- "density derivative function"}else{
-	                           ylab <- "density function"}
-	                }
-    if(is.null(main)){ 
-	     if(f$deriv.order !=0) {main <- "Kernel density derivative estimate"}else{
-	                            main <- "Kernel density estimation"}
-	                }
-    if(is.null(sub)){
-	     if(f$deriv.order !=0) {sub <- paste("Kernel",f$kernel,";","Derivative order = ",f$deriv.order,";", "Bandwidth = ", formatC(f$h))}else{
-	                            sub <- paste("Kernel",f$kernel,";", "Bandwidth = ", formatC(f$h))}
-	                }  
-    gn <- if (!is.null(fx)) function(par) fx(par, ...)
-    if (is.null(fx)){
-    plot.default(f$eval.points,f$est.fx, main=main,sub=sub, xlab=xlab, ylab=ylab, type=type,font.lab=2,cex.lab=0.9,
-                 font.main=2,cex.main=0.9,font.sub=2,cex.sub=0.7,las=las,lwd=lwd,...)}else{
-    plot.default(f$eval.points,f$est.fx, ylim=c(min(f$est.fx,fx(f$eval.points),na.rm = TRUE),max(f$est.fx,fx(f$eval.points),na.rm = TRUE)),
-	             main=main,sub=sub, xlab=xlab, ylab=ylab, type=type,col=col,lty=lty,
-                 font.main=2,cex.main=0.9,font.sub=2,cex.sub=0.7,las=las,lwd=lwd,...)
-    curve(fx,xlim = c(min(f$eval.points,na.rm = TRUE), max(f$eval.points,na.rm = TRUE)), n = length(f$eval.points), lty = 8,lwd=lwd,add=TRUE)			 
-    legend("topright", c("Estimate","True"),lty=c(lty,8),col=c(col,"black"),lwd=c(lwd,lwd), inset = .015,cex=1)
-	}
-    invisible(NULL)
-}
+    kernel_label <- tools::toTitleCase(x@kernel)
 
+    if (missing(y.title))
+      y.title <- if (x@deriv.order == 0L)
+        expression(hat(f)(x))
+      else
+        bquote(hat(f)^{(.(x@deriv.order))}(x))
 
-plot.dkde <- function(x,fx=NULL,...) plot.dkde1d(x,fx,...)
+    if (missing(x.title)) x.title <- "x"
 
-######
+    if (missing(main.title))
+      main.title <- paste0(
+        if (x@deriv.order == 0L) "Kernel Density Estimate"
+        else paste0("Kernel Density Derivative  (r = ", x@deriv.order, ")"),
+        "\n",
+        kernel_label, " kernel",
+        "  |  h = ", round(x@h, 4),
+        "  |  n = ", x@n
+      )
 
-lines.dkde1d <- function(f,...)
-                    {
-    class(f) <- "dkde"
-    lines.default(f$eval.points,f$est.fx,...)
-    invisible(NULL)
-}
+    df <- data.frame(xv = x@x, y = x@y)
 
-lines.dkde <- function(x,...) lines.dkde1d(x,...) 
+    if (band) {
+      se <- stats::sd(x@y) / sqrt(x@n)
+      df$ylo <- x@y - se
+      df$yhi <- x@y + se
+    }
+
+    p <- ggplot2::ggplot(df, ggplot2::aes(x = xv, y = y))
+
+    if (band)
+      p <- p + ggplot2::geom_ribbon(
+        ggplot2::aes(ymin = ylo, ymax = yhi),
+        fill = colors$fill, alpha = 0.45
+      )
+
+    if (zero.line)
+      p <- p + ggplot2::geom_hline(
+        yintercept = 0, linetype = "dashed",
+        color = colors$zero, linewidth = 0.5
+      )
+
+    if (type %in% c("l", "o"))
+      p <- p + ggplot2::geom_line(color = colors$line, linewidth = 0.9)
+    if (type %in% c("p", "o"))
+      p <- p + ggplot2::geom_point(color = colors$line, size = 0.7)
+
+    if (rug) {
+      df_rug <- data.frame(xv = x@data)
+      p <- p + ggplot2::geom_rug(
+        data  = df_rug,
+        ggplot2::aes(x = xv, y = NULL),
+        color = colors$rug, alpha = 0.4,
+        sides = "b", linewidth = 0.3
+      )
+    }
+
+    p <- p +
+      ggplot2::ggtitle(main.title) +
+      ggplot2::xlab(x.title) +
+      ggplot2::ylab(y.title) +
+      theme +
+      ggplot2::theme(
+        plot.title   = ggplot2::element_text(size = title.size, face = title.face,
+                                             hjust = 0.5),
+        axis.title   = ggplot2::element_text(size = axis.size),
+        panel.border = ggplot2::element_rect(colour = "grey40", fill = NA,
+                                             linewidth = 0.5),
+        plot.margin  = ggplot2::margin(8, 12, 6, 8)
+      )
+
+    print(p)
+    invisible(p)
+  }
+)
+
+## kedd 1.x compatibility: dkde(...)$est.fx, $eval.points, $h, $n, ...
+setMethod("$", "dkde", function(x, name)
+  .dollar(x, name, c(eval.points = "x", est.fx = "y")))

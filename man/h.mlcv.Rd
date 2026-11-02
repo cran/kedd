@@ -1,69 +1,94 @@
 \name{h.mlcv}
 \alias{h.mlcv}
-\alias{h.mlcv.default}
-\alias{print.h.mlcv}
-\title{
-Maximum-Likelihood Cross-validation for Bandwidth Selection
-}
+\title{Maximum-Likelihood Cross-Validation for Bandwidth Selection}
 \description{
-  The (S3) generic function \code{h.mlcv} computes the maximum 
-  likelihood cross-validation (Kullback-Leibler information) 
-  bandwidth selector of a one-dimensional kernel density estimate.
+  Computes the maximum-likelihood (Kullback-Leibler) cross-validation
+  bandwidth selector for a kernel density estimator (density estimation
+  only, \code{deriv.order = 0}).
+  Returns an S4 object of class \code{\linkS4class{bandwidth}}.
 }
 \usage{
-h.mlcv(x, \dots)
-\method{h.mlcv}{default}(x, lower = 0.1, upper = 5, tol = 0.1 * lower, 
-         kernel = c("gaussian", "epanechnikov", "uniform", "triangular", 
-         "triweight", "tricube", "biweight", "cosine"), \dots)
+h.mlcv(x, kernel = "gaussian", lower, upper, tol, nthreads = 0L)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{vector of data values.}
-  \item{lower, upper}{range over which to maximize. The default is
-    almost always satisfactory.}
-  \item{tol}{the convergence tolerance for \code{\link{optimize}}.}
-  \item{kernel}{a character string giving the smoothing kernel to be used, with default
-    \code{"gaussian"}.}
-  \item{\dots}{further arguments for (non-default) methods.}
+  \item{x}{numeric vector of data values.}
+  \item{kernel}{character string giving the kernel; one of
+    \code{"gaussian"} (default), \code{"epanechnikov"}, \code{"uniform"},
+    \code{"triangular"}, \code{"biweight"}, \code{"triweight"},
+    \code{"tricube"}, \code{"cosine"}, \code{"silverman"}, \code{"logistic"},
+    or a power kernel \code{"pow(s,t)"} (see \code{\link{kernel.pow}}).}
+  \item{lower, upper}{bounds of the search interval.  Defaults to
+    \code{[0.01 * hos, 2 * hos]}.}
+  \item{tol}{convergence tolerance for \code{\link{optimize}}.
+    Default \code{0.01 * lower}.}
+  \item{nthreads}{number of OpenMP threads for this call: \code{0} (default)
+    = all processors, \code{k > 0} = \code{k} threads, both capped by the
+    environment variable \code{OMP_THREAD_LIMIT}. The result does not depend on
+    it, and it never changes the threads used by later calls.}
 }
 \details{
-  \code{h.mlcv} maximum-likelihood cross-validation implements for choosing 
-  the optimal bandwidth \eqn{h} of kernel density estimator.\cr
-  
-  This method was proposed by Habbema, Hermans, and Van den Broeck (1971) and by Duin (1976). The maximum-likelihood 
-  cross-validation (MLCV) function is defined by:
-  \deqn{MLCV(h) = n^{-1} \sum_{i=1}^{n} \log\left[\hat{f}_{h,i}(x)\right]}{MLCV(h) = n^-1 sum( log(hat(f(h))),i=1...n)}
-  the estimate \eqn{\hat{f}_{h,i}(x)}{hat(f)(x)} on the subset \eqn{\{X_{j}\}_{j \neq i}}{(X_j)_(j != i)}
-  denoting the leave-one-out estimator, can be written:
-  \deqn{\hat{f}_{h,i}(X_{i}) = \frac{1}{(n-1) h} \sum_{j \neq i} K \left(\frac{X_{j}-X_{i}}{h}\right)}{hat(f)(X_i) = 1/(n-1) h sum(K(x(j)-x(i)/h), j != i)}
-  Define that \eqn{h_{mlcv}}{h(mlcv)} as good which approaches the finite maximum of \eqn{MLCV(h)}{MLCV(h)}:
-  \deqn{h_{mlcv} = \arg \max_{h} MLCV(h) = \arg \max_{h} \left(n^{-1} \sum_{i=1}^{n} \log\left[\sum_{j \neq i} K \left(\frac{X_{j}-X_{i}}{h}\right)\right]-\log[(n-1)h]\right)}{h(mlcv)= argmax MLCV(h) = argmax n^-1 sum(log(sum(K(x(j)-x(i)/h),j != i)),i=1...n) - log((n-1)h)}
+  Habbema, Hermans, and Van den Broek (1974) and Duin (1976) proposed
+  maximising the leave-one-out log-likelihood:
+  \deqn{MLCV(h) = n^{-1}\sum_{i=1}^{n}
+    \log\!\left[\hat{f}_{h,i}(X_i)\right]}{%
+    MLCV(h) = (1/n) * sum_i log(hat_f_{-i}(Xi))}
+  where the leave-one-out estimator is
+  \deqn{\hat{f}_{h,i}(X_i) =
+    \frac{1}{(n-1)h}\sum_{j \neq i}K\!\left(\frac{X_j-X_i}{h}\right)}{%
+    hat_f_{-i}(Xi) = 1/((n-1)*h) * sum_{j!=i} K((Xj-Xi)/h)}
+  Equivalently,
+  \deqn{h_{mlcv} = \arg\max_{h}\left(n^{-1}\sum_{i}\log\!\left[
+    \sum_{j \neq i}K\!\left(\frac{X_j-X_i}{h}\right)\right]
+    -\log[(n-1)h]\right)}{%
+    h_mlcv = argmax_h { (1/n)*sum_i log(sum_{j!=i} K((Xj-Xi)/h))
+    - log((n-1)*h) }}
+
+  Only applicable to density estimation (\eqn{r=0}).
 }
 \value{
-  \item{x}{data points - same as input.}
-  \item{data.name}{the deparsed name of the \code{x} argument.}
-  \item{n}{the sample size after elimination of missing values.}
-  \item{kernel}{name of kernel to use}
-  \item{h}{value of bandwidth parameter.}
-  \item{mlcv}{the maximal likelihood CV value.}
+  An S4 object of class \code{\linkS4class{bandwidth}} with slots:
+  \describe{
+    \item{\code{data}}{the (cleaned) data vector.}
+    \item{\code{kernel}}{name of the kernel used.}
+    \item{\code{deriv.order}}{\code{0L} (density only).}
+    \item{\code{h}}{selected bandwidth.}
+    \item{\code{min.obj}}{negative of the maximum MLCV value.}
+    \item{\code{hos}}{over-smoothing bandwidth (upper bound).}
+    \item{\code{method}}{\code{"MLCV"}.}
+  }
 }
 \references{
-  Habbema, J. D. F., Hermans, J., and Van den Broek, K. (1974)
-  A stepwise discrimination analysis program using density estimation. 
-  \emph{Compstat 1974: Proceedings in Computational Statistics}. Physica Verlag, Vienna.
-
   Duin, R. P. W. (1976).
-  On the choice of smoothing parameters of Parzen estimators of probability density functions. 
+  On the choice of smoothing parameters of Parzen estimators of
+  probability density functions.
   \emph{IEEE Transactions on Computers}, \bold{C-25}, 1175--1179.
+
+  Habbema, J. D. F., Hermans, J. and Van den Broek, K. (1974).
+  A stepwise discrimination analysis program using density estimation.
+  \emph{Compstat 1974: Proceedings in Computational Statistics}.
+  Physica Verlag, Vienna.
+
+  Wand, M. P. and Jones, M. C. (1995).
+  \emph{Kernel Smoothing}.
+  Chapman and Hall, London.
 }
-\author{Arsalane Chouaib Guidoum \email{acguidoum@usthb.dz}
-}
+\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz}}
 \seealso{
-\code{\link{plot.h.mlcv}}, see \code{\link[locfit]{lcv}} in package \CRANpkg{locfit}.
+  \code{\linkS4class{bandwidth}}, \code{\link{h.ucv}}, \code{\link{h.amise}}, \code{\link{h.scv}},
+  \code{\link{dkde}}.
 }
 \examples{
-h.mlcv(bimodal)
-h.mlcv(bimodal, kernel ="epanechnikov")
+x <- rnorm(100)
+
+bw <- h.mlcv(x)
+show(bw)
+plot(bw)
+
+bw2 <- h.mlcv(x, kernel = "epanechnikov")
+show(bw2)
+## other kernels on a Marron-Wand sample
+h.mlcv(outlier, kernel = "logistic")
+h.mlcv(outlier, kernel = "pow(2,2)")
 }
 \keyword{smooth}
 \keyword{bandwidth selection}

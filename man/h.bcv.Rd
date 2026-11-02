@@ -1,127 +1,129 @@
 \name{h.bcv}
 \alias{h.bcv}
-\alias{h.bcv.default}
-\alias{print.h.bcv}
-\title{
-Biased Cross-Validation for Bandwidth Selection
-}
+\title{Biased Cross-Validation for Bandwidth Selection}
 \description{
-  The (S3) generic function \code{h.bcv} computes the biased 
-  cross-validation bandwidth selector of r'th derivative of 
-  kernel density estimator one-dimensional.
+  Computes the biased cross-validation bandwidth selector (BCV1 or BCV2)
+  of the r'th derivative of a kernel density estimator (one-dimensional).
+  Returns an S4 object of class \code{\linkS4class{bandwidth}}.
 }
 \usage{
-h.bcv(x, \dots)
-\method{h.bcv}{default}(x, whichbcv = 1, deriv.order = 0, lower = 0.1 * hos, upper = 2 * hos, 
-         tol = 0.1 * lower, kernel = c("gaussian","epanechnikov",
-         "triweight","tricube","biweight","cosine"), \dots)
+h.bcv(x, whichbcv = 1L, deriv.order = 0L, kernel = "gaussian",
+      lower, upper, tol, nthreads = 0L)
 }
 \arguments{
-  \item{x}{vector of data values.}
-  \item{whichbcv}{method selected, \code{1 = BCV1} or \code{2 = BCV2}, see details.}
-  \item{deriv.order}{derivative order (scalar).}
-  \item{lower, upper}{range over which to minimize. The default is
-    almost always satisfactory. \code{hos} (Over-smoothing) is calculated internally
-    from an \code{kernel}, see details.}
-  \item{tol}{the convergence tolerance for \code{\link{optimize}}.}
-  \item{kernel}{a character string giving the smoothing kernel to be used, with default
-    \code{"gaussian"}.}
-  \item{\dots}{further arguments for (non-default) methods.}
+  \item{x}{numeric vector of data values.}
+  \item{whichbcv}{integer: \code{1} for BCV1 (Scott and Terrell 1987,
+    default) or \code{2} for BCV2 (Jones and Kappenman 1991).}
+  \item{deriv.order}{non-negative integer: derivative order \eqn{r}. Maximum
+    \eqn{r} for this selector: any for Gaussian and Silverman; cosine 1;
+    logistic 8; Epanechnikov 1; uniform 0; triangular 0; biweight 2;
+    triweight 3; tricube 3; \code{pow(s,t)} \eqn{\min(r^*, 6)}{min(r*, 6)}, where
+    \eqn{r^*}{r*} is the largest integer \eqn{r < t + 1/2} (and
+    \eqn{r < s + 1/2} if \eqn{s} is not an even integer, and \eqn{2r \le st}{2r <= st}
+    if \eqn{s} and \eqn{t} are integers). Above it \code{h = NA}
+    is returned with a warning. See \code{\link{kedd-package}}, section
+    \sQuote{Maximum derivative order}.}
+  \item{kernel}{character string giving the kernel; one of
+    \code{"gaussian"} (default), \code{"epanechnikov"}, \code{"uniform"},
+    \code{"triangular"}, \code{"biweight"}, \code{"triweight"},
+    \code{"tricube"}, \code{"cosine"}, \code{"silverman"}, \code{"logistic"},
+    or a power kernel \code{"pow(s,t)"} (see \code{\link{kernel.pow}}).}
+  \item{lower, upper}{bounds of the search interval.  Defaults to
+    \code{[0.01 * hos, 2 * hos]}.}
+  \item{tol}{convergence tolerance for \code{\link{optimize}}.
+    Default \code{0.01 * lower} (after validation of \code{lower}).}
+  \item{nthreads}{number of OpenMP threads for this call: \code{0} (default)
+    = all processors, \code{k > 0} = \code{k} threads, both capped by the
+    environment variable \code{OMP_THREAD_LIMIT}. The result does not depend on
+    it, and it never changes the threads used by later calls.}
 }
 \details{
-  \code{h.bcv} biased cross-validation implements for choosing the bandwidth \eqn{h} of a 
-  r'th derivative kernel density estimator. if \code{whichbcv = 1} then \bold{BCV1} is selected
-  (Scott and George 1987), and if \code{whichbcv = 2} used \bold{BCV2} (Jones and Kappenman 1991).\cr
-  
-  Scott and George (1987) suggest a method which has as its immediate target the \bold{AMISE}
-  (e.g. Silverman 1986, section 3.3). We denote \eqn{\hat{\theta}_{r}(h)}{hat(theta)(h;r)} and 
-  \eqn{\bar{\theta}_{r}(h)}{bar(theta)(h;r)} (Peter and Marron 1987, Jones and Kappenman 1991) by:
-  %%\deqn{\hat{\theta}_{r}(h) = (n-1)^{-1} n R\left(\hat{f}_{h}^{(r)}\right) - (n-1)^{-1} h^{-2r-1} R\left(K^{(r)}\right)}{}
-  \deqn{\hat{\theta}_{r}(h)= \frac{(-1)^{r}}{n(n-1)h^{2r+1}} \sum_{i=1}^{n} \sum_{j=1;j \neq i}^{n} K^{(r)} \ast K^{(r)} \left(\frac{X_{j}-X_{i}}{h}\right)}{hat(theta)(h;r) = (-1)^r / n(n-1) h^(2r+1) sum(sum(K(.;r)*K(.;r)(x(j)-x(i)/h)), i=1...n, j=1...n, j != i)}
+  Let
+  \deqn{\hat{\theta}_{r}(h)= \frac{(-1)^{r}}{n(n-1)h^{2r+1}}
+    \sum_{i=1}^{n}\sum_{j \neq i}
+    K^{(r)}\ast K^{(r)}\!\left(\frac{X_j-X_i}{h}\right)}{%
+    hat_theta(h;r) = (-1)^r/(n*(n-1)*h^(2r+1)) *
+    sum_i sum_{j!=i} K(r)*K(r)((Xj-Xi)/h)}
   and
-  %%\deqn{\bar{\theta}_{r}(h) = (-1)^{r} n^{-1} \sum_{i=1}^{n} \hat{f}_{h,i}^{(2r)}(X_{i})}{}
-  \deqn{\bar{\theta}_{r}(h)= \frac{(-1)^r}{n(n-1) h^{2r+1}} \sum_{i=1}^{n} \sum_{j=1;j \neq i}^{n} K^{(2r)} \left(\frac{X_{j}-X_{i}}{h}\right)}{bar(theta)(h;r) = (-1)^r / n(n-1) h^(2r+1) sum(sum(K((x(j)-x(i)/h);2r)), i=1...n, j=1...n, j != i)}
-  Scott and George (1987) proposed using \eqn{\hat{\theta}_{r}(h)}{hat(theta)(h;r)} to estimate \eqn{f^{(r)}(x)}{f(x;r)}. 
-  Thus, \eqn{\hat{h}^{(r)}_{BCV1}}{h(r)_(BCV1)}, say, is the \eqn{h} that minimises:
-  \deqn{BCV1(h;r)= \frac{R\left(K^{(r)}\right)}{nh^{2r+1}} + \frac{1}{4} \mu_{2}^{2}(K) h^{4} \hat{\theta}_{r+2}(h)}{BCV1(h;r) = R(K(x;r))/ n h^(2r+1) + 0.25 mu(K(x))^2 h^4 hat(theta)(h;r+2)}
-  and we define \eqn{\hat{h}^{(r)}_{BCV2}}{h(r)_(BCV2)} as the minimiser of (Jones and Kappenman 1991):
-  \deqn{BCV2(h;r)= \frac{R\left(K^{(r)}\right)}{nh^{2r+1}} + \frac{1}{4} \mu_{2}^{2}(K) h^{4} \bar{\theta}_{r+2}(h)}{BCV2(h;r) = R(K(x;r))/ n h^(2r+1) + 0.25 mu(K(x))^2 h^4 bar(theta)(h;r+2)}
-  where \eqn{K^{(r)} \ast K^{(r)} (x)}{K(x;r)*K(x;r)} is the convolution of the r'th derivative kernel function \eqn{K^{(r)}(x)}{K(x;r)}
-  (see \code{\link{kernel.conv}} and \code{\link{kernel.fun}}); \eqn{R\left(K^{(r)}\right) = \int_{R} K^{(r)}(x)^{2} dx}{R(K(x;r)) = int K(x;r)^2 dx} and \eqn{\mu_{2}(K) = \int_{R}x^{2} K(x) dx}{mu(K(x)) = int x^2 K(x) dx}.\cr
-  
-  The range over which to minimize is \code{hos} Oversmoothing bandwidth, the default is almost always 
-  satisfactory. See George and Scott (1985), George (1990), Scott (1992, pp 165), Wand and Jones (1995, pp 61).
+  \deqn{\bar{\theta}_{r}(h)= \frac{(-1)^r}{n(n-1)h^{2r+1}}
+    \sum_{i=1}^{n}\sum_{j \neq i}
+    K^{(2r)}\!\left(\frac{X_j-X_i}{h}\right)}{%
+    bar_theta(h;r) = (-1)^r/(n*(n-1)*h^(2r+1)) *
+    sum_i sum_{j!=i} K(2r)((Xj-Xi)/h)}
+
+  \bold{BCV1} (Scott and Terrell 1987) minimises:
+  \deqn{BCV1(h;r)= \frac{R\left(K^{(r)}\right)}{nh^{2r+1}} +
+    \frac{\mu_2^2(K)}{4}\,h^{4}\,\hat{\theta}_{r+2}(h)}{%
+    BCV1(h;r) = R(K(r))/(n*h^(2r+1)) + mu2^2/4 * h^4 * hat_theta(h;r+2)}
+
+  \bold{BCV2} (Jones and Kappenman 1991) minimises:
+  \deqn{BCV2(h;r)= \frac{R\left(K^{(r)}\right)}{nh^{2r+1}} +
+    \frac{\mu_2^2(K)}{4}\,h^{4}\,\bar{\theta}_{r+2}(h)}{%
+    BCV2(h;r) = R(K(r))/(n*h^(2r+1)) + mu2^2/4 * h^4 * bar_theta(h;r+2)}
+
+  where \eqn{K^{(r)}\ast K^{(r)}}{K(r)*K(r)} is the convolution of the
+  r'th kernel derivative (see \code{\link{kernel.conv}},
+  \code{\link{kernel.fun}}),
+  \eqn{R(K^{(r)})=\int K^{(r)}(x)^2\,dx}{R(K(r))=int K(r)^2 dx},
+  \eqn{\mu_2(K)=\int x^2 K(x)\,dx}{mu2(K)=int x^2 K(x) dx}.\cr
+
+  The search is bounded by the over-smoothing bandwidth \code{hos}
+  (Terrell and Scott 1985; Scott 1992, p.\,165; Wand and Jones 1995, p.\,61).
 }
 \value{
-  \item{x}{data points - same as input.}
-  \item{data.name}{the deparsed name of the \code{x} argument.}
-  \item{n}{the sample size after elimination of missing values.}
-  \item{kernel}{name of kernel to use}
-  \item{deriv.order}{the derivative order to use.}
-  \item{whichbcv}{method selected.}
-  \item{h}{value of bandwidth parameter.}
-  \item{min.bcv}{the minimal BCV value.}
+  An S4 object of class \code{\linkS4class{bandwidth}} with slots:
+  \describe{
+    \item{\code{data}}{the (cleaned) data vector.}
+    \item{\code{kernel}}{name of the kernel used.}
+    \item{\code{deriv.order}}{derivative order \eqn{r}.}
+    \item{\code{h}}{selected bandwidth.}
+    \item{\code{min.obj}}{minimum BCV value.}
+    \item{\code{hos}}{over-smoothing bandwidth (upper bound).}
+    \item{\code{method}}{\code{"BCV1"} or \code{"BCV2"}.}
+  }
 }
 \references{
-  Jones, M. C. and Kappenman, R. F. (1991). 
-  On a class of kernel density estimate bandwidth selectors. 
+  Jones, M. C. and Kappenman, R. F. (1991).
+  On a class of kernel density estimate bandwidth selectors.
   \emph{Scandinavian Journal of Statistics}, \bold{19}, 337--349.
-  
-  Jones, M. C., Marron, J. S. and Sheather,S. J. (1996).
-  A brief survey of bandwidth selection for density estimation. 
-  \emph{Journal of the American Statistical Association}, \bold{91}, 401--407.
-  
-  Peter, H. and Marron, J.S. (1987).
+
+  Peter, H. and Marron, J. S. (1987).
   Estimation of integrated squared density derivatives.
   \emph{Statistics and Probability Letters}, \bold{6}, 109--115.
-  
-  Scott, D.W. and George, R. T. (1987).
-  Biased and unbiased cross-validation in density estimation. 
-  \emph{Journal of the American Statistical Association}, \bold{82}, 1131--1146.
-  
-  Sheather,S. J. (2004).
-  Density estimation.
-  \emph{Statistical Science}, \bold{19}, 588--597.
 
-  Tarn, D. (2007).
-  \CRANpkg{ks}: Kernel density estimation and kernel discriminant
-  analysis for multivariate data in \R.
-  \emph{Journal of Statistical Software}, \bold{21}(7), 1--16. 
-  
+  Scott, D. W. and Terrell, G. R. (1987).
+  Biased and unbiased cross-validation in density estimation.
+  \emph{Journal of the American Statistical Association}, \bold{82},
+  1131--1146.
+
   Wand, M. P. and Jones, M. C. (1995).
   \emph{Kernel Smoothing}.
   Chapman and Hall, London.
-  
-  Wolfgang, H. (1991).
-  \emph{Smoothing Techniques}, 
-  \emph{With Implementation in S}.
-  Springer-Verlag, New York. 
+
+  Härdle, W. (1991).
+  \emph{Smoothing Techniques, With Implementation in S}.
+  Springer-Verlag, New York.
 }
-\author{Arsalane Chouaib Guidoum \email{acguidoum@usthb.dz}
-}
+\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz}}
 \seealso{
-\code{\link{plot.h.bcv}}, see \code{\link[stats]{bw.bcv}} in package "stats" and 
-\code{\link[MASS]{bcv}} in package \CRANpkg{MASS} for Gaussian kernel only if \code{deriv.order = 0},
-\code{\link[ks]{Hbcv}} for bivariate data in package \CRANpkg{ks} for Gaussian kernel 
-only if \code{deriv.order = 0}, \code{\link[locfit]{kdeb}} in package \CRANpkg{locfit} 
-if \code{deriv.order = 0}.
+  \code{\linkS4class{bandwidth}}, \code{\link{h.ucv}}, \code{\link{h.ccv}},
+  \code{\link{h.mcv}}, \code{\link{h.tcv}}, \code{\link{h.scv}}, \code{\link{h.amise}},
+  \code{\link{kernel.conv}}, \code{\link{kernel.fun}}, \code{\link{dkde}}.
 }
 \examples{
-## EXAMPLE 1:
-
 x <- rnorm(100)
-h.bcv(x,whichbcv = 1, deriv.order = 0)
-h.bcv(x,whichbcv = 2, deriv.order = 0)
 
-## EXAMPLE 2:
+## BCV1, density (r = 0)
+bw1 <- h.bcv(x, whichbcv = 1, deriv.order = 0)
+show(bw1)
 
-## Derivative order = 0
-
-h.bcv(kurtotic,deriv.order = 0)
-
-## Derivative order = 1
-
-h.bcv(kurtotic,deriv.order = 1)
+## BCV2, first derivative (r = 1)
+bw2 <- h.bcv(x, whichbcv = 2, deriv.order = 1)
+show(bw2)
+plot(bw2)
+## other kernels on a Marron-Wand sample
+h.bcv(bimodal, kernel = "logistic")
+h.bcv(bimodal, whichbcv = 2, kernel = kernel.pow(2, 4))
 }
 \keyword{smooth}
 \keyword{bandwidth selection}

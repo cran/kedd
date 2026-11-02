@@ -1,134 +1,120 @@
 \name{h.ucv}
 \alias{h.ucv}
-\alias{h.ucv.default}
-\alias{print.h.ucv}
-\title{
-Unbiased (Least-Squares) Cross-Validation for Bandwidth Selection
-}
+\title{Unbiased (Least-Squares) Cross-Validation for Bandwidth Selection}
 \description{
-  The (S3) generic function \code{h.ucv} computes the unbiased 
-  (least-squares) cross-validation bandwidth selector
-  of r'th derivative of kernel density estimator one-dimensional.
-  
+  Computes the unbiased (least-squares) cross-validation bandwidth selector
+  of the r'th derivative of a kernel density estimator (one-dimensional).
+  Returns an S4 object of class \code{\linkS4class{bandwidth}}.
 }
 \usage{
-h.ucv(x, \dots)
-\method{h.ucv}{default}(x, deriv.order = 0, lower = 0.1 * hos, upper = 2 * hos, 
-         tol = 0.1 * lower, kernel = c("gaussian", "epanechnikov", "uniform", 
-         "triangular", "triweight", "tricube", "biweight", "cosine"), \dots)
+h.ucv(x, deriv.order = 0L, kernel = "gaussian",
+      lower, upper, tol, nthreads = 0L)
 }
 \arguments{
-  \item{x}{vector of data values.}
-  \item{deriv.order}{derivative order (scalar).}
-  \item{lower, upper}{range over which to minimize. The default is
-    almost always satisfactory. \code{hos} (Over-smoothing) is calculated internally
-    from an \code{kernel}, see details.}
-  \item{tol}{the convergence tolerance for \code{\link{optimize}}.}
-  \item{kernel}{a character string giving the smoothing kernel to be used, with default
-    \code{"gaussian"}.}
-  \item{\dots}{further arguments for (non-default) methods.}
+  \item{x}{numeric vector of data values.}
+  \item{deriv.order}{non-negative integer: derivative order \eqn{r}. Maximum
+    \eqn{r} for this selector: any for Gaussian and Silverman; cosine 1;
+    logistic 8; Epanechnikov 1; uniform 0; triangular 0; biweight 2;
+    triweight 3; tricube 3; \code{pow(s,t)} \eqn{\min(r^*, 6)}{min(r*, 6)}, where
+    \eqn{r^*}{r*} is the largest integer \eqn{r < t + 1/2} (and
+    \eqn{r < s + 1/2} if \eqn{s} is not an even integer, and \eqn{2r \le st}{2r <= st}
+    if \eqn{s} and \eqn{t} are integers). Above it \code{h = NA}
+    is returned with a warning. See \code{\link{kedd-package}}, section
+    \sQuote{Maximum derivative order}.}
+  \item{kernel}{character string giving the kernel; one of
+    \code{"gaussian"} (default), \code{"epanechnikov"}, \code{"uniform"},
+    \code{"triangular"}, \code{"biweight"}, \code{"triweight"},
+    \code{"tricube"}, \code{"cosine"}, \code{"silverman"}, \code{"logistic"},
+    or a power kernel \code{"pow(s,t)"} (see \code{\link{kernel.pow}}).}
+  \item{lower, upper}{bounds of the search interval. Defaults to
+    \code{[0.01 * hos, 2 * hos]} where \code{hos} is the over-smoothing
+    bandwidth computed internally.}
+  \item{tol}{convergence tolerance passed to \code{\link{optimize}}.
+    Default \code{0.01 * lower} (after validation of \code{lower}).}
+  \item{nthreads}{number of OpenMP threads for this call: \code{0} (default)
+    = all processors, \code{k > 0} = \code{k} threads, both capped by the
+    environment variable \code{OMP_THREAD_LIMIT}. The result does not depend on
+    it, and it never changes the threads used by later calls.}
 }
 \details{
-  \code{h.ucv} unbiased (least-squares) cross-validation implements for choosing the bandwidth \eqn{h} 
-  of a r'th derivative kernel density estimator.\cr
-  
-  Rudemo (1982) and Bowman (1984) proposed a so-called unbiased (least-squares)  cross-validation 
-  (UCV) in kernel density estimator. An adaptation of unbiased cross-validation is proposed by 
-  Wolfgang et al. (1990) for bandwidth choice in the r'th derivative of kernel density estimator. 
-  The essential idea of this methods, for the estimation of \eqn{f^{(r)}(x)}{f(x;r)} (\eqn{r} is derivative order), 
-  is to use the bandwidth \eqn{h} which minimizes the function:
-  \deqn{UCV(h;r) = \int \left(\hat{f}_{h}^{(r)}(x)\right)^{2} - 2n^{-1}(-1)^{r}\sum_{i=1}^{n} \hat{f}_{h,i}^{(2r)}(X_{i})}{UCV(h;r)= int (hat(f)(x;r))^2 - 2 n^(-1) (-1)^r sum(hat(f)(X_i;2r),i=1,...n)}
-  The bandwidth minimizing this function is:
-  \deqn{\hat{h}^{(r)}_{ucv} = \arg \min_{h^{(r)}} UCV(h;r)}{h(r) = argmin UCV(h;r)}
-  for \eqn{r = 0, 1, 2, \dots}\cr
-  where  
-  \deqn{\int \left(\hat{f}_{h}^{(r)}(x)\right)^{2} = \frac{R\left(K^{(r)}\right)}{nh^{2r+1}} + \frac{(-1)^{r}}{n (n-1) h^{2r+1}} \sum_{i=1}^{n}\sum_{j=1;j \neq i}^{n} K^{(r)} \ast K^{(r)} \left(\frac{X_{j}-X_{i}}{h}\right)}{int (hat(f)(x;r))^2 dx = R(k(x;r))/n h^(2r+1) +  (-1)^r / n (n-1) h^(2r+1) sum(sum(K(.;r)*K(.;r)(x(j)-x(i)/h)), i=1...n, j=1...n, j != i)}
-  and \eqn{K^{(r)} \ast K^{(r)} (x)}{K(x;r)*K(x;r)} is the convolution of the r'th derivative kernel function \eqn{K^{(r)}(x)}{K(x;r)}
-  (see \code{\link{kernel.conv}} and \code{\link{kernel.fun}}).\cr
-  The estimate \eqn{\hat{f}_{h,i}^{(2r)}(x)}{hat(f)(x;2r)} on the subset \eqn{\{X_{j}\}_{j \neq i}}{(X_j)_(j != i)}
-  denoting the leave-one-out estimator, can be written:
-  \deqn{\hat{f}_{h,i}^{(2r)}(X_{i}) = \frac{1}{(n-1) h^{2r+1}} \sum_{j \neq i} K^{(2r)} \left(\frac{X_{j}-X_{i}}{h}\right)}{hat(f)(X_i;2r) = 1 /(n-1) h^(2r+1) sum(K(x(j)-x(i)/h;2r), j != i)}
-  The function \eqn{UCV(h;r)} is unbiased cross-validation in the sense that \eqn{E[UCV]=MISE[\hat{f}_{h}^{(r)}(x)]-R(f^{(r)}(x))}{E[UCV(h;r)] = MISE[hat(f)(x;r)]-R(f(x;r))}
-  (see, Scott and George 1987). Can be simplified to give the computationally:
-  \deqn{UCV(h;r) = \frac{R\left(K^{(r)}\right)}{nh^{2r+1}} + \frac{(-1)^{r}}{n (n-1) h^{2r+1}} \sum_{i=1}^{n}\sum_{j=1 ;j \neq i}^{n} \left(K^{(r)} \ast K^{(r)} -2K^{(2r)}\right) \left(\frac{X_{j}-X_{i}}{h}\right)}{UCV(h;r) = R(k(x;r))/n h^(2r+1) +  (-1)^r / n (n-1) h^(2r+1) sum(sum(K(.;r)*K(.;r) - 2 K(.;r))(x(j)-x(i)/h), i=1...n, j=1...n, j != i)}
-  where \eqn{R\left(K^{(r)}\right) = \int_{R} K^{(r)}(x)^{2} dx}{R(K(x;r)) = int K(x;r)^2 dx}.\cr 
-  
-  The range over which to minimize is \code{hos} Oversmoothing bandwidth, the default is almost always 
-  satisfactory. See George and Scott (1985), George (1990), Scott (1992, pp 165), Wand and Jones (1995, pp 61).    
+  Rudemo (1982) and Bowman (1984) proposed unbiased (least-squares)
+  cross-validation (UCV) for kernel density estimation.  Härdle,
+  Marron and Wand (1990) extended the criterion to the r'th derivative
+  estimator.  The bandwidth \eqn{\hat{h}_{UCV}^{(r)}}{h_UCV(r)} minimises:
+  \deqn{UCV(h;r) = \frac{R\left(K^{(r)}\right)}{nh^{2r+1}} +
+    \frac{(-1)^{r}}{n(n-1)h^{2r+1}} \sum_{i=1}^{n}\sum_{j \neq i}
+    \Bigl(K^{(r)}\ast K^{(r)} - 2\,K^{(2r)}\Bigr)
+    \!\left(\frac{X_j-X_i}{h}\right)}{%
+    UCV(h;r) = R(K(r))/(n*h^(2r+1)) +
+    (-1)^r/(n*(n-1)*h^(2r+1)) * sum_i sum_{j!=i}
+    (K(r)*K(r) - 2*K(2r))((Xj-Xi)/h)}
+  where \eqn{K^{(r)}\ast K^{(r)}(x)}{K(r)*K(r)(x)} is the convolution
+  of the r'th derivative of the kernel (see \code{\link{kernel.conv}},
+  \code{\link{kernel.fun}}), and
+  \eqn{R(K^{(r)})=\int K^{(r)}(x)^2\,dx}{R(K(r)) = int K(r)(x)^2 dx}.\cr
+
+  UCV is unbiased in the sense that
+  \eqn{E[UCV(h;r)]=MISE[\hat{f}_h^{(r)}]-R(f^{(r)})}{E[UCV] = MISE - R(f(r))}
+  (Scott and Terrell 1987).\cr
+
+  The search is bounded by the over-smoothing bandwidth \code{hos}
+  (Terrell and Scott 1985; Scott 1992, p.\,165; Wand and Jones 1995, p.\,61).
 }
 \value{
-  \item{x}{data points - same as input.}
-  \item{data.name}{the deparsed name of the \code{x} argument.}
-  \item{n}{the sample size after elimination of missing values.}
-  \item{kernel}{name of kernel to use}
-  \item{deriv.order}{the derivative order to use.}
-  \item{h}{value of bandwidth parameter.}
-  \item{min.ucv}{the minimal UCV value.}
+  An S4 object of class \code{\linkS4class{bandwidth}} with slots:
+  \describe{
+    \item{\code{data}}{the (cleaned) data vector.}
+    \item{\code{kernel}}{name of the kernel used.}
+    \item{\code{deriv.order}}{derivative order \eqn{r}.}
+    \item{\code{h}}{selected bandwidth.}
+    \item{\code{min.obj}}{minimum UCV value.}
+    \item{\code{hos}}{over-smoothing bandwidth (upper bound).}
+    \item{\code{method}}{\code{"UCV"}.}
+  }
 }
-\references{  
-  Bowman, A. (1984). 
-  An alternative method of cross-validation for the smoothing 
-  of kernel density estimates. 
+\references{
+  Bowman, A. (1984).
+  An alternative method of cross-validation for the smoothing of kernel
+  density estimates.
   \emph{Biometrika}, \bold{71}, 353--360.
-  
-  Jones, M. C. and Kappenman, R. F. (1991). 
-  On a class of kernel density estimate bandwidth selectors. 
-  \emph{Scandinavian Journal of Statistics}, \bold{19}, 337--349.
-  
-  Jones, M. C., Marron, J. S. and Sheather,S. J. (1996).
-  A brief survey of bandwidth selection for density estimation. 
-  \emph{Journal of the American Statistical Association}, \bold{91}, 401--407.
-  
-  Peter, H. and Marron, J.S. (1987).
-  Estimation of integrated squared density derivatives.
-  \emph{Statistics and Probability Letters}, \bold{6}, 109--115.
-  
-  Rudemo, M. (1982). 
-  Empirical choice of histograms and kernel density estimators. 
-  \emph{Scandinavian Journal of Statistics}, \bold{9}, 65--78. 
 
-  Scott, D.W. and George, R. T. (1987).
-  Biased and unbiased cross-validation in density estimation. 
-  \emph{Journal of the American Statistical Association}, \bold{82}, 1131--1146.  
-  
-  Sheather, S. J. (2004).
-  Density estimation.
-  \emph{Statistical Science}, \bold{19}, 588--597.
+  Rudemo, M. (1982).
+  Empirical choice of histograms and kernel density estimators.
+  \emph{Scandinavian Journal of Statistics}, \bold{9}, 65--78.
 
-  Tarn, D. (2007).
-  \CRANpkg{ks}: Kernel density estimation and kernel discriminant
-  analysis for multivariate data in \R.
-  \emph{Journal of Statistical Software}, \bold{21}(7), 1--16. 
-  
+  Scott, D. W. and Terrell, G. R. (1987).
+  Biased and unbiased cross-validation in density estimation.
+  \emph{Journal of the American Statistical Association}, \bold{82},
+  1131--1146.
+
   Wand, M. P. and Jones, M. C. (1995).
   \emph{Kernel Smoothing}.
   Chapman and Hall, London.
-  
-  Wolfgang, H. (1991).
-  \emph{Smoothing Techniques}, 
-  \emph{With Implementation in S}.
-  Springer-Verlag, New York. 
 
-  Wolfgang, H., Marron, J. S. and Wand, M. P. (1990).
+  Härdle, W., Marron, J. S. and Wand, M. P. (1990).
   Bandwidth choice for density derivatives.
-  \emph{Journal of the Royal Statistical Society, Series B}, 223--232. 
+  \emph{Journal of the Royal Statistical Society, Series B}, 223--232.
 }
-\author{Arsalane Chouaib Guidoum \email{acguidoum@usthb.dz}
-}
+\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz}}
 \seealso{
-\code{\link{plot.h.ucv}}, see \code{\link[stats]{bw.ucv}} in package "stats" and 
-\code{\link[MASS]{ucv}} in package \CRANpkg{MASS} for Gaussian kernel only if \code{deriv.order = 0},
-\code{\link[ks]{hlscv}} in package \CRANpkg{ks} for Gaussian kernel only if \code{0 <= deriv.order <= 5}, 
-\code{\link[locfit]{kdeb}} in package \CRANpkg{locfit} if \code{deriv.order = 0}. 
+  \code{\linkS4class{bandwidth}}, \code{\link{h.bcv}}, \code{\link{h.ccv}},
+  \code{\link{h.mcv}}, \code{\link{h.tcv}}, \code{\link{h.scv}}, \code{\link{h.amise}},
+  \code{\link{kernel.conv}}, \code{\link{kernel.fun}}, \code{\link{dkde}}.
 }
 \examples{
-## Derivative order = 0
+x <- rnorm(100)
 
-h.ucv(kurtotic,deriv.order = 0)
+## density (r = 0)
+bw0 <- h.ucv(x, deriv.order = 0)
+show(bw0)
+plot(bw0)
 
-## Derivative order = 1
-
-h.ucv(kurtotic,deriv.order = 1)
+## first derivative (r = 1)
+bw1 <- h.ucv(x, deriv.order = 1)
+show(bw1)
+## other kernels on a Marron-Wand sample
+h.ucv(claw, kernel = "logistic")
+h.ucv(claw, kernel = "pow(2,3)")
 }
 \keyword{smooth}
 \keyword{bandwidth selection}

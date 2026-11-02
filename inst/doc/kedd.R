@@ -1,346 +1,133 @@
-### R code from vignette source 'kedd.Rnw'
-
-###################################################
-### code chunk number 1: kedd.Rnw:132-133
-###################################################
+## ----setup, include = FALSE---------------------------------------------------
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6,
+                      fig.height = 3.8, fig.align = "center", dpi = 96)
 library(kedd)
-
-
-###################################################
-### code chunk number 2: kedd.Rnw:135-137
-###################################################
-kernel.fun(x = seq(-0.02,0.02,by=0.01), deriv.order = 1, kernel = "gaussian")$kx
-kernel.conv(x = seq(-0.02,0.02,by=0.01), deriv.order = 1, kernel = "gaussian")$kx
-
-
-###################################################
-### code chunk number 3: kedd.Rnw:139-141
-###################################################
-plot(kernel.fun(deriv.order = 1, kernel = "gaussian"))
-plot(kernel.conv(deriv.order = 1, kernel = "gaussian"))
-
-
-###################################################
-### code chunk number 4: kedd.Rnw:146-147
-###################################################
-plot(kernel.fun(deriv.order = 1, kernel = "gaussian"),main = "", sub = "")
-
-
-###################################################
-### code chunk number 5: kedd.Rnw:149-150
-###################################################
-plot(kernel.conv(deriv.order = 1, kernel = "gaussian"),main = "", sub = "")
-
-
-###################################################
-### code chunk number 6: kedd.Rnw:176-182
-###################################################
-fx <- function(x) 0.5 *(-4*x-6)* dnorm(x,-1.5,0.5) + 0.5 *(-4*x+6) * dnorm(x,1.5,0.5)
-kernels <- c("gaussian","biweight","triweight","tricube")
-plot(dkde(x = bimodal, deriv.order = 1, h = 0.6, kernel = kernels[1]),col = 1,ylim=c(-0.6,0.6) ,sub="", main="")
-for (i in 2:length(kernels))lines(dkde(x = bimodal, deriv.order = 1, h = 0.6, kernel = kernels[i] ), col = i)
-curve(fx,add=TRUE,lty=8)
-legend("topright", legend = c(TRUE,kernels), col = c("black",seq(kernels)),lty = c(8,rep(1,length(kernels))), inset = .015)
-
-
-###################################################
-### code chunk number 7: kedd.Rnw:184-189
-###################################################
-h <- c(0.14,0.3,0.6,1.2)                                                                                                               
-plot(dkde(x = bimodal, deriv.order = 1, h = h[1], kernel = kernels[1]),col = 1,ylim=c(-0.6,1) ,sub="", main="")                   
-for (i in 2:length(h))lines(dkde(x = bimodal, deriv.order = 1, h = h[i], kernel = kernels[1] ), col = i)                            
-curve(fx,add=TRUE,lty=8)                                                                                                            
-legend("topright", legend = c("TRUE",paste("h =",bquote(.(h)))), col = c("black",seq(h)),lty = c(8,rep(1,length(h))), inset = .015) 
-
-
-###################################################
-### code chunk number 8: kedd.Rnw:229-233
-###################################################
-hatf  <- dkde(bimodal, deriv.order = 0)
-hatf1 <- dkde(bimodal, deriv.order = 1)
-hatf2 <- dkde(bimodal, deriv.order = 2)
-hatf3 <- dkde(bimodal, deriv.order = 3)
-
-
-###################################################
-### code chunk number 9: kedd.Rnw:237-248
-###################################################
-fx  <- function(x) 0.5 * dnorm(x,-1.5,0.5) + 0.5 * dnorm(x,1.5,0.5)
-fx1 <- function(x) 0.5 *(-4*x-6)* dnorm(x,-1.5,0.5) + 0.5 *(-4*x+6) * 
-                   dnorm(x,1.5,0.5)
-fx2 <- function(x) 0.5 * ((-4*x-6)^2 - 4) * dnorm(x,-1.5,0.5) + 0.5 *
-                   ((-4*x+6)^2 - 4) * dnorm(x,1.5,0.5)
-fx3 <- function(x) 0.5 * (-4*x-6) * ((-4*x-6)^2 - 12) * dnorm(x,-1.5,0.5) +
-                     0.5 * (-4*x+6) * ((-4*x+6)^2 - 12) * dnorm(x,1.5,0.5)
-plot(hatf ,fx = fx)
-plot(hatf1,fx = fx1)
-plot(hatf2,fx = fx2)
-plot(hatf3,fx = fx3)
-
-
-###################################################
-### code chunk number 10: kedd.Rnw:253-254
-###################################################
-plot(hatf,fx = fx,lwd=2,sub="",main="")
-
-
-###################################################
-### code chunk number 11: kedd.Rnw:256-257
-###################################################
-plot(hatf1,fx = fx1,lwd=2,sub="",main="")
-
-
-###################################################
-### code chunk number 12: kedd.Rnw:259-260
-###################################################
-plot(hatf2,fx = fx2,lwd=2,sub="",main="")
-
-
-###################################################
-### code chunk number 13: kedd.Rnw:262-263
-###################################################
-plot(hatf3,fx = fx3,lwd=2,sub="",main="")
-
-
-###################################################
-### code chunk number 14: kedd.Rnw:312-316
-###################################################
-h.amise(bimodal, deriv.order = 0)
-h.amise(bimodal, deriv.order = 1)
-h.amise(bimodal, deriv.order = 2)
-h.amise(bimodal, deriv.order = 3)
-
-
-###################################################
-### code chunk number 15: kedd.Rnw:352-356
-###################################################
-kernels <- eval(formals(h.mlcv.default)$kernel)
-hmlcv <- numeric()
-for(i in 1:length(kernels))  
-             hmlcv[i] <- h.mlcv(bimodal, kernel =  kernels[i])$h
-
-
-###################################################
-### code chunk number 16: kedd.Rnw:358-359
-###################################################
-data.frame(kernels,hmlcv)
-
-
-###################################################
-### code chunk number 17: kedd.Rnw:362-364
-###################################################
-plot(h.mlcv(bimodal, kernel =  kernels[1]), seq.bws = seq(0.1,1,length=50))
-plot(h.mlcv(bimodal, kernel =  kernels[2]), seq.bws = seq(0.1,1,length=50))
-
-
-###################################################
-### code chunk number 18: kedd.Rnw:369-370
-###################################################
-plot(h.mlcv(bimodal, kernel =  kernels[1]), seq.bws = seq(0.1,1,length=50),sub="",main="")
-
-
-###################################################
-### code chunk number 19: kedd.Rnw:372-373
-###################################################
-plot(h.mlcv(bimodal, kernel =  kernels[2]), seq.bws = seq(0.1,1,length=50),sub="",main="")
-
-
-###################################################
-### code chunk number 20: kedd.Rnw:412-416
-###################################################
-h.ucv(bimodal, deriv.order = 0)
-h.ucv(bimodal, deriv.order = 1)
-h.ucv(bimodal, deriv.order = 2)
-h.ucv(bimodal, deriv.order = 3)
-
-
-###################################################
-### code chunk number 21: kedd.Rnw:419-420
-###################################################
-for (i in 0:3) plot(h.ucv(bimodal, deriv.order = i))
-
-
-###################################################
-### code chunk number 22: kedd.Rnw:425-426
-###################################################
-plot(h.ucv(bimodal, deriv.order = 0),sub="",main="")
-
-
-###################################################
-### code chunk number 23: kedd.Rnw:428-429
-###################################################
-plot(h.ucv(bimodal, deriv.order = 1),sub="",main="")
-
-
-###################################################
-### code chunk number 24: kedd.Rnw:431-432
-###################################################
-plot(h.ucv(bimodal, deriv.order = 2),sub="",main="")
-
-
-###################################################
-### code chunk number 25: kedd.Rnw:434-435
-###################################################
-plot(h.ucv(bimodal, deriv.order = 3),sub="",main="")
-
-
-###################################################
-### code chunk number 26: kedd.Rnw:481-485
-###################################################
-h.bcv(bimodal, whichbcv = 1, deriv.order = 0)
-h.bcv(bimodal, whichbcv = 2, deriv.order = 0)
-h.bcv(bimodal, whichbcv = 1, deriv.order = 1, lower=0.1, upper=0.8)
-h.bcv(bimodal, whichbcv = 2, deriv.order = 1, lower=0.1, upper=0.8)
-
-
-###################################################
-### code chunk number 27: kedd.Rnw:488-499
-###################################################
-## deriv.order = 0
-plot(h.bcv(bimodal, whichbcv = 2, deriv.order = 0))
-lines(h.bcv(bimodal, whichbcv = 1, deriv.order = 0),col="red")
-legend("topright", c("BCV1","BCV2"),lty=1,col=c("red","black"),
-       inset = .015)
-## deriv.order = 1
-plot(h.bcv(bimodal, whichbcv = 2, deriv.order = 1),seq.bws = 
-     seq(0.1,0.8,length=50))
-lines(h.bcv(bimodal, whichbcv = 1, deriv.order = 1),col="red")
-legend("topright", c("BCV1","BCV2"),lty=1,col=c("red","black"),
-      inset = .015)
-
-
-###################################################
-### code chunk number 28: kedd.Rnw:504-507
-###################################################
-plot(h.bcv(bimodal, whichbcv = 2, deriv.order = 0),sub="",main="")
-lines(h.bcv(bimodal, whichbcv = 1, deriv.order = 0),col="red")
-legend("topright", c("BCV1","BCV2"),lty=1,col=c("red","black"),inset = .015)
-
-
-###################################################
-### code chunk number 29: kedd.Rnw:509-512
-###################################################
-plot(h.bcv(bimodal, whichbcv = 2, deriv.order = 1),seq.bws=seq(0.1,0.8,length=50),sub="",main="")
-lines(h.bcv(bimodal, whichbcv = 1, deriv.order = 1),col="red")
-legend("topright", c("BCV1","BCV2"),lty=1,col=c("red","black"),inset = .015)
-
-
-###################################################
-### code chunk number 30: kedd.Rnw:553-557
-###################################################
-h.ccv(bimodal, deriv.order = 0, upper = 0.5)
-h.ccv(bimodal, deriv.order = 1, upper = 0.5)
-h.ccv(bimodal, deriv.order = 2, upper = 0.5)
-h.ccv(bimodal, deriv.order = 3, upper = 0.5)
-
-
-###################################################
-### code chunk number 31: kedd.Rnw:560-562
-###################################################
-for (i in 0:3) 
- plot(h.ccv(bimodal, deriv.order = i), seq.bws=seq(0.1,0.5,length=50))
-
-
-###################################################
-### code chunk number 32: kedd.Rnw:567-568
-###################################################
-plot(h.ccv(bimodal, deriv.order = 0),seq.bws=seq(0.1,0.5,length=50),sub="",main="")
-
-
-###################################################
-### code chunk number 33: kedd.Rnw:570-571
-###################################################
-plot(h.ccv(bimodal, deriv.order = 1),seq.bws=seq(0.1,0.5,length=50),sub="",main="")
-
-
-###################################################
-### code chunk number 34: kedd.Rnw:573-574
-###################################################
-plot(h.ccv(bimodal, deriv.order = 2),seq.bws=seq(0.1,0.5,length=50),sub="",main="")
-
-
-###################################################
-### code chunk number 35: kedd.Rnw:576-577
-###################################################
-plot(h.ccv(bimodal, deriv.order = 3),seq.bws=seq(0.1,0.5,length=50),sub="",main="")
-
-
-###################################################
-### code chunk number 36: kedd.Rnw:614-618
-###################################################
-h.mcv(bimodal, deriv.order = 0, upper = 0.5)
-h.mcv(bimodal, deriv.order = 1, upper = 0.5)
-h.mcv(bimodal, deriv.order = 2, upper = 0.5)
-h.mcv(bimodal, deriv.order = 3, upper = 0.5)
-
-
-###################################################
-### code chunk number 37: kedd.Rnw:621-623
-###################################################
-for (i in 0:3)
- plot(h.mcv(bimodal, deriv.order = i), seq.bws=seq(0.1,0.5,length=50))
-
-
-###################################################
-### code chunk number 38: kedd.Rnw:628-629
-###################################################
-plot(h.mcv(bimodal, deriv.order = 0),seq.bws=seq(0.1,0.5,length=50),sub="",main="")
-
-
-###################################################
-### code chunk number 39: kedd.Rnw:631-632
-###################################################
-plot(h.mcv(bimodal, deriv.order = 1),seq.bws=seq(0.1,0.5,length=50),sub="",main="")
-
-
-###################################################
-### code chunk number 40: kedd.Rnw:634-635
-###################################################
-plot(h.mcv(bimodal, deriv.order = 2),seq.bws=seq(0.1,0.5,length=50),sub="",main="")
-
-
-###################################################
-### code chunk number 41: kedd.Rnw:637-638
-###################################################
-plot(h.mcv(bimodal, deriv.order = 3),seq.bws=seq(0.1,0.5,length=50),sub="",main="")
-
-
-###################################################
-### code chunk number 42: kedd.Rnw:676-680
-###################################################
-h.tcv(bimodal, deriv.order = 0)
-h.tcv(bimodal, deriv.order = 1)
-h.tcv(bimodal, deriv.order = 2)
-h.tcv(bimodal, deriv.order = 3)
-
-
-###################################################
-### code chunk number 43: kedd.Rnw:683-684
-###################################################
-for (i in 0:3) plot(h.tcv(bimodal, deriv.order = i))
-
-
-###################################################
-### code chunk number 44: kedd.Rnw:689-690
-###################################################
-plot(h.tcv(bimodal, deriv.order = 0),seq.bws=seq(0.1,1.5,length=50),sub="",main="")
-
-
-###################################################
-### code chunk number 45: kedd.Rnw:692-693
-###################################################
-plot(h.tcv(bimodal, deriv.order = 1),seq.bws=seq(0.3,1.5,length=50),sub="",main="")
-
-
-###################################################
-### code chunk number 46: kedd.Rnw:695-696
-###################################################
-plot(h.tcv(bimodal, deriv.order = 2),seq.bws=seq(0.5,1.5,length=50),sub="",main="")
-
-
-###################################################
-### code chunk number 47: kedd.Rnw:698-699
-###################################################
-plot(h.tcv(bimodal, deriv.order = 3),seq.bws=seq(0.5,1.5,length=50),sub="",main="")
-
+## plot() methods print their figure; quiet() keeps the returned ggplot without
+## drawing it, so that layers can be added before display.
+quiet <- function(expr) { grDevices::pdf(NULL); on.exit(grDevices::dev.off()); expr }
+
+## ----kfun---------------------------------------------------------------------
+kf <- kernel.fun(kernel = "biweight", deriv.order = 1L)
+kf
+plot(kf)
+
+## ----kconv--------------------------------------------------------------------
+kc <- kernel.conv(kernel = "logistic", deriv.order = 1L)
+plot(kc)
+kernel.conv(x = 0, kernel = "logistic", deriv.order = 1L)@y   # -R(K') = -1/30
+
+## ----constants----------------------------------------------------------------
+kers <- c("gaussian", "epanechnikov", "uniform", "triangular", "biweight",
+          "triweight", "tricube", "cosine", "silverman", "logistic",
+          "pow(2,4)", "pow(1.5,2.5)")
+round(t(sapply(kers, function(k) Cpp_kernel_constants(k, 0L)[c("mu2", "mu4", "R")])), 5)
+
+## ----pow----------------------------------------------------------------------
+kernel.pow(2, 3)
+all.equal(kernel.fun(kernel = "pow(2,2)")@y, kernel.fun(kernel = "biweight")@y)
+Cpp_kernel_constants(kernel.pow(1.5, 2.5), 0L)
+plot(kernel.fun(kernel = kernel.pow(1.5, 2.5)))
+
+## ----pow-shapes, fig.height = 3.4---------------------------------------------
+grid <- seq(-1, 1, length.out = 201)
+shapes <- do.call(rbind, lapply(c("pow(2,1)", "pow(2,4)", "pow(4,1)", "pow(1,2)"),
+  function(k) data.frame(x = grid, K = Cpp_kernel_deriv(k, grid, 0L), kernel = k)))
+ggplot2::ggplot(shapes, ggplot2::aes(x, K, colour = kernel)) +
+  ggplot2::geom_line(linewidth = 0.9) + ggplot2::theme_minimal()
+
+## ----data---------------------------------------------------------------------
+set.seed(2027)
+n <- 300
+x <- c(rnorm(0.6 * n, -1, 0.5), rnorm(0.4 * n, 1.5, 0.7))
+f_true <- function(t, r = 0L) {
+  comp <- function(m, s) {
+    z  <- (t - m) / s
+    He <- switch(r + 1L, 1, z, z^2 - 1)        # Hermite polynomials
+    (-1)^r * He * dnorm(z) / s^(r + 1)
+  }
+  0.6 * comp(-1, 0.5) + 0.4 * comp(1.5, 0.7)
+}
+
+## ----dkde---------------------------------------------------------------------
+f0 <- dkde(data = x)
+f0
+p <- quiet(plot(f0))
+p + ggplot2::stat_function(fun = f_true, linetype = "dashed")
+
+## ----dkde-r1------------------------------------------------------------------
+h1 <- h.scv(x, deriv.order = 1L)
+p1 <- quiet(plot(dkde(data = x, h = h1@h, deriv.order = 1L)))
+p1 + ggplot2::stat_function(fun = f_true, args = list(r = 1L), linetype = "dashed")
+
+## ----dkde-r1-small------------------------------------------------------------
+c(h_density = f0@h, h_derivative = h1@h)
+plot(dkde(data = x, h = f0@h, deriv.order = 1L), band = FALSE)
+
+## ----dkde-kernels-------------------------------------------------------------
+grid <- seq(-3, 4, length.out = 300)
+est <- do.call(rbind, lapply(c("gaussian", "logistic", "pow(2,4)"), function(k) {
+  d <- dkde(x = grid, data = x, h = h.ucv(x, kernel = k)@h, kernel = k)
+  data.frame(x = d@x, y = d@y, kernel = k)
+}))
+ggplot2::ggplot(est, ggplot2::aes(x, y, colour = kernel)) +
+  ggplot2::geom_line(linewidth = 0.8) +
+  ggplot2::stat_function(fun = f_true, colour = "black", linetype = "dashed") +
+  ggplot2::theme_minimal()
+
+## ----ucv----------------------------------------------------------------------
+bw <- h.ucv(x)
+bw
+plot(bw)
+
+## ----overlay------------------------------------------------------------------
+p <- quiet(plot(h.ucv(x)))
+p$plot +
+  lines(h.bcv(x), color = "darkred") +
+  lines(h.ccv(x), color = "darkorange") +
+  lines(h.mcv(x), color = "purple")
+
+## ----compare------------------------------------------------------------------
+ise <- function(h, r) {
+  d <- dkde(x = seq(-4, 5, length.out = 400), data = x, h = h, deriv.order = r)
+  sum((d@y - f_true(d@x, r))^2) * diff(d@x[1:2])
+}
+sel <- list(AMISE = h.amise, UCV = h.ucv, BCV1 = h.bcv,
+            BCV2 = function(x, ...) h.bcv(x, whichbcv = 2, ...),
+            CCV = h.ccv, MCV = h.mcv, TCV = h.tcv, SCV = h.scv)
+tab <- sapply(0:1, function(r) {
+  h <- sapply(sel, function(f) f(x, deriv.order = r)@h)
+  c(rbind(h = h, ISE = sapply(h, ise, r = r)))
+})
+dimnames(tab) <- list(paste(rep(names(sel), each = 2), c("h", "ISE")),
+                      c("r = 0", "r = 1"))
+round(tab, 4)
+c(MLCV = h.mlcv(x)@h)   # density only
+
+## ----kernels------------------------------------------------------------------
+ks <- c("gaussian", "epanechnikov", "uniform", "triangular", "biweight", "triweight",
+        "tricube", "cosine", "silverman", "logistic", "pow(2,4)", "pow(1.5,2.5)")
+round(sapply(ks, function(k) h.ucv(x, kernel = k)@h), 4)
+
+## ----claw---------------------------------------------------------------------
+f_claw <- function(x) 0.5 * dnorm(x) +
+  rowSums(sapply(0:4, function(l) 0.1 * dnorm(x, l / 2 - 1, 0.1)))
+bw_claw <- sapply(list(UCV = h.ucv, BCV1 = h.bcv, MCV = h.mcv, SCV = h.scv,
+                       AMISE = h.amise), function(f) suppressWarnings(f(claw))@h)
+round(bw_claw, 4)
+p <- quiet(plot(dkde(data = claw, h = bw_claw[["UCV"]])))
+p + ggplot2::stat_function(fun = f_claw, linetype = "dashed")
+
+## ----datasets-----------------------------------------------------------------
+samples <- list(kurtotic = kurtotic, outlier = outlier, bimodal = bimodal,
+                trimodal = trimodal, claw = claw)
+round(sapply(samples, function(s)
+  sapply(list(AMISE = h.amise, UCV = h.ucv, BCV1 = h.bcv, MCV = h.mcv, SCV = h.scv),
+         function(f) suppressWarnings(f(s))@h)), 4)
+
+## ----threads------------------------------------------------------------------
+c(all = Cpp_omp_threads(0L), two = Cpp_omp_threads(2L))
+y <- rnorm(1500)
+system.time(h_seq <- h.ucv(y, nthreads = 1L)@h)
+system.time(h_par <- h.ucv(y, nthreads = 0L)@h)
+all.equal(h_seq, h_par)
 

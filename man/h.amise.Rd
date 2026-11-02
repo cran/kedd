@@ -1,101 +1,113 @@
 \name{h.amise}
 \alias{h.amise}
-\alias{h.amise.default}
-\alias{print.h.amise}
-\title{
-AMISE for Optimal Bandwidth Selectors
-}
+\title{AMISE Reference (Maximal Smoothing) Bandwidth}
 \description{
-  The (S3) generic function \code{h.amise} evaluates the asymptotic 
-  mean integrated squared error \bold{AMISE} for optimal smoothing
-  parameters \eqn{h} of r'th derivative of kernel density 
-  estimator one-dimensional.
+  Computes the reference bandwidth \eqn{h_{os}}{h_os} for the r'th
+  derivative of a kernel density estimator: the AMISE-optimal bandwidth in
+  which \eqn{R(f^{(r+2)})}{R(f(r+2))} is replaced by the value given by the
+  maximal smoothing principle of Terrell (1990).  For \eqn{r = 0} it is the
+  oversmoothed bandwidth, an upper bound for the optimal one.  Returns an S4
+  object of class \code{\linkS4class{bandwidth}}.
 }
 \usage{
-h.amise(x, \dots)
-\method{h.amise}{default}(x, deriv.order = 0, lower = 0.1 * hos, upper = 2 * hos, 
-         tol = 0.1 * lower, kernel = c("gaussian", "epanechnikov", "triweight", 
-         "tricube", "biweight", "cosine"), \dots)
+h.amise(x, deriv.order = 0L, kernel = "gaussian")
 }
 \arguments{
-  \item{x}{vector of data values.}
-  \item{deriv.order}{derivative order (scalar).}
-  \item{lower, upper}{range over which to minimize. The default is
-    almost always satisfactory. \code{hos} (Over-smoothing) is calculated internally
-    from an \code{kernel}, see details.}
-  \item{tol}{the convergence tolerance for \code{\link{optimize}}.}
-  \item{kernel}{a character string giving the smoothing kernel to be used, with default
-    \code{"gaussian"}.}
-  \item{\dots}{further arguments for (non-default) methods.}
+  \item{x}{numeric vector of data values.}
+  \item{deriv.order}{non-negative integer: derivative order \eqn{r}. Maximum
+    \eqn{r} for this selector: any for Gaussian and Silverman; cosine 1;
+    logistic 8; Epanechnikov 1; uniform 0; triangular 0; biweight 2;
+    triweight 3; tricube 3; \code{pow(s,t)} \eqn{\min(r^*, 6)}{min(r*, 6)}, where
+    \eqn{r^*}{r*} is the largest integer \eqn{r < t + 1/2} (and
+    \eqn{r < s + 1/2} if \eqn{s} is not an even integer, and \eqn{2r \le st}{2r <= st}
+    if \eqn{s} and \eqn{t} are integers). Above it \code{h = NA}
+    is returned with a warning. See \code{\link{kedd-package}}, section
+    \sQuote{Maximum derivative order}.}
+  \item{kernel}{character string giving the kernel; one of
+    \code{"gaussian"} (default), \code{"epanechnikov"}, \code{"uniform"},
+    \code{"triangular"}, \code{"biweight"}, \code{"triweight"},
+    \code{"tricube"}, \code{"cosine"}, \code{"silverman"}, \code{"logistic"},
+    or a power kernel \code{"pow(s,t)"} (see \code{\link{kernel.pow}}).}
 }
 \details{
-  \code{h.amise} asymptotic mean integrated squared error implements for choosing 
-  the optimal bandwidth \eqn{h} of a r'th derivative kernel density estimator.\cr
-  
-  We Consider the following AMISE version of the r'th derivative of \eqn{f} the r'th 
-  derivative of the kernel estimate (see Scott 1992, pp 131):
-  \deqn{AMISE(h;r)= \frac{R\left(K^{(r)}\right)}{nh^{2r+1}} + \frac{1}{4} h^{4} \mu_{2}^{2}(K) R\left(f^{(r+2)}\right)}{AMISE(h;r)= R(K(x;r))/ n h^(2r+1) + 0.25 mu(K(x))^2 h^4 R(f(x;r+2))}
-  The optimal bandwidth minimizing this function is:
-  \deqn{h_{(r)}^{\ast} = \left[\frac{(2r+1)R\left(K^{(r)}\right)}{\mu_{2}^{2}(K) R\left(f^{(r+2)}\right)}\right]^{1/(2r+5)} n^{-1/(2r+5)}}{h(r) = ( ((2r+1)R(K(x;r)))/(mu(K(x))^2 R(f(x;r+2))) )^(1/(2r+5)) n^-1/(2r+5)}
-  whereof
-  \deqn{\inf_{h > 0} AMISE(h;r) = \frac{2r+5}{4} R\left(K^{(r)}\right)^{\frac{4}{(2r+5)}} \left[ \frac{\mu_{2}^{2}(K)R\left(f^{(r+2)}\right)}{2r+1} \right]^{\frac{2r+1}{2r+5}} n^{-\frac{4}{2r+5}}}{inf AMISE(h;r) = 2r+5/4 R(K(x;r))^(4/2r+5) ((mu(K(x))^2 R(f(x;r+2)))/(2r+1))^((2r+1)/(2r+5)) n^-4/2r+5}
-  which is the smallest possible AMISE for estimation of \eqn{f^{(r)}(x)}{f(x;r)} using the kernel \eqn{K(x)}{K(x)}, 
-  where \eqn{R\left(K^{(r)}\right) = \int_{R} K^{(r)}(x)^{2} dx}{R(K(x;r)) = int K(x;r)^2 dx} and \eqn{\mu_{2}(K) = \int_{R}x^{2} K(x) dx}{mu(K(x)) = int x^2 K(x) dx}.\cr
-  
-  The range over which to minimize is \code{hos} Oversmoothing bandwidth, the default is almost always 
-  satisfactory. See George and Scott (1985), George (1990), Scott (1992, pp 165), Wand and Jones (1995, pp 61).
+  The AMISE of the r'th derivative estimator is (Scott 1992, p.\,131):
+  \deqn{AMISE(h;r)=\frac{R(K^{(r)})}{nh^{2r+1}} +
+    \frac{\mu_2^2(K)}{4}\,h^{4}\,R\!\left(f^{(r+2)}\right)}{%
+    AMISE(h;r) = R(K(r))/(n*h^(2r+1)) + mu2^2/4 * h^4 * R(f(r+2))}
+
+  The minimising bandwidth is:
+  \deqn{h_r^{\ast} =
+    \left[\frac{(2r+1)\,R(K^{(r)})}{\mu_2^2(K)\,R(f^{(r+2)})}\right]^{1/(2r+5)}
+    n^{-1/(2r+5)}}{%
+    h*(r) = ((2r+1)*R(K(r)) / (mu2^2 * R(f(r+2))))^(1/(2r+5)) * n^(-1/(2r+5))}
+
+  \eqn{R(f^{(r+2)})}{R(f(r+2))} is replaced by
+  \eqn{35/(243\,\hat{\sigma}^{2r+5})}{35/(243 sigma_hat^(2r+5))}
+  (maximal smoothing principle, Terrell 1990), where
+  \eqn{\hat{\sigma}}{sigma_hat} is the sample standard deviation, which gives
+  \deqn{h_{os} = \hat{\sigma}\left[\frac{243\,(2r+1)\,R(K^{(r)})}{35\,\mu_2^2(K)\,n}\right]^{1/(2r+5)}.}{%
+    h_os = sigma_hat * (243 (2r+1) R(K(r)) / (35 mu2^2 n))^(1/(2r+5)).}
+  The same value bounds the search interval of the cross-validation
+  selectors (\eqn{[0.01\,h_{os}, 2\,h_{os}]}{[0.01 h_os, 2 h_os]}).\cr
+
+  No optimisation is performed; the result is computed directly.
+  \eqn{R(K^{(r)})=\int K^{(r)}(x)^2\,dx}{R(K(r))=int K(r)^2 dx},
+  \eqn{\mu_2(K)=\int x^2 K(x)\,dx}{mu2(K)=int x^2 K(x) dx}.
 }
 \value{
-  \item{x}{data points - same as input.}
-  \item{data.name}{the deparsed name of the \code{x} argument.}
-  \item{n}{the sample size after elimination of missing values.}
-  \item{kernel}{name of kernel to use}
-  \item{deriv.order}{the derivative order to use.}
-  \item{h}{value of bandwidth parameter.}
-  \item{amise}{the AMISE value.}
+  An S4 object of class \code{\linkS4class{bandwidth}} with slots:
+  \describe{
+    \item{\code{data}}{the (cleaned) data vector.}
+    \item{\code{kernel}}{name of the kernel used.}
+    \item{\code{deriv.order}}{derivative order \eqn{r}.}
+    \item{\code{h}}{reference bandwidth \eqn{h_{os}}{h_os}.}
+    \item{\code{min.obj}}{\code{NA} (no minimisation is performed).}
+    \item{\code{hos}}{same as \code{h} (the reference bandwidth).}
+    \item{\code{method}}{\code{"AMISE"}.}
+  }
 }
 \references{
-  Bowman, A. W. and Azzalini, A. (1997).
-  \emph{Applied Smoothing Techniques for
-  Data Analysis: the Kernel Approach with 
-  S-Plus Illustrations}.
-  Oxford University Press, Oxford.
-  
   Radhey, S. S. (1987).
   MISE of kernel estimates of a density and its derivatives.
   \emph{Statistics and Probability Letters}, \bold{5}, 153--159.
-  
+
   Scott, D. W. (1992).
-  \emph{Multivariate Density Estimation. Theory, Practice and Visualization}.
+  \emph{Multivariate Density Estimation. Theory, Practice and
+  Visualization}.
   New York: Wiley.
-  
-  Sheather, S. J. (2004).
-  Density estimation.
-  \emph{Statistical Science}, \bold{19}, 588--597.
-  
+
   Silverman, B. W. (1986).
   \emph{Density Estimation for Statistics and Data Analysis}.
   Chapman & Hall/CRC. London.
- 
+
+  Terrell, G. R. (1990).
+  The maximal smoothing principle in density estimation.
+  \emph{Journal of the American Statistical Association}, \bold{85},
+  470--477.
+
   Wand, M. P. and Jones, M. C. (1995).
   \emph{Kernel Smoothing}.
   Chapman and Hall, London.
 }
-\author{Arsalane Chouaib Guidoum \email{acguidoum@usthb.dz}
-}
+\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz}}
 \seealso{
-\code{\link{plot.h.amise}}, see \code{\link[sm]{nmise}} in package \CRANpkg{sm} this function 
-evaluates the mean integrated squared error of a density estimate (\code{deriv.order = 0}) 
-which is constructed from data which follow a normal distribution.
+  \code{\linkS4class{bandwidth}}, \code{\link{h.ucv}}, \code{\link{h.bcv}},
+  \code{\link{h.ccv}}, \code{\link{h.mcv}}, \code{\link{h.tcv}}, \code{\link{h.scv}},
+  \code{\link{h.mlcv}}, \code{\link{dkde}}.
 }
 \examples{
-## Derivative order = 0
+x <- rnorm(100)
 
-h.amise(kurtotic,deriv.order = 0)
+## density (r = 0)
+bw0 <- h.amise(x, deriv.order = 0)
+show(bw0)
 
-## Derivative order = 1
-
-h.amise(kurtotic,deriv.order = 1)
+## first derivative (r = 1)
+bw1 <- h.amise(x, deriv.order = 1)
+show(bw1)
+## other kernels on a Marron-Wand sample
+h.amise(kurtotic, kernel = "logistic")
+h.amise(kurtotic, kernel = kernel.pow(2, 4))
 }
 \keyword{smooth}
 \keyword{bandwidth selection}

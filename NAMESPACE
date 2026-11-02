@@ -1,50 +1,43 @@
-importFrom("graphics", "curve", "legend", "lines.default","plot.default")
-importFrom("stats", "D", "dnorm", "integrate", "optimize", "sd")
+useDynLib(kedd, .registration = TRUE)
+importFrom(Rcpp, evalCpp)
+importFrom(methods, new, is, isVirtualClass, setClass, setValidity,
+           setGeneric, setMethod, show, validObject, slot, slotNames)
+importFrom(stats,  optimize, sd, var)
+importFrom(graphics, plot, lines, legend, curve)
+importFrom(ggplot2, ggplot, aes, geom_line, geom_point, geom_vline,
+           geom_hline, geom_ribbon, geom_rug, annotate,
+           ggtitle, xlab, ylab, scale_x_log10,
+           theme_minimal, theme, element_text, element_rect, margin)
+importFrom(tools, toTitleCase)
+importFrom(utils, globalVariables)
 
+## S4 classes
+exportClasses(bandwidth, dkde, kfun, kconv)
 
-export(kernel.fun,kernel.fun.default,kernel.conv,kernel.conv.default,plot.kernel.fun,plot.kernel.conv,
-       dkde,dkde.default,print.dkde,plot.dkde,lines.dkde,
-	   h.bcv,h.bcv.default,print.h.bcv,plot.h.bcv,lines.h.bcv,
-	   h.ucv,h.ucv.default,print.h.ucv,plot.h.ucv,lines.h.ucv,
-	   h.ccv,h.ccv.default,print.h.ccv,plot.h.ccv,lines.h.ccv,
-	   h.amise,h.amise.default,print.h.amise,plot.h.amise,lines.h.amise,
-	   h.mcv,h.mcv.default,print.h.mcv,plot.h.mcv,lines.h.mcv,
-	   h.mlcv,h.mlcv.default,print.h.mlcv,plot.h.mlcv,lines.h.mlcv,
-	   h.tcv,h.tcv.default,print.h.tcv,plot.h.tcv,lines.h.tcv)
-	   
-S3method(kernel.fun, default)
-S3method(kernel.conv, default)
-S3method(dkde, default)
-S3method(h.bcv, default)
-S3method(h.ucv, default)
-S3method(h.ccv, default)
-S3method(h.amise, default)
-S3method(h.mcv, default)
-S3method(h.mlcv, default)
-S3method(h.tcv, default)
-S3method(plot, kernel.fun)
-S3method(plot, kernel.conv)
-S3method(plot, dkde)
-S3method(plot, h.bcv)
-S3method(plot, h.ucv)
-S3method(plot, h.ccv)
-S3method(plot, h.amise)
-S3method(plot, h.mcv)
-S3method(plot, h.mlcv)
-S3method(plot, h.tcv)
-S3method(lines, dkde)
-S3method(lines, h.bcv)
-S3method(lines, h.ucv)
-S3method(lines, h.ccv)
-S3method(lines, h.amise)
-S3method(lines, h.mcv)
-S3method(lines, h.mlcv)
-S3method(lines, h.tcv)
-S3method(print, dkde )
-S3method(print, h.bcv)
-S3method(print, h.ucv)
-S3method(print, h.ccv)
-S3method(print, h.amise)
-S3method(print, h.mcv)
-S3method(print, h.mlcv)
-S3method(print, h.tcv)
+## Generics
+exportMethods(show, plot, lines, "$")
+
+## Bandwidth selectors
+export(h.ucv, h.bcv, h.ccv, h.mcv, h.tcv, h.amise, h.mlcv, h.scv)
+
+## Kernel evaluators
+export(kernel.fun, kernel.conv, kernel.pow)
+
+## KDE
+export(dkde)
+
+## Low-level Rcpp exports (advanced use)
+export(Cpp_hos,
+       Cpp_kernel_deriv,
+       Cpp_kernel_conv,
+       Cpp_h_ucv,
+       Cpp_h_bcv_1,
+       Cpp_h_bcv_2,
+       Cpp_h_ccv,
+       Cpp_h_mcv,
+       Cpp_h_tcv,
+       Cpp_h_scv,
+       Cpp_plot_cv,
+       Cpp_conv2conv,
+       Cpp_kernel_constants,
+       Cpp_omp_threads)
