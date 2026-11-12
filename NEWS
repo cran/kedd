@@ -1,3 +1,5 @@
+Version 2.0.1: 2026-11-12    o Version 2.0.1 released.
+                             o Other minor bug fixes: R (>= 4.6.0).
 Version 2.0.0: 2026-11-01    o Version 2.0.0 released.
                              o New bandwidth selector h.scv(): Smoothed
                                Cross-Validation (Hall, Marron & Park 1992) with

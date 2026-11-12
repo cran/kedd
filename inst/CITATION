@@ -18,12 +18,13 @@ bibentry(
 bibentry(
   bibtype = "Manual",
   title   = "kedd: Kernel Estimator and Bandwidth Selection for Density and Its Derivatives",
-  author  = c(person("Arsalane Chouaib", "Guidoum"), person("Amel", "Henider")),
+  author  = c(person("Arsalane Chouaib", "Guidoum"), person("Amel", "Henider"),
+              person("Iago", "Giné-Vázquez")),
   year    = "2026",
-  note    = "R package version 2.0.0",
+  note    = "R package version 2.0.1",
   url     = "https://github.com/ac-guidoum/kedd",
   textVersion = paste(
-    "Guidoum, A. C. and Henider, A. (2026). kedd: Kernel Estimator and",
-    "Bandwidth Selection for Density and Its Derivatives. R package version 2.0.0,",
+    "Guidoum, A. C., Henider, A. and Giné-Vázquez, I. (2026). kedd: Kernel Estimator and",
+    "Bandwidth Selection for Density and Its Derivatives. R package version 2.0.1,",
     "https://github.com/ac-guidoum/kedd")
 )

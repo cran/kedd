@@ -58,7 +58,9 @@ kernel.pow(s = 2, t = 2)
 \value{
   A character string \code{"pow(s,t)"}.
 }
-\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz}}
+\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz},
+  Amel Henider \email{amel.henider@univ-tam.dz} and
+  Iago Giné-Vázquez \email{iago.gin-vaz@protonmail.com}}
 \seealso{
   \code{\link{kernel.fun}}, \code{\link{kernel.conv}}, \code{\link{h.ucv}},
   \code{\link{dkde}}.

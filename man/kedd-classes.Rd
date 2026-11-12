@@ -54,7 +54,9 @@
       \code{NULL}.}
   }
 }
-\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz}}
+\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz},
+  Amel Henider \email{amel.henider@univ-tam.dz} and
+  Iago Giné-Vázquez \email{iago.gin-vaz@protonmail.com}}
 \seealso{
   \code{\link{dkde}}, \code{\link{kernel.fun}}, \code{\link{kernel.conv}},
   \code{\linkS4class{bandwidth}}.

@@ -86,7 +86,9 @@ h.mcv(x, deriv.order = 0L, kernel = "gaussian",
   \emph{Kernel Smoothing}.
   Chapman and Hall, London.
 }
-\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz}}
+\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz},
+  Amel Henider \email{amel.henider@univ-tam.dz} and
+  Iago Giné-Vázquez \email{iago.gin-vaz@protonmail.com}}
 \seealso{
   \code{\linkS4class{bandwidth}}, \code{\link{h.ucv}}, \code{\link{h.bcv}},
   \code{\link{h.ccv}}, \code{\link{h.tcv}}, \code{\link{h.scv}}, \code{\link{h.amise}},

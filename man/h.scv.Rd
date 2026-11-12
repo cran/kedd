@@ -60,7 +60,9 @@ h.scv(x, g = NULL, deriv.order = 0L, kernel = "gaussian",
   Smoothed cross-validation.
   \emph{Probability Theory and Related Fields}, \bold{92}, 1--20.
 }
-\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz}}
+\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz},
+  Amel Henider \email{amel.henider@univ-tam.dz} and
+  Iago Giné-Vázquez \email{iago.gin-vaz@protonmail.com}}
 \seealso{
   \code{\link{h.ucv}}, \code{\link{h.bcv}}, \code{\linkS4class{bandwidth}}.
 }

@@ -62,7 +62,9 @@
       \code{min.obj}).  Unknown names give \code{NULL}.}
   }
 }
-\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz}}
+\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz},
+  Amel Henider \email{amel.henider@univ-tam.dz} and
+  Iago Giné-Vázquez \email{iago.gin-vaz@protonmail.com}}
 \seealso{
   \code{\link{h.ucv}}, \code{\link{h.bcv}}, \code{\link{h.ccv}},
   \code{\link{h.mcv}}, \code{\link{h.tcv}}, \code{\link{h.scv}},

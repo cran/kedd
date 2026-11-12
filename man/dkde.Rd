@@ -103,7 +103,9 @@ dkde(x = NULL, data, h, deriv.order = 0L,
   \emph{Smoothing Techniques, With Implementation in S}.
   Springer-Verlag, New York.
 }
-\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz}}
+\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz},
+  Amel Henider \email{amel.henider@univ-tam.dz} and
+  Iago Giné-Vázquez \email{iago.gin-vaz@protonmail.com}}
 \seealso{
   \code{\link{kernel.fun}}, \code{\link{h.ucv}}, \code{\link{h.bcv}},
   \code{\link{h.amise}}, \code{\link[stats]{density}} (for \eqn{r=0}).

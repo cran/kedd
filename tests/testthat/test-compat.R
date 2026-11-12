@@ -15,7 +15,9 @@ test_that("bandwidth : $h, $kernel, $deriv.order, $x, $n, $min.ucv", {
   expect_identical(bw$min.ucv, bw@min.obj)
   expect_identical(bw$hos, bw@hos)
   expect_null(bw$inconnu)
-  expect_identical(h.bcv(xc, deriv.order = 1L)$h, h.bcv(xc, deriv.order = 1L)@h)
+  ## one call only: two OpenMP runs may differ in the last bits (reduction order)
+  bw1 <- h.bcv(xc, deriv.order = 1L)
+  expect_identical(bw1$h, bw1@h)
 })
 
 test_that("kfun / kconv : $kx (appel positionnel de kedd 1.x)", {

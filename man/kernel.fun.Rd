@@ -72,7 +72,9 @@ kernel.fun(x = NULL, deriv.order = 0L, kernel = "gaussian", n.grid = 512L)
   \emph{Density Estimation for Statistics and Data Analysis}.
   Chapman & Hall/CRC, London.
 }
-\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz}}
+\author{Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz},
+  Amel Henider \email{amel.henider@univ-tam.dz} and
+  Iago Giné-Vázquez \email{iago.gin-vaz@protonmail.com}}
 \seealso{
   \code{\link{kernel.conv}}, \code{\linkS4class{kfun}},
   \code{\link{dkde}}, \code{\link{h.ucv}}.

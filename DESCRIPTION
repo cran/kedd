@@ -2,8 +2,8 @@ Package: kedd
 Type: Package
 Title: Kernel Estimator and Bandwidth Selection for Density and Its
         Derivatives
-Version: 2.0.0
-Date: 2026-11-01
+Version: 2.0.1
+Date: 2026-11-08
 Authors@R: c(
     person("Arsalane Chouaib", "Guidoum",
            email   = "acguidoum@univ-tam.dz",
@@ -44,11 +44,11 @@ NeedsCompilation: yes
 LazyData: true
 Encoding: UTF-8
 Config/roxygen2/version: 8.1.1
-Packaged: 2026-11-02 06:23:52 UTC; stars
+Packaged: 2026-11-11 21:40:11 UTC; stars
 Author: Arsalane Chouaib Guidoum [aut, cre] (ORCID:
     <https://orcid.org/0000-0003-3781-2160>),
   Amel Henider [aut],
   Iago Giné-Vázquez [ctb] (ORCID:
     <https://orcid.org/0000-0002-6725-2638>)
 Repository: CRAN
-Date/Publication: 2026-11-02 08:20:02 UTC
+Date/Publication: 2026-11-12 10:40:24 UTC

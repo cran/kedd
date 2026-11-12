@@ -10,9 +10,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<meta name="author" content="Arsalane Chouaib Guidoum and Amel Henider" />
+<meta name="author" content="Arsalane Chouaib Guidoum, Amel Henider and Iago Giné-Vázquez" />
 
-<meta name="date" content="2026-11-02" />
+<meta name="date" content="2026-11-11" />
 
 <title>kedd: kernel estimation of a density and its derivatives</title>
 
@@ -341,8 +341,9 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">kedd: kernel estimation of a density and
 its derivatives</h1>
-<h4 class="author">Arsalane Chouaib Guidoum and Amel Henider</h4>
-<h4 class="date">2026-11-02</h4>
+<h4 class="author">Arsalane Chouaib Guidoum, Amel Henider and Iago
+Giné-Vázquez</h4>
+<h4 class="date">2026-11-11</h4>
 
 
 
@@ -887,12 +888,12 @@ the computing time does:</p>
 <span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1500</span>)</span>
 <span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="fu">system.time</span>(h_seq <span class="ot">&lt;-</span> <span class="fu">h.ucv</span>(y, <span class="at">nthreads =</span> <span class="dv">1</span><span class="dt">L</span>)<span class="sc">@</span>h)</span>
 <span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="co">#&gt;    user  system elapsed </span></span>
-<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="co">#&gt;    1.04    0.00    1.03</span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="co">#&gt;    1.05    0.00    1.03</span></span>
 <span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a><span class="fu">system.time</span>(h_par <span class="ot">&lt;-</span> <span class="fu">h.ucv</span>(y, <span class="at">nthreads =</span> <span class="dv">0</span><span class="dt">L</span>)<span class="sc">@</span>h)</span>
 <span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a><span class="co">#&gt;    user  system elapsed </span></span>
-<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a><span class="co">#&gt;    1.13    0.29    0.20</span></span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a><span class="co">#&gt;    1.14    0.23    0.22</span></span>
 <span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a><span class="fu">all.equal</span>(h_seq, h_par)</span>
-<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Mean relative difference: 1.496107e-08&quot;</span></span></code></pre></div>
+<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Mean relative difference: 1.519555e-08&quot;</span></span></code></pre></div>
 </div>
 <div id="summary-of-functions" class="section level2">
 <h2>7. Summary of functions</h2>
@@ -986,9 +987,8 @@ the computing time does:</p>
 <h2>References</h2>
 <ul>
 <li>Bowman, A. (1984). An alternative method of cross-validation for the
-smoothing of kernel density estimates. <em>Biometrika</em>, 71,
-353–360.</li>
-<li>Duin, R. P. W. (1976). On the choice of smoothing parameters of
+smoothing of density estimates. <em>Biometrika</em>, 71, 353–360.</li>
+<li>Duin, R. P. W. (1976). On the choice of smoothing parameters for
 Parzen estimators of probability density functions. <em>IEEE
 Transactions on Computers</em>, C-25, 1175–1179.</li>
 <li>Feluch, W. and Koronacki, J. (1992). A note on modified

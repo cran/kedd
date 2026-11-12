@@ -1,6 +1,6 @@
 ---
 title: "kedd: kernel estimation of a density and its derivatives"
-author: "Arsalane Chouaib Guidoum and Amel Henider"
+author: "Arsalane Chouaib Guidoum, Amel Henider and Iago Giné-Vázquez"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -377,8 +377,8 @@ all.equal(h_seq, h_par)
 ## References
 
 * Bowman, A. (1984). An alternative method of cross-validation for the smoothing
-  of kernel density estimates. *Biometrika*, 71, 353–360.
-* Duin, R. P. W. (1976). On the choice of smoothing parameters of Parzen
+  of density estimates. *Biometrika*, 71, 353–360.
+* Duin, R. P. W. (1976). On the choice of smoothing parameters for Parzen
   estimators of probability density functions. *IEEE Transactions on Computers*,
   C-25, 1175–1179.
 * Feluch, W. and Koronacki, J. (1992). A note on modified cross-validation in
