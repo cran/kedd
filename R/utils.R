@@ -44,16 +44,78 @@ kernel.pow <- function(s = 2, t = 2) {
   as.numeric(strsplit(sub("^pow\\((.*)\\)$", "\\1", kernel), ",")[[1L]])
 }
 
-## TRUE when K^(r) is not square integrable or K^(2r) vanishes for the power family:
-## r < t + 1/2 (behaviour at |x| = 1), r < s + 1/2 unless s is an even integer
-## (behaviour of |x|^s at 0), and 2r <= st for integer s, t (K is then a
-## polynomial of degree st in |x|, as the named kernels)
-.pow_bad <- function(kernel, r) {
+## Order of regularity q of the kernel: for m <= q the pointwise derivative K^(m) is
+## the derivative of K in the sense of distributions (K^(m-1) is absolutely
+## continuous); for m > q it misses Dirac masses at the jumps of K^(q).
+## Pow(s,t): (1 - |x|)^t at |x| = 1 gives q = ceiling(t + 1) - 1, and |x|^s at 0
+## gives q = ceiling(s + 1) - 1 unless s is an even integer.
+.kernel_q <- function(kernel) {
+  if (startsWith(kernel, "pow(")) {
+    st <- .pow_params(kernel)
+    q1 <- ceiling(st[2L] + 1) - 1
+    q0 <- if (st[1L] == round(st[1L]) && st[1L] %% 2 == 0) Inf else ceiling(st[1L] + 1) - 1
+    return(min(q0, q1))
+  }
+  switch(kernel,
+         uniform = 0,
+         triangular = , epanechnikov = , cosine = 1,
+         biweight = 2,
+         triweight = , tricube = , silverman = 3,
+         gaussian = , logistic = Inf)
+}
+
+## TRUE when K^(m) is square integrable: always for m <= q, except for Pow(s,t),
+## whose derivatives behave like (1 - |x|)^(t - m) and |x|^(s - m)
+.kernel_l2 <- function(kernel, m) {
+  if (m > .kernel_q(kernel)) return(FALSE)
+  if (!startsWith(kernel, "pow(")) return(TRUE)
   st   <- .pow_params(kernel)
-  int  <- all(st == round(st))
   even <- st[1L] == round(st[1L]) && st[1L] %% 2 == 0
-  (2 * r >= 2 * st[2L] + 1) || (!even && 2 * r >= 2 * st[1L] + 1) ||
-    (int && 2 * r > st[1L] * st[2L])
+  (2 * m < 2 * st[2L] + 1) && (even || 2 * m < 2 * st[1L] + 1)
+}
+
+## Warning message of a selector when deriv.order r is not admissible
+.bad_msg <- function(kernel, method) {
+  if (kernel == "silverman" && method %in% c("BCV1", "BCV2", "MCV", "CCV"))
+    paste0("the Silverman kernel is of order 4 (mu2 = 0): ", method,
+           " is not defined for it; h = NA.")
+  else
+    paste0("deriv.order is above the maximum order of ", method,
+           " for this kernel; h = NA.")
+}
+
+## TRUE when deriv.order r is admissible for the criterion `method` and the kernel:
+## the criterion is then built on derivatives K^(m) taken pointwise with m <= q,
+## and on a square-integrable K^(r) (K^(r+2) for BCV1). The caps come from the
+## derivative orders implemented in C++, 20 (logistic) and 16 (Pow): r for dkde,
+## 2r + 4 for the selectors.
+.admissible <- function(kernel, r, method) {
+  m <- switch(method,
+              AMISE = , DKDE = r,
+              UCV = , TCV = , SCV = 2L * r,
+              MCV = 2L * r + 2L,
+              CCV = , BCV2 = 2L * r + 4L,
+              BCV1 = r + 2L,
+              MLCV = 0L)
+  ## BCV1, BCV2, MCV and CCV use the bias expansion of a second-order kernel
+  ## (mu2(K), mu4(K)); the Silverman kernel is of order 4 (mu2 = 0)
+  if (kernel == "silverman" && method %in% c("BCV1", "BCV2", "MCV", "CCV"))
+    return(FALSE)
+  l2  <- if (method == "BCV1") r + 2L else r
+  top <- if (method == "DKDE") r else 2L * r + 4L
+  cap <- (kernel == "logistic" && top > 20L) ||
+         (startsWith(kernel, "pow(") && top > 16L)
+  !cap && m <= .kernel_q(kernel) && .kernel_l2(kernel, l2)
+}
+
+## Largest admissible deriv.order of a criterion for a kernel
+## (Inf when unbounded, NA when no order is admissible)
+.max_order <- function(kernel, method) {
+  kernel <- .normalize_kernel(kernel)
+  ok <- vapply(0:25, function(r) .admissible(kernel, r, method), logical(1L))
+  if (all(ok)) return(Inf)
+  if (!ok[1L]) return(NA_integer_)
+  which(!ok)[1L] - 2L
 }
 
 ## OpenMP threads: 0 = all processors (capped by OMP_THREAD_LIMIT), k > 0 = k threads.
@@ -68,7 +130,7 @@ kernel.pow <- function(s = 2, t = 2) {
 
 ## Internal: validate common arguments shared by all bandwidth selectors.
 .check_bw_args <- function(x, deriv.order, kernel, nthreads,
-                            method_name = "h.bw") {
+                            method_name = "UCV") {
   if (missing(kernel) || is.null(kernel)) kernel <- "gaussian"
   kernel <- .normalize_kernel(kernel)
   if (!is.numeric(x) || !is.null(dim(x)) || length(x) < 2L)
@@ -82,21 +144,15 @@ kernel.pow <- function(s = 2, t = 2) {
   x <- x[!is.na(x)]
   r <- as.integer(deriv.order)
   n <- length(x)
-  ## kernel-order compatibility for finite-support kernels
-  bad <- (kernel == "uniform"      && (2L * r) >= 1L) ||
-         (kernel == "triangular"   && (2L * r) >= 2L) ||
-         (kernel == "epanechnikov" && (2L * r) >= 3L) ||
-         (kernel == "biweight"     && (2L * r) >= 5L) ||
-         (kernel == "triweight"    && (2L * r) >= 7L) ||
-         (kernel == "tricube"      && (2L * r) >= 7L) ||
-         (kernel == "cosine"       && r >= 2L) ||
-         (kernel == "logistic"     && 2L * r + 4L > 20L) ||
-         (startsWith(kernel, "pow(") && (2L * r + 4L > 16L || .pow_bad(kernel, r)))
+  ## admissible derivative order of the criterion for this kernel
+  bad <- !.admissible(kernel, r, method_name)
+  msg <- if (bad) .bad_msg(kernel, method_name) else NA_character_
   list(x = x, r = r, n = n, kernel = kernel,
-       nthreads = nthreads, bad = bad)
+       nthreads = nthreads, bad = bad, msg = msg)
 }
 
-## Oversmoothing bandwidth (Silverman rule)
+## Oversmoothing bandwidth (Silverman rule). The Silverman kernel is of order 4
+## (mu2 = 0): the Gaussian value is used for the search interval.
 .hos <- function(kernel, r, x) {
   ker <- if (kernel == "silverman") "gaussian" else kernel
   Cpp_hos(ker, r, length(x)) * sqrt(var(x))

@@ -19,7 +19,10 @@ kernel.fun(x = NULL, deriv.order = 0L, kernel = "gaussian", n.grid = 512L)
     biweight 4; triweight 6; tricube 9; \code{pow(s,t)} \eqn{\min(st, 16)}{min(st, 16)}
     (16 if \eqn{s} or \eqn{t} is not an integer). Above it, zero is returned
     (with a warning for logistic and pow). See
-    \code{\link{kedd-package}}, section \sQuote{Maximum derivative order}.}
+    \code{\link{kedd-package}}, section \sQuote{Maximum derivative order}.
+    Above the regularity \eqn{q} of the kernel (see \code{\link{kedd-package}},
+    section \sQuote{Maximum derivative order}), the values are pointwise
+    derivatives, which miss the Dirac masses of the derivative of \eqn{K}.}
   \item{kernel}{character string giving the kernel; one of
     \code{"gaussian"} (default), \code{"epanechnikov"}, \code{"uniform"},
     \code{"triangular"}, \code{"biweight"}, \code{"triweight"},

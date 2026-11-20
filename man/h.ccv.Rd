@@ -12,12 +12,12 @@ h.ccv(x, deriv.order = 0L, kernel = "gaussian",
 }
 \arguments{
   \item{x}{numeric vector of data values.}
-  \item{deriv.order}{non-negative integer: derivative order \eqn{r}. CCV uses
-    \eqn{K^{(r+2)}}, so the maximum \eqn{r} is: any for Gaussian and
-    Silverman; logistic 8; biweight 0; triweight 1; tricube 1;
-    \code{pow(s,t)} \eqn{\min(r^*-2, 6)}{min(r*-2, 6)} (see \code{\link{h.ucv}}
-    for \eqn{r^*}{r*}); not available for uniform, triangular,
-    Epanechnikov and cosine. Above it \code{h = NA} is returned with a warning. See
+  \item{deriv.order}{non-negative integer: derivative order \eqn{r}. CCV evaluates
+    \eqn{K^{(2r+4)}} at the pairwise differences, so \eqn{2r + 4 \le q},
+    where \eqn{q} is the regularity of the kernel. Maximum \eqn{r}: any for
+    Gaussian; logistic 8; \code{pow(s,t)}
+    \eqn{\lfloor q/2 \rfloor - 2}{floor(q/2) - 2}, at most 6; not available
+    for the other named kernels (\eqn{q \le 3}; Silverman is also of order 4). Above it \code{h = NA} is returned with a warning. See
     \code{\link{kedd-package}}, section \sQuote{Maximum derivative order}.}
   \item{kernel}{character string giving the kernel; one of
     \code{"gaussian"} (default), \code{"epanechnikov"}, \code{"uniform"},
@@ -34,7 +34,7 @@ h.ccv(x, deriv.order = 0L, kernel = "gaussian",
     it, and it never changes the threads used by later calls.}
 }
 \details{
-  Jones and Kappenman (1991) proposed \emph{complete cross-validation}
+  Jones and Kappenman (1992) proposed \emph{complete cross-validation}
   (CCV) for kernel density estimation.  The method estimates the
   integrated squared density derivative using
   \eqn{\bar{\theta}_r(h)}{bar_theta(h;r)} (Peter and Marron 1987).
@@ -82,7 +82,7 @@ h.ccv(x, deriv.order = 0L, kernel = "gaussian",
   }
 }
 \references{
-  Jones, M. C. and Kappenman, R. F. (1991).
+  Jones, M. C. and Kappenman, R. F. (1992).
   On a class of kernel density estimate bandwidth selectors.
   \emph{Scandinavian Journal of Statistics}, \bold{19}, 337--349.
 
@@ -99,7 +99,7 @@ h.ccv(x, deriv.order = 0L, kernel = "gaussian",
   Iago Giné-Vázquez \email{iago.gin-vaz@protonmail.com}}
 \seealso{
   \code{\linkS4class{bandwidth}}, \code{\link{h.ucv}}, \code{\link{h.bcv}},
-  \code{\link{h.mcv}}, \code{\link{h.tcv}}, \code{\link{h.scv}}, \code{\link{h.amise}},
+  \code{\link{h.mcv}}, \code{\link{h.tcv}}, \code{\link{h.scv}}, \code{\link{h.pcv}}, \code{\link{h.amise}},
   \code{\link{kernel.conv}}, \code{\link{kernel.fun}}.
 }
 \examples{
@@ -115,7 +115,7 @@ bw1 <- h.ccv(x, deriv.order = 1)
 show(bw1)
 ## other kernels on a Marron-Wand sample
 h.ccv(trimodal, kernel = "logistic")
-h.ccv(trimodal, kernel = "pow(2,3)")
+h.ccv(trimodal, kernel = "pow(2,4)")
 }
 \keyword{smooth}
 \keyword{bandwidth selection}

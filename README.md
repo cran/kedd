@@ -6,12 +6,12 @@
 [![Total downloads](https://cranlogs.r-pkg.org/badges/grand-total/kedd)](https://cran.r-project.org/package=kedd)
 [![Monthly downloads](https://cranlogs.r-pkg.org/badges/kedd)](https://cran.r-project.org/package=kedd)
 [![Weekly downloads](https://cranlogs.r-pkg.org/badges/last-week/kedd)](https://cran.r-project.org/package=kedd)
-[![Test coverage](https://img.shields.io/badge/coverage-99.5%25-brightgreen)](#tests)
+[![Test coverage](https://img.shields.io/badge/coverage-99.2%25-brightgreen)](#tests)
 
-The `kedd` package (version 2.0.1) provides nonparametric kernel smoothing tools for
+The `kedd` package (version 2.0.2) provides nonparametric kernel smoothing tools for
 [R](https://www.r-project.org/): kernel estimation of a density **and of its
 derivatives of any order r**, kernel functions, their derivatives and
-convolutions, and eight data-driven bandwidth selectors. Results are S4 objects
+convolutions, and nine data-driven bandwidth selectors. Results are S4 objects
 with ggplot2 graphics; the $O(n^2)$ criteria run in C++ (Rcpp) with OpenMP.
 
 **Authors:** Arsalane Chouaib Guidoum (author, maintainer) and Amel Henider
@@ -55,14 +55,15 @@ functions. Logistic derivatives are available up to order 20.
 | `h.amise` | Asymptotic MISE rule (normal reference) | 0, 1, 2, … (max: see below) | Wand & Jones (1995) |
 | `h.ucv` | Unbiased (least-squares) Cross-Validation | 0, 1, 2, … (max: see below) | Rudemo (1982), Bowman (1984) |
 | `h.bcv` | Biased Cross-Validation (BCV1, BCV2) | 0, 1, 2, … (max: see below) | Scott & Terrell (1987) |
-| `h.ccv` | Complete Cross-Validation | 0, 1, 2, … (max: see below) | Jones & Kappenman (1991) |
+| `h.ccv` | Complete Cross-Validation | 0, 1, 2, … (max: see below) | Jones & Kappenman (1992) |
 | `h.mcv` | Modified Cross-Validation | 0, 1, 2, … (max: see below) | Stute (1992) |
 | `h.tcv` | Trimmed Cross-Validation | 0, 1, 2, … (max: see below) | Feluch & Koronacki (1992) |
 | `h.scv` | Smoothed Cross-Validation (Gaussian kernel) | 0, 1, 2, … (no limit) | Hall, Marron & Park (1992) |
+| `h.pcv` | Partitioned Cross-Validation (UCV, TCV, MCV, CCV, BCV1 or BCV2 in `m` subsamples, `nrep` partitions) | as the criterion | Marron (1987) |
 | `h.mlcv` | Maximum-Likelihood Cross-Validation | 0 only | Habbema et al. (1974), Duin (1976) |
 
-With the Gaussian and Silverman kernels every order r is allowed; with
-the other kernels r is limited, as given in the table
+With the Gaussian kernel every order r is allowed; with the other kernels
+r is limited by the regularity of the kernel, as given in the table
 [Maximum derivative order r](#maximum-derivative-order-r) below.
 
 All selectors return an S4 object of class `bandwidth`; the search interval is
@@ -70,30 +71,38 @@ All selectors return an S4 object of class `bandwidth`; the search interval is
 
 ### Maximum derivative order r
 
-Highest `deriv.order` for each kernel. Above it, `kernel.fun()`,
-`kernel.conv()` and `dkde()` return zero, and the selectors return `h = NA`
-with a warning (the criterion is not finite); "—" means not available even at
-$r = 0$.
+The regularity $q$ of a kernel is the largest $m$ such that the pointwise
+derivative $K^{(m)}$ is the derivative of $K$ in the sense of distributions
+($K^{(m-1)}$ absolutely continuous). For $m > q$, $K^{(m)}$ misses the Dirac
+masses at the jumps of $K^{(q)}$, and a criterion that evaluates it at the
+pairwise differences no longer estimates its target. Each criterion therefore
+restricts $r$: $r \le q$ for `dkde` and `h.amise`, $2r \le q$ for UCV and TCV
+($K^{(2r)}$), $2r + 2 \le q$ for MCV, $r + 2 \le q$ for BCV1 (convolution of
+$K^{(r+2)}$) and $2r + 4 \le q$ for BCV2 and CCV. $K^{(r)}$ ($K^{(r+2)}$ for
+BCV1) must also be square integrable, and the selectors are capped at $r = 8$
+(logistic) and $r = 6$ (Pow), the derivative orders implemented being 20 and
+16. Above the limit the selectors return `h = NA` with a warning, and `dkde()`
+gives a warning; "—" means not available even at $r = 0$:
 
-| Kernel | `kernel.fun`, `kernel.conv`, `dkde` | `h.ucv`, `h.bcv`, `h.tcv`, `h.amise` | `h.mcv` | `h.ccv` |
-|---|:---:|:---:|:---:|:---:|
-| Gaussian, Silverman | any | any | any | any |
-| cosine | any | 1 | 0 | — |
-| logistic | 20 | 8 | 8 | 8 |
-| Epanechnikov | 2 | 1 | 0 | — |
-| uniform | 0 | 0 | — | — |
-| triangular | 1 | 0 | — | — |
-| biweight | 4 | 2 | 1 | 0 |
-| triweight | 6 | 3 | 2 | 1 |
-| tricube | 9 | 3 | 2 | 1 |
-| pow(s,t) | $\min(st, 16)$ | $\min(r^\ast, 6)$ | $\min(r^\ast-1, 6)$ | $\min(r^\ast-2, 6)$ |
+| kernel | $q$ | `dkde` | `h.amise` | `h.ucv`, `h.tcv` | `h.mcv` | BCV1 | BCV2, `h.ccv` |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| `gaussian` | $\infty$ | any | any | any | any | any | any |
+| `logistic` | $\infty$ | 20 | 8 | 8 | 8 | 8 | 8 |
+| `silverman` | 3 | 3 | (*) | 1 | (*) | (*) | (*) |
+| `triweight`, `tricube` | 3 | 3 | 3 | 1 | 0 | 1 | — |
+| `biweight` | 2 | 2 | 2 | 1 | 0 | 0 | — |
+| `epanechnikov`, `triangular`, `cosine` | 1 | 1 | 1 | 0 | — | — | — |
+| `uniform` | 0 | 0 | 0 | 0 | — | — | — |
 
-For Pow(s,t), $r^\ast$ is the largest integer $r < t + \frac12$, with $2r \le st$
-when $s$ and $t$ are integers and $r < s + \frac12$ when $s$ is not an even integer
-(so `pow(3,3)` and `tricube` both give 3, 2, 1). Examples: `pow(2,3)` 6, 3, 2, 1;
-`pow(2,8)` 16, 6, 6, 6; `pow(1.5,2.5)` 16, 1, 0, —. `h.scv` (Gaussian kernel)
-has no limit and `h.mlcv` is for $r = 0$ only. The same table is in
-`?kedd` (section *Maximum derivative order*).
+(*) The Silverman kernel is of order 4 ($\mu_2(K) = 0$): `h.amise()` returns
+the value of the Gaussian kernel with a warning, and BCV1, BCV2, MCV and CCV,
+built on the bias expansion of a second-order kernel, are not defined for it. For `pow(s,t)`,
+$q = \lceil t + 1 \rceil - 1$ ($q = t$ for an integer $t$) from $|x| = 1$, and
+$q = \lceil s + 1 \rceil - 1$ from $x = 0$ unless $s$ is an even integer; $q$
+is the smaller of the two. For example `pow(2,4)`: $q = 4$ and 4, 4, 2, 1, 2,
+0; `pow(1.5,2.5)`: $q = 2$ and 1, 1, 1, 0, —, —. `h.scv` (Gaussian kernel) has
+no limit and `h.mlcv` is for $r = 0$ only; `h.pcv` has the limits of its criterion.
+The same table is in `?kedd` (section *Maximum derivative order*).
 
 ### Main functions
 
@@ -107,18 +116,18 @@ has no limit and `h.mlcv` is for $r = 0$ only. The same table is in
 ## Installation
 
 ```r
-# Released version 2.0.1 on CRAN
+# Released version 2.0.2 on CRAN
 install.packages("kedd")
 
 # Development version from GitHub
 # install.packages("remotes")
 remotes::install_github("ac-guidoum/kedd", build_vignettes = TRUE)
 
-# Version 2.0.1 from the source tarball
-install.packages("kedd_2.0.1.tar.gz", repos = NULL, type = "source")
+# Version 2.0.2 from the source tarball
+install.packages("kedd_2.0.2.tar.gz", repos = NULL, type = "source")
 
 # or from the source directory
-devtools::install("path/to/kedd_2.0.1")
+devtools::install("path/to/kedd_2.0.2")
 ```
 
 Building from source compiles C++ code: on Windows this needs
@@ -142,6 +151,7 @@ plot(dkde(data = x, h = h1@h, deriv.order = 1))
 h.ucv(x)       # unbiased CV
 h.bcv(x)       # biased CV
 h.scv(x)       # smoothed CV (Gaussian kernel)
+h.pcv(x, m = 2)  # partitioned CV (UCV in 2 subsamples)
 
 # Kernel function evaluation
 kf <- kernel.fun(kernel = "epanechnikov", deriv.order = 1L)
@@ -193,7 +203,7 @@ demo("bandwidths", package = "kedd") # all selectors compared on a bimodal sampl
 
 ## Tests
 
-The `testthat` suite (≈1,460 expectations) covers every selector × kernel, the
+The `testthat` suite (≈1,850 expectations) covers every selector × kernel, the
 `nthreads` behaviour, the content of every ggplot2 figure (`plot()`, `lines()`),
 the datasets and input validation. It
 checks every kernel constant ($\mu_2$, $\mu_4$, $R(K^{(r)})$), convolution and
@@ -202,21 +212,21 @@ integration, and checks Pow(s,t) against the named kernels it generalises
 (identical kernels, convolutions and bandwidths).
 
 Line coverage measured with [`covr`](https://CRAN.R-project.org/package=covr)
-(tests only): **99.5 %** overall.
+(tests only): **99.2 %** overall.
 
 | File | Coverage | File | Coverage |
 |---|---:|---|---:|
-| `src/kedd.cpp` | 99.6 % | `R/h.mcv.R` | 100 % |
-| `R/bandwidth-class.R` | 100 % | `R/h.mlcv.R` | 100 % |
-| `R/dkde.R` | 98.9 % | `R/h.scv.R` | 100 % |
+| `src/kedd.cpp` | 99.5 % | `R/h.mlcv.R` | 100 % |
+| `R/bandwidth-class.R` | 99.1 % | `R/h.pcv.R` | 95.7 % |
+| `R/dkde.R` | 97.8 % | `R/h.scv.R` | 100 % |
 | `R/h.amise.R` | 100 % | `R/h.tcv.R` | 100 % |
 | `R/h.bcv.R` | 100 % | `R/h.ucv.R` | 100 % |
-| `R/h.ccv.R` | 100 % | `R/kernel.fun.R` | 98.4 % |
-| `R/utils.R` | 98.3 % | | |
+| `R/h.ccv.R` | 100 % | `R/kernel.fun.R` | 98.3 % |
+| `R/h.mcv.R` | 100 % | `R/utils.R` | 97.9 % |
 
 ```r
-cv <- covr::package_coverage("path/to/kedd_2.0.1", type = "tests")
-covr::percent_coverage(cv)                     # 99.5
+cv <- covr::package_coverage("path/to/kedd_2.0.2", type = "tests")
+covr::percent_coverage(cv)                     # 99.2
 covr::report(cv)                               # line-by-line HTML report
 source("data-raw/benchmark.R")                 # execution time of every function
 ```
@@ -225,29 +235,30 @@ source("data-raw/benchmark.R")                 # execution time of every functio
 
 CRAN downloads of `kedd` from the RStudio/Posit CRAN mirror, obtained with
 [`cranlogs`](https://CRAN.R-project.org/package=cranlogs) (daily counts since
-2014) and cross-checked with [`dlstats`](https://CRAN.R-project.org/package=dlstats)
-(monthly counts; identical on the 69 months both cover, Jan 2021 – Sep 2026).
+the first release in August 2013) and cross-checked with
+[`dlstats`](https://CRAN.R-project.org/package=dlstats) (monthly counts; identical
+on the 70 months both cover, Jan 2021 – Oct 2026).
 
 ![Monthly CRAN downloads of kedd](man/figures/downloads.png)
 
-| Statistic (as of 29 Oct 2026) | Value |
+| Statistic (as of 19 Nov 2026) | Value |
 |---|---:|
-| Total downloads (Aug 2014 – Oct 2026) | **64,271** |
-| Last month | 387 |
-| Last week | 54 |
-| Monthly mean / median | 437 / 309 |
+| Total downloads (Aug 2013 – Nov 2026) | **66,708** |
+| Last month | 735 |
+| Last week | 301 |
+| Monthly mean / median | 417 / 298 |
 | Best month | Sep 2025 (1,776) |
 
-| Year | 2014* | 2015 | 2016 | 2017 | 2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 | 2026* |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Downloads | 1,285 | 3,872 | 2,818 | 2,918 | 3,856 | 7,657 | 12,813 | 10,566 | 4,844 | 743 | 3,462 | 6,260 | 3,177 |
+| Year | 2013* | 2014 | 2015 | 2016 | 2017 | 2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 | 2026* |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Downloads | 586 | 2,472 | 3,872 | 2,818 | 2,918 | 3,856 | 7,657 | 12,813 | 10,566 | 4,844 | 743 | 3,462 | 6,260 | 3,841 |
 
-\* partial years (from Aug 2014; to 29 Oct 2026). The badges above are live; the
+\* partial years (from Aug 2013; to 19 Nov 2026). The badges above are live; the
 figures in this section are a snapshot.
 
 ```r
 library(cranlogs)
-sum(cran_downloads("kedd", from = "2014-08-01", to = Sys.Date() - 1)$count)  # total
+sum(cran_downloads("kedd", from = "2013-08-01", to = Sys.Date() - 1)$count)  # total
 cran_downloads("kedd", when = "last-month")
 
 library(dlstats)
@@ -290,8 +301,12 @@ To cite the package (`citation("kedd")`):
   Physica Verlag, Vienna.
 - Hall, P., Marron, J. S. and Park, B. U. (1992). Smoothed cross-validation.
   *Probability Theory and Related Fields*, **92**, 1–20.
-- Jones, M. C. and Kappenman, R. F. (1991). On a class of kernel density estimate
+- Härdle, W., Marron, J. S. and Wand, M. P. (1990). Bandwidth choice for
+  density derivatives. *Journal of the Royal Statistical Society B*, **52**,
+  223–232.
+- Jones, M. C. and Kappenman, R. F. (1992). On a class of kernel density estimate
   bandwidth selectors. *Scandinavian Journal of Statistics*, **19**, 337–349.
+- Marron, J. S. (1987). Partitioned cross-validation. *Econometric Reviews*, **6**, 271–283.
 - Marron, J. S. and Wand, M. P. (1992). Exact mean integrated squared error.
   *The Annals of Statistics*, **20**, 712–736.
 - Rudemo, M. (1982). Empirical choice of histograms and kernel density
@@ -301,7 +316,4 @@ To cite the package (`citation("kedd")`):
 - Stute, W. (1992). Modified cross validation in density estimation. *Journal of
   Statistical Planning and Inference*, **30**, 293–305.
 - Wand, M. P. and Jones, M. C. (1995). *Kernel Smoothing*. Chapman & Hall.
-- Härdle, W., Marron, J. S. and Wand, M. P. (1990). Bandwidth choice for
-  density derivatives. *Journal of the Royal Statistical Society B*, **52**,
-  223–232.
 

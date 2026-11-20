@@ -18,13 +18,14 @@ dkde(x = NULL, data, h, deriv.order = 0L,
   \item{data}{numeric vector of observations.}
   \item{h}{positive bandwidth scalar.  If missing, the UCV bandwidth
     \code{\link{h.ucv}(data, deriv.order, kernel)} is used.}
-  \item{deriv.order}{non-negative integer: derivative order \eqn{r}. Maximum
-    \eqn{r} with \eqn{K^{(r)} \ne 0}: any for Gaussian, cosine and Silverman;
-    logistic 20; Epanechnikov 2; uniform 0; triangular 1; biweight 4;
-    triweight 6; tricube 9; \code{pow(s,t)} \eqn{\min(st, 16)}{min(st, 16)}.
-    When \code{h} is missing it is chosen by \code{\link{h.ucv}}, whose limits
-    are lower (see \code{\link{kedd-package}}, section
-    \sQuote{Maximum derivative order}).}
+  \item{deriv.order}{non-negative integer: derivative order \eqn{r}. The estimate is the
+    \eqn{r}-th derivative of the density estimate when \eqn{r \le q}, where
+    \eqn{q} is the regularity of the kernel: any for Gaussian; logistic 20;
+    triweight, tricube and Silverman 3; biweight 2; Epanechnikov, triangular
+    and cosine 1; uniform 0; \code{pow(s,t)} \eqn{q}, at most 16. Above it a
+    warning is given. When \code{h} is missing it is chosen by
+    \code{\link{h.ucv}}, whose limits are lower (see \code{\link{kedd-package}},
+    section \sQuote{Maximum derivative order}).}
   \item{kernel}{character string giving the kernel; one of
     \code{"gaussian"} (default), \code{"epanechnikov"}, \code{"uniform"},
     \code{"triangular"}, \code{"biweight"}, \code{"triweight"},
@@ -108,7 +109,8 @@ dkde(x = NULL, data, h, deriv.order = 0L,
   Iago Giné-Vázquez \email{iago.gin-vaz@protonmail.com}}
 \seealso{
   \code{\link{kernel.fun}}, \code{\link{h.ucv}}, \code{\link{h.bcv}},
-  \code{\link{h.amise}}, \code{\link[stats]{density}} (for \eqn{r=0}).
+  \code{\link{h.scv}}, \code{\link{h.pcv}}, \code{\link{h.amise}},
+  \code{\link[stats]{density}} (for \eqn{r=0}).
 }
 \examples{
 x <- rnorm(100)

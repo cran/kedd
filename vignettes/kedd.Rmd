@@ -43,8 +43,8 @@ difficulty is the choice of $h$, which is what the package is about.
 * `kernel.fun()`, `kernel.conv()` — the kernels $K^{(r)}$ and their convolutions
   $K^{(r)} * K^{(r)}$, for ten named kernels and the power family Pow(s,t);
 * `dkde()` — the estimator $\hat f_h^{(r)}$;
-* eight data-driven bandwidth selectors: `h.amise()`, `h.ucv()`, `h.bcv()`,
-  `h.ccv()`, `h.mcv()`, `h.tcv()`, `h.scv()`, `h.mlcv()`.
+* nine data-driven bandwidth selectors: `h.amise()`, `h.ucv()`, `h.bcv()`,
+  `h.ccv()`, `h.mcv()`, `h.tcv()`, `h.scv()`, `h.pcv()`, `h.mlcv()`.
 
 All results are S4 objects with `show()` and **ggplot2** `plot()` methods, and the
 $O(n^2)$ criteria run in C++ (Rcpp) in parallel (OpenMP).
@@ -54,8 +54,8 @@ $O(n^2)$ criteria run in C++ (Rcpp) in parallel (OpenMP).
 ### 2.1 The kernels
 
 Ten named kernels and the power family Pow(s,t) (section 2.2) are available in
-every function through the argument `kernel`. "r max" is the highest derivative
-order that is not identically zero.
+every function through the argument `kernel`. "r max" is the highest order of
+the pointwise derivative $K^{(r)}$ that is not identically zero.
 
 | kernel | $K(x)$ | support | r max |
 |---|---|---|:---:|
@@ -72,26 +72,39 @@ order that is not identically zero.
 | `pow(s,t)` | $c_{s,t}(1-\lvert x\rvert^s)^t$, $c_{s,t} = \frac{s}{2B(1/s,\,t+1)}$ | $[-1,1]$ | $\min(st,16)$ |
 
 For `pow(s,t)`, $\min(st, 16)$ applies when $s$ and $t$ are integers (16
-otherwise). The bandwidth selectors need $R(K^{(r)}) < \infty$ (and MCV, CCV
-use $K^{(r+1)}$, $K^{(r+2)}$), so their maximum order is lower. Above it they
-return `h = NA` with a warning; "—" means not available even at $r = 0$:
+otherwise).
 
-| kernel | `h.ucv`, `h.bcv`, `h.tcv`, `h.amise` | `h.mcv` | `h.ccv` |
-|---|:---:|:---:|:---:|
-| `gaussian`, `silverman` | any | any | any |
-| `cosine` | 1 | 0 | — |
-| `logistic` | 8 | 8 | 8 |
-| `epanechnikov` | 1 | 0 | — |
-| `uniform` | 0 | — | — |
-| `triangular` | 0 | — | — |
-| `biweight` | 2 | 1 | 0 |
-| `triweight` | 3 | 2 | 1 |
-| `tricube` | 3 | 2 | 1 |
-| `pow(s,t)` | $\min(r^\ast, 6)$ | $\min(r^\ast-1, 6)$ | $\min(r^\ast-2, 6)$ |
+The regularity $q$ of a kernel is the largest $m$ such that the pointwise
+derivative $K^{(m)}$ is the derivative of $K$ in the sense of distributions
+($K^{(m-1)}$ absolutely continuous). For $m > q$, $K^{(m)}$ misses the Dirac
+masses at the jumps of $K^{(q)}$, and a criterion that evaluates it at the
+pairwise differences no longer estimates its target. Each criterion therefore
+restricts $r$: $r \le q$ for `dkde` and `h.amise`, $2r \le q$ for UCV and TCV
+($K^{(2r)}$), $2r + 2 \le q$ for MCV, $r + 2 \le q$ for BCV1 (convolution of
+$K^{(r+2)}$) and $2r + 4 \le q$ for BCV2 and CCV. $K^{(r)}$ ($K^{(r+2)}$ for
+BCV1) must also be square integrable, and the selectors are capped at $r = 8$
+(logistic) and $r = 6$ (Pow), the derivative orders implemented being 20 and
+16. Above the limit the selectors return `h = NA` with a warning, and `dkde()`
+gives a warning; "—" means not available even at $r = 0$:
 
-Here $r^\ast$ is the largest integer $r < t + \frac12$ (with $2r \le st$ when $s$
-and $t$ are integers, and $r < s + \frac12$ when $s$ is not an even integer); e.g. `pow(2,3)`: 3, 2, 1. `h.scv` (Gaussian
-kernel) has no limit and `h.mlcv` is for $r = 0$ only.
+| kernel | $q$ | `dkde` | `h.amise` | `h.ucv`, `h.tcv` | `h.mcv` | BCV1 | BCV2, `h.ccv` |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| `gaussian` | $\infty$ | any | any | any | any | any | any |
+| `logistic` | $\infty$ | 20 | 8 | 8 | 8 | 8 | 8 |
+| `silverman` | 3 | 3 | (*) | 1 | (*) | (*) | (*) |
+| `triweight`, `tricube` | 3 | 3 | 3 | 1 | 0 | 1 | — |
+| `biweight` | 2 | 2 | 2 | 1 | 0 | 0 | — |
+| `epanechnikov`, `triangular`, `cosine` | 1 | 1 | 1 | 0 | — | — | — |
+| `uniform` | 0 | 0 | 0 | 0 | — | — | — |
+
+(*) The Silverman kernel is of order 4 ($\mu_2(K) = 0$): `h.amise()` returns
+the value of the Gaussian kernel with a warning, and BCV1, BCV2, MCV and CCV,
+built on the bias expansion of a second-order kernel, are not defined for it. For `pow(s,t)`,
+$q = \lceil t + 1 \rceil - 1$ ($q = t$ for an integer $t$) from $|x| = 1$, and
+$q = \lceil s + 1 \rceil - 1$ from $x = 0$ unless $s$ is an even integer; $q$
+is the smaller of the two. For example `pow(2,4)`: $q = 4$ and 4, 4, 2, 1, 2,
+0; `pow(1.5,2.5)`: $q = 2$ and 1, 1, 1, 0, —, —. `h.scv` (Gaussian kernel) has
+no limit and `h.mlcv` is for $r = 0$ only; `h.pcv` has the limits of its criterion.
 
 `kernel.fun()` evaluates $K^{(r)}$ on a grid (or at given points) and returns an
 object of class `kfun`:
@@ -217,7 +230,7 @@ ggplot2::ggplot(est, ggplot2::aes(x, y, colour = kernel)) +
 ## 4. Bandwidth selectors
 
 All selectors return an object of class `bandwidth` (slots `h`, `min.obj`,
-`hos`, `method`, ...). Writing $\psi_h(u) = u/h$ for the scaled differences
+`hos`, `method`, ..., and for PCV `criterion` and `groups`). Writing $\psi_h(u) = u/h$ for the scaled differences
 $X_j - X_i$, the criteria minimised are:
 
 * **AMISE** (`h.amise`) — closed-form rule with a normal reference
@@ -236,6 +249,12 @@ $X_j - X_i$, the criteria minimised are:
 * **SCV** (`h.scv`) — smoothed cross-validation (Gaussian kernel): the squared
   bias is estimated from a Gaussian pilot $\tilde f_g$, which gives a closed form
   in terms of $\phi^{(2r)}$ for any $r$.
+* **PCV** (`h.pcv`) — partitioned cross-validation (Marron, 1987): the sample
+  is partitioned at random into `m` subsamples, a score (`criterion = "UCV"` by
+  default, or TCV, MCV, CCV, BCV1, BCV2) is computed in each subsample at the
+  bandwidth $h\,m^{1/(2r+5)}$ suited to its size, and $h$ minimises the average;
+  the across-sample variability is reduced and the cost divided by about `m`;
+  with `nrep > 1` the score is also averaged over `nrep` random partitions.
 * **MLCV** (`h.mlcv`) — maximum-likelihood (leave-one-out) cross-validation,
   density only.
 
@@ -267,7 +286,10 @@ ise <- function(h, r) {
 }
 sel <- list(AMISE = h.amise, UCV = h.ucv, BCV1 = h.bcv,
             BCV2 = function(x, ...) h.bcv(x, whichbcv = 2, ...),
-            CCV = h.ccv, MCV = h.mcv, TCV = h.tcv, SCV = h.scv)
+            CCV = h.ccv, MCV = h.mcv, TCV = h.tcv, SCV = h.scv,
+            PCV = function(x, ...) h.pcv(x, m = 2, nrep = 5, ...))
+# reproducible random partitions of PCV (UCV in 2 subsamples, 5 partitions)
+set.seed(1)
 tab <- sapply(0:1, function(r) {
   h <- sapply(sel, function(f) f(x, deriv.order = r)@h)
   c(rbind(h = h, ISE = sapply(h, ise, r = r)))
@@ -312,8 +334,10 @@ instance, is hard to estimate: the five narrow peaks need a small bandwidth.
 ```{r claw}
 f_claw <- function(x) 0.5 * dnorm(x) +
   rowSums(sapply(0:4, function(l) 0.1 * dnorm(x, l / 2 - 1, 0.1)))
+set.seed(1)
 bw_claw <- sapply(list(UCV = h.ucv, BCV1 = h.bcv, MCV = h.mcv, SCV = h.scv,
-                       AMISE = h.amise), function(f) suppressWarnings(f(claw))@h)
+                       PCV = function(s) h.pcv(s, m = 2, nrep = 5), AMISE = h.amise),
+                  function(f) suppressWarnings(f(claw))@h)
 round(bw_claw, 4)
 p <- quiet(plot(dkde(data = claw, h = bw_claw[["UCV"]])))
 p + ggplot2::stat_function(fun = f_claw, linetype = "dashed")
@@ -324,8 +348,10 @@ The same selectors on the five samples:
 ```{r datasets}
 samples <- list(kurtotic = kurtotic, outlier = outlier, bimodal = bimodal,
                 trimodal = trimodal, claw = claw)
+set.seed(1)
 round(sapply(samples, function(s)
-  sapply(list(AMISE = h.amise, UCV = h.ucv, BCV1 = h.bcv, MCV = h.mcv, SCV = h.scv),
+  sapply(list(AMISE = h.amise, UCV = h.ucv, BCV1 = h.bcv, MCV = h.mcv, SCV = h.scv,
+              PCV = function(s) h.pcv(s, m = 2, nrep = 5)),
          function(f) suppressWarnings(f(s))@h)), 4)
 ```
 
@@ -361,6 +387,7 @@ all.equal(h_seq, h_par)
 | `dkde(x, data, h, deriv.order, kernel, nthreads)` | $\hat f_h^{(r)}(x)$ | `dkde` |
 | `h.amise(x, deriv.order, kernel)` | AMISE rule | `bandwidth` |
 | `h.ucv`, `h.bcv`, `h.ccv`, `h.mcv`, `h.tcv`, `h.scv` `(x, deriv.order, kernel, lower, upper, tol, nthreads)` | cross-validation selectors | `bandwidth` |
+| `h.pcv(x, m, criterion, nrep, deriv.order, kernel, lower, upper, tol, nthreads)` | partitioned CV | `bandwidth` |
 | `h.mlcv(x, kernel, lower, upper, tol, nthreads)` | likelihood CV (density) | `bandwidth` |
 | `show()`, `plot()` | print / ggplot2 figure | — |
 | `lines(<bandwidth>)` | criterion curve as a ggplot2 layer | layer |
@@ -390,8 +417,9 @@ all.equal(h_seq, h_par)
   Physica Verlag, Vienna.
 * Hall, P., Marron, J. S. and Park, B. U. (1992). Smoothed cross-validation.
   *Probability Theory and Related Fields*, 92, 1–20.
-* Jones, M. C. and Kappenman, R. F. (1991). On a class of kernel density estimate
+* Jones, M. C. and Kappenman, R. F. (1992). On a class of kernel density estimate
   bandwidth selectors. *Scandinavian Journal of Statistics*, 19, 337–349.
+* Marron, J. S. (1987). Partitioned cross-validation. *Econometric Reviews*, 6, 271–283.
 * Marron, J. S. and Wand, M. P. (1992). Exact mean integrated squared error.
   *The Annals of Statistics*, 20, 712–736.
 * Rudemo, M. (1982). Empirical choice of histograms and kernel density

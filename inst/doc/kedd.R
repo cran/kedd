@@ -93,7 +93,10 @@ ise <- function(h, r) {
 }
 sel <- list(AMISE = h.amise, UCV = h.ucv, BCV1 = h.bcv,
             BCV2 = function(x, ...) h.bcv(x, whichbcv = 2, ...),
-            CCV = h.ccv, MCV = h.mcv, TCV = h.tcv, SCV = h.scv)
+            CCV = h.ccv, MCV = h.mcv, TCV = h.tcv, SCV = h.scv,
+            PCV = function(x, ...) h.pcv(x, m = 2, nrep = 5, ...))
+# reproducible random partitions of PCV (UCV in 2 subsamples, 5 partitions)
+set.seed(1)
 tab <- sapply(0:1, function(r) {
   h <- sapply(sel, function(f) f(x, deriv.order = r)@h)
   c(rbind(h = h, ISE = sapply(h, ise, r = r)))
@@ -111,8 +114,10 @@ round(sapply(ks, function(k) h.ucv(x, kernel = k)@h), 4)
 ## ----claw---------------------------------------------------------------------
 f_claw <- function(x) 0.5 * dnorm(x) +
   rowSums(sapply(0:4, function(l) 0.1 * dnorm(x, l / 2 - 1, 0.1)))
+set.seed(1)
 bw_claw <- sapply(list(UCV = h.ucv, BCV1 = h.bcv, MCV = h.mcv, SCV = h.scv,
-                       AMISE = h.amise), function(f) suppressWarnings(f(claw))@h)
+                       PCV = function(s) h.pcv(s, m = 2, nrep = 5), AMISE = h.amise),
+                  function(f) suppressWarnings(f(claw))@h)
 round(bw_claw, 4)
 p <- quiet(plot(dkde(data = claw, h = bw_claw[["UCV"]])))
 p + ggplot2::stat_function(fun = f_claw, linetype = "dashed")
@@ -120,8 +125,10 @@ p + ggplot2::stat_function(fun = f_claw, linetype = "dashed")
 ## ----datasets-----------------------------------------------------------------
 samples <- list(kurtotic = kurtotic, outlier = outlier, bimodal = bimodal,
                 trimodal = trimodal, claw = claw)
+set.seed(1)
 round(sapply(samples, function(s)
-  sapply(list(AMISE = h.amise, UCV = h.ucv, BCV1 = h.bcv, MCV = h.mcv, SCV = h.scv),
+  sapply(list(AMISE = h.amise, UCV = h.ucv, BCV1 = h.bcv, MCV = h.mcv, SCV = h.scv,
+              PCV = function(s) h.pcv(s, m = 2, nrep = 5)),
          function(f) suppressWarnings(f(s))@h)), 4)
 
 ## ----threads------------------------------------------------------------------

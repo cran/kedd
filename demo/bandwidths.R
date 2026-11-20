@@ -24,7 +24,8 @@ selectors <- list(
   CCV   = function(r) h.ccv(x, deriv.order = r),
   MCV   = function(r) h.mcv(x, deriv.order = r),
   TCV   = function(r) h.tcv(x, deriv.order = r),
-  SCV   = function(r) h.scv(x, deriv.order = r)
+  SCV   = function(r) h.scv(x, deriv.order = r),
+  PCV   = function(r) h.pcv(x, m = 2, nrep = 5, deriv.order = r)
 )
 
 ## integrated squared error of the estimate obtained with each bandwidth
@@ -66,6 +67,8 @@ samples <- list(kurtotic = kurtotic, outlier = outlier, bimodal = bimodal,
                 trimodal = trimodal, claw = claw)
 sel_data <- list(AMISE = h.amise, UCV = h.ucv, BCV1 = h.bcv,
                  BCV2 = function(s) h.bcv(s, whichbcv = 2),
-                 CCV = h.ccv, MCV = h.mcv, TCV = h.tcv, SCV = h.scv, MLCV = h.mlcv)
+                 CCV = h.ccv, MCV = h.mcv, TCV = h.tcv, SCV = h.scv,
+                 PCV = function(s) h.pcv(s, m = 2, nrep = 5), MLCV = h.mlcv)
+set.seed(1)
 round(sapply(samples, function(s)
   sapply(sel_data, function(f) suppressWarnings(f(s))@h)), 4)

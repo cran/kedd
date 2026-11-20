@@ -13,16 +13,16 @@ h.bcv(x, whichbcv = 1L, deriv.order = 0L, kernel = "gaussian",
 \arguments{
   \item{x}{numeric vector of data values.}
   \item{whichbcv}{integer: \code{1} for BCV1 (Scott and Terrell 1987,
-    default) or \code{2} for BCV2 (Jones and Kappenman 1991).}
-  \item{deriv.order}{non-negative integer: derivative order \eqn{r}. Maximum
-    \eqn{r} for this selector: any for Gaussian and Silverman; cosine 1;
-    logistic 8; Epanechnikov 1; uniform 0; triangular 0; biweight 2;
-    triweight 3; tricube 3; \code{pow(s,t)} \eqn{\min(r^*, 6)}{min(r*, 6)}, where
-    \eqn{r^*}{r*} is the largest integer \eqn{r < t + 1/2} (and
-    \eqn{r < s + 1/2} if \eqn{s} is not an even integer, and \eqn{2r \le st}{2r <= st}
-    if \eqn{s} and \eqn{t} are integers). Above it \code{h = NA}
-    is returned with a warning. See \code{\link{kedd-package}}, section
-    \sQuote{Maximum derivative order}.}
+    default) or \code{2} for BCV2 (Jones and Kappenman 1992).}
+  \item{deriv.order}{non-negative integer: derivative order \eqn{r}. BCV1 uses the
+    convolution of \eqn{K^{(r+2)}}, so \eqn{r + 2 \le q}, where \eqn{q} is
+    the regularity of the kernel: any for Gaussian; logistic 8; triweight
+    and tricube 1; biweight 0; not available for Epanechnikov, uniform,
+    triangular, cosine and Silverman (order 4, \eqn{\mu_2(K) = 0}{mu2(K) = 0}); \code{pow(s,t)} \eqn{q - 2}, at most 6.
+    BCV2 evaluates \eqn{K^{(2r+4)}}, so \eqn{2r + 4 \le q}: any for
+    Gaussian; logistic 8; not available for the other named kernels;
+    \code{pow(s,t)} \eqn{\lfloor q/2 \rfloor - 2}{floor(q/2) - 2}, at most 6. Above it \code{h = NA} is returned with a warning. See
+    \code{\link{kedd-package}}, section \sQuote{Maximum derivative order}.}
   \item{kernel}{character string giving the kernel; one of
     \code{"gaussian"} (default), \code{"epanechnikov"}, \code{"uniform"},
     \code{"triangular"}, \code{"biweight"}, \code{"triweight"},
@@ -56,7 +56,7 @@ h.bcv(x, whichbcv = 1L, deriv.order = 0L, kernel = "gaussian",
     \frac{\mu_2^2(K)}{4}\,h^{4}\,\hat{\theta}_{r+2}(h)}{%
     BCV1(h;r) = R(K(r))/(n*h^(2r+1)) + mu2^2/4 * h^4 * hat_theta(h;r+2)}
 
-  \bold{BCV2} (Jones and Kappenman 1991) minimises:
+  \bold{BCV2} (Jones and Kappenman 1992) minimises:
   \deqn{BCV2(h;r)= \frac{R\left(K^{(r)}\right)}{nh^{2r+1}} +
     \frac{\mu_2^2(K)}{4}\,h^{4}\,\bar{\theta}_{r+2}(h)}{%
     BCV2(h;r) = R(K(r))/(n*h^(2r+1)) + mu2^2/4 * h^4 * bar_theta(h;r+2)}
@@ -66,6 +66,10 @@ h.bcv(x, whichbcv = 1L, deriv.order = 0L, kernel = "gaussian",
   \code{\link{kernel.fun}}),
   \eqn{R(K^{(r)})=\int K^{(r)}(x)^2\,dx}{R(K(r))=int K(r)^2 dx},
   \eqn{\mu_2(K)=\int x^2 K(x)\,dx}{mu2(K)=int x^2 K(x) dx}.\cr
+
+  BCV2 may have several local minima; \code{\link{optimize}} returns one of
+  them without a warning, so the curve \code{plot(h.bcv(x, whichbcv = 2))}
+  should be checked.\cr
 
   The search is bounded by the over-smoothing bandwidth \code{hos}
   (Terrell and Scott 1985; Scott 1992, p.\,165; Wand and Jones 1995, p.\,61).
@@ -83,7 +87,7 @@ h.bcv(x, whichbcv = 1L, deriv.order = 0L, kernel = "gaussian",
   }
 }
 \references{
-  Jones, M. C. and Kappenman, R. F. (1991).
+  Jones, M. C. and Kappenman, R. F. (1992).
   On a class of kernel density estimate bandwidth selectors.
   \emph{Scandinavian Journal of Statistics}, \bold{19}, 337--349.
 
@@ -109,7 +113,7 @@ h.bcv(x, whichbcv = 1L, deriv.order = 0L, kernel = "gaussian",
   Iago Giné-Vázquez \email{iago.gin-vaz@protonmail.com}}
 \seealso{
   \code{\linkS4class{bandwidth}}, \code{\link{h.ucv}}, \code{\link{h.ccv}},
-  \code{\link{h.mcv}}, \code{\link{h.tcv}}, \code{\link{h.scv}}, \code{\link{h.amise}},
+  \code{\link{h.mcv}}, \code{\link{h.tcv}}, \code{\link{h.scv}}, \code{\link{h.pcv}}, \code{\link{h.amise}},
   \code{\link{kernel.conv}}, \code{\link{kernel.fun}}, \code{\link{dkde}}.
 }
 \examples{

@@ -35,6 +35,7 @@
     \code{\link{h.mcv}}   \tab modified cross-validation \cr
     \code{\link{h.tcv}}   \tab trimmed cross-validation \cr
     \code{\link{h.scv}}   \tab smoothed cross-validation (Gaussian) \cr
+    \code{\link{h.pcv}}   \tab partitioned cross-validation \cr
     \code{\link{h.mlcv}}  \tab maximum-likelihood cross-validation \cr
   }
 
@@ -64,34 +65,58 @@
   \code{demo("kedd")}, \code{demo("kernels")} and \code{demo("bandwidths")}.
 }
 \section{Maximum derivative order}{
-  Highest derivative order \eqn{r} (\code{deriv.order}) for each kernel.
-  Column 2: \eqn{K^{(r)}} is not identically zero (\code{\link{kernel.fun}},
-  \code{\link{kernel.conv}}, \code{\link{dkde}}); above it these functions
-  return zero. Columns 3 to 5: the selector criterion is finite; above it the
-  selectors return \code{h = NA} with a warning. "any" means no limit and "--"
-  means not available, even at \eqn{r = 0}.
-  \tabular{lcccc}{
-    \bold{kernel} \tab \bold{kernel.fun, kernel.conv, dkde} \tab \bold{UCV, BCV, TCV, AMISE} \tab \bold{MCV} \tab \bold{CCV} \cr
-    \code{gaussian}     \tab any \tab any \tab any \tab any \cr
-    \code{cosine}       \tab any \tab 1   \tab 0   \tab --  \cr
-    \code{silverman}    \tab any \tab any \tab any \tab any \cr
-    \code{logistic}     \tab 20  \tab 8   \tab 8   \tab 8   \cr
-    \code{epanechnikov} \tab 2   \tab 1   \tab 0   \tab --  \cr
-    \code{uniform}      \tab 0   \tab 0   \tab --  \tab --  \cr
-    \code{triangular}   \tab 1   \tab 0   \tab --  \tab --  \cr
-    \code{biweight}     \tab 4   \tab 2   \tab 1   \tab 0   \cr
-    \code{triweight}    \tab 6   \tab 3   \tab 2   \tab 1   \cr
-    \code{tricube}      \tab 9   \tab 3   \tab 2   \tab 1   \cr
-    \code{pow(s,t)}     \tab \eqn{\min(st, 16)}{min(st, 16)} \tab \eqn{\min(r^*, 6)}{min(r*, 6)} \tab \eqn{\min(r^*-1, 6)}{min(r*-1, 6)} \tab \eqn{\min(r^*-2, 6)}{min(r*-2, 6)} \cr
+  The regularity \eqn{q} of a kernel is the largest \eqn{m} such that the
+  pointwise derivative \eqn{K^{(m)}} is the derivative of \eqn{K} in the sense
+  of distributions (\eqn{K^{(m-1)}} absolutely continuous). For \eqn{m > q},
+  \eqn{K^{(m)}} misses the Dirac masses at the jumps of \eqn{K^{(q)}}, and a
+  criterion that evaluates it at the pairwise differences \eqn{X_i - X_j} no
+  longer estimates its target. Each criterion therefore restricts \eqn{r}:
+  \tabular{ll}{
+    \code{\link{dkde}}, \code{\link{h.amise}} \tab \eqn{r \le q} \cr
+    \code{\link{h.ucv}}, \code{\link{h.tcv}} (\eqn{K^{(2r)}}) \tab \eqn{2r \le q} \cr
+    \code{\link{h.mcv}} (\eqn{K^{(2r+2)}}) \tab \eqn{2r + 2 \le q} \cr
+    \code{\link{h.bcv}}, BCV1 (convolution of \eqn{K^{(r+2)}}) \tab \eqn{r + 2 \le q} \cr
+    \code{\link{h.bcv}}, BCV2, and \code{\link{h.ccv}} (\eqn{K^{(2r+4)}}) \tab \eqn{2r + 4 \le q} \cr
   }
-  For \code{pow(s,t)}, \eqn{st} applies when \eqn{s} and \eqn{t} are integers
-  (16 otherwise), and \eqn{r^*}{r*} is the largest integer
-  \eqn{r < t + 1/2}, with \eqn{2r \le st}{2r <= st} when \eqn{s} and \eqn{t}
-  are integers and \eqn{r < s + 1/2} when \eqn{s} is not an even integer.
-  For example \code{pow(2,3)}: 6, 3, 2, 1; \code{pow(2,8)}: 16, 6, 6, 6;
-  \code{pow(1.5,2.5)}: 16, 1, 0, --.
-  \code{\link{h.scv}} (Gaussian kernel) has no limit and \code{\link{h.mlcv}}
-  is for \eqn{r = 0} only.
+  In addition \eqn{K^{(r)}} (\eqn{K^{(r+2)}} for BCV1) must be square
+  integrable, and the selectors are capped at \eqn{r = 8} for the logistic
+  kernel and \eqn{r = 6} for \code{pow(s,t)}, the derivative orders
+  implemented being 20 and 16. Above the limit the selectors return
+  \code{h = NA} with a warning, and \code{\link{dkde}} gives a warning.
+  "any" means no limit and "--" means not available, even at \eqn{r = 0}.
+  \tabular{lccccccc}{
+    \bold{kernel} \tab \eqn{q} \tab \bold{dkde} \tab \bold{AMISE} \tab \bold{UCV, TCV} \tab \bold{MCV} \tab \bold{BCV1} \tab \bold{BCV2, CCV} \cr
+    \code{gaussian}     \tab \eqn{\infty}{Inf} \tab any \tab any \tab any \tab any \tab any \tab any \cr
+    \code{logistic}     \tab \eqn{\infty}{Inf} \tab 20  \tab 8   \tab 8   \tab 8   \tab 8   \tab 8   \cr
+    \code{silverman}    \tab 3 \tab 3 \tab (*) \tab 1 \tab (*) \tab (*) \tab (*) \cr
+    \code{triweight}    \tab 3 \tab 3 \tab 3   \tab 1 \tab 0  \tab 1  \tab -- \cr
+    \code{tricube}      \tab 3 \tab 3 \tab 3   \tab 1 \tab 0  \tab 1  \tab -- \cr
+    \code{biweight}     \tab 2 \tab 2 \tab 2   \tab 1 \tab 0  \tab 0  \tab -- \cr
+    \code{epanechnikov} \tab 1 \tab 1 \tab 1   \tab 0 \tab -- \tab -- \tab -- \cr
+    \code{triangular}   \tab 1 \tab 1 \tab 1   \tab 0 \tab -- \tab -- \tab -- \cr
+    \code{cosine}       \tab 1 \tab 1 \tab 1   \tab 0 \tab -- \tab -- \tab -- \cr
+    \code{uniform}      \tab 0 \tab 0 \tab 0   \tab 0 \tab -- \tab -- \tab -- \cr
+  }
+  (*) The Silverman kernel is of order 4 (\eqn{\mu_2(K) = 0}{mu2(K) = 0}):
+  \code{\link{h.amise}} returns the value of the Gaussian kernel with a
+  warning, and the search interval of the selectors uses it too. BCV1, BCV2,
+  MCV and CCV, built on the bias expansion of a second-order kernel
+  (\eqn{\mu_2(K)}{mu2(K)}, \eqn{\mu_4(K)}{mu4(K)}), are not defined for it:
+  with \eqn{\mu_2(K) = 0}{mu2(K) = 0} the bias term of BCV vanishes and the
+  criterion decreases up to the end of the search interval.
+
+  For \code{pow(s,t)}, the factor \eqn{(1 - |x|)^t} at \eqn{|x| = 1} gives
+  \eqn{q = \lceil t + 1 \rceil - 1}{q = ceiling(t + 1) - 1} (\eqn{q = t} for an
+  integer \eqn{t}), and \eqn{|x|^s} at 0 gives
+  \eqn{q = \lceil s + 1 \rceil - 1}{q = ceiling(s + 1) - 1} unless \eqn{s} is an
+  even integer; \eqn{q} is the smaller of the two. \eqn{K^{(m)}} is square
+  integrable when \eqn{m < t + 1/2} and, unless \eqn{s} is an even integer,
+  \eqn{m < s + 1/2}. For example \code{pow(2,4)}: \eqn{q = 4} and the
+  limits 4, 4, 2, 1, 2, 0; \code{pow(2,8)}: 8, 6, 4, 3, 6, 2;
+  \code{pow(1.5,2.5)}: \eqn{q = 2} and 1, 1, 1, 0, --, --.
+  \code{\link{h.scv}} (Gaussian kernel) has no limit, \code{\link{h.mlcv}}
+  is for \eqn{r = 0} only, and \code{\link{h.pcv}} has the limits of the
+  score computed in each subsample.
 }
 \author{
   Arsalane Chouaib Guidoum \email{acguidoum@univ-tam.dz} (author, maintainer),
@@ -110,7 +135,7 @@
 }
 \seealso{
   \code{\link{dkde}}, \code{\link{kernel.fun}}, \code{\link{kernel.conv}},
-  \code{\link{kernel.pow}}, \code{\link{h.ucv}}, \code{\link{h.scv}},
+  \code{\link{kernel.pow}}, \code{\link{h.ucv}}, \code{\link{h.scv}}, \code{\link{h.pcv}},
   \code{\linkS4class{bandwidth}}, \code{\link{kedd-data}},
   \code{vignette("kedd")}, \code{citation("kedd")}.
 }

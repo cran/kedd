@@ -17,10 +17,10 @@ h.bcv <- function(x, whichbcv = 1L, deriv.order = 0L, kernel = "gaussian",
     warning("'whichbcv' must be 1 or 2; using 1.")
     whichbcv <- 1L
   }
-  v <- .check_bw_args(x, deriv.order, kernel, nthreads)
   method <- if (whichbcv == 1L) "BCV1" else "BCV2"
+  v <- .check_bw_args(x, deriv.order, kernel, nthreads, method)
   if (v$bad) {
-    warning("deriv.order is above the maximum order for this kernel; h = NA.")
+    warning(v$msg)
     return(new("bandwidth", data = v$x, kernel = v$kernel,
                deriv.order = v$r, h = NA_real_, min.obj = NA_real_,
                hos = NA_real_, method = method))

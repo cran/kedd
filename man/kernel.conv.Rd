@@ -16,7 +16,10 @@ kernel.conv(x = NULL, deriv.order = 0L, kernel = "gaussian", n.grid = 512L)
 logistic 20; Epanechnikov 2; uniform 0; triangular 1; biweight 4;
 triweight 6; tricube 9; \code{pow(s,t)} \eqn{\min(st, 16)}{min(st, 16)}
 (16 if \eqn{s} or \eqn{t} is not an integer). See \code{\link{kedd-package}},
-section \sQuote{Maximum derivative order}.}
+section \sQuote{Maximum derivative order}.
+    Above the regularity \eqn{q} of the kernel (see \code{\link{kedd-package}},
+    section \sQuote{Maximum derivative order}), the values are pointwise
+    derivatives, which miss the Dirac masses of the derivative of \eqn{K}.}
 
 \item{kernel}{character string giving the kernel; one of
     \code{"gaussian"} (default), \code{"epanechnikov"}, \code{"uniform"},

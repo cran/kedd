@@ -2,8 +2,8 @@ Package: kedd
 Type: Package
 Title: Kernel Estimator and Bandwidth Selection for Density and Its
         Derivatives
-Version: 2.0.1
-Date: 2026-11-08
+Version: 2.0.2
+Date: 2026-11-20
 Authors@R: c(
     person("Arsalane Chouaib", "Guidoum",
            email   = "acguidoum@univ-tam.dz",
@@ -20,9 +20,10 @@ Maintainer: Arsalane Chouaib Guidoum <acguidoum@univ-tam.dz>
 Description: Kernel estimation of a univariate probability density and of its
     derivatives of any order r, with data-driven bandwidth selection. Provides the
     kernel estimator of the derivative of order r, the kernels, their derivatives and
-    convolutions, and eight bandwidth selectors: the asymptotic MISE rule (AMISE),
+    convolutions, and nine bandwidth selectors: the asymptotic MISE rule (AMISE),
     and unbiased (UCV), biased (BCV1, BCV2), complete (CCV), modified (MCV),
-    trimmed (TCV), smoothed (SCV) and maximum-likelihood (MLCV) cross-validation.
+    trimmed (TCV), smoothed (SCV), partitioned (PCV) and maximum-likelihood (MLCV)
+    cross-validation.
     Supports ten named kernels (Gaussian, Epanechnikov, uniform, triangular,
     biweight, triweight, tricube, cosine, Silverman, logistic) and the power
     family Pow(s,t), c(1-|x|^s)^t on [-1,1]. Results are S4 objects with 'ggplot2'
@@ -44,11 +45,11 @@ NeedsCompilation: yes
 LazyData: true
 Encoding: UTF-8
 Config/roxygen2/version: 8.1.1
-Packaged: 2026-11-11 21:40:11 UTC; stars
+Packaged: 2026-11-20 15:58:20 UTC; stars
 Author: Arsalane Chouaib Guidoum [aut, cre] (ORCID:
     <https://orcid.org/0000-0003-3781-2160>),
   Amel Henider [aut],
   Iago Giné-Vázquez [ctb] (ORCID:
     <https://orcid.org/0000-0002-6725-2638>)
 Repository: CRAN
-Date/Publication: 2026-11-12 10:40:24 UTC
+Date/Publication: 2026-11-20 17:50:14 UTC

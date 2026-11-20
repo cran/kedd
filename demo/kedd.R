@@ -27,6 +27,9 @@ plot(dkde(data = x, h = bw1@h, deriv.order = 1L))
 h.bcv(x, kernel = "logistic")
 h.bcv(x, kernel = kernel.pow(2, 4))   # same as kernel = "pow(2,4)"
 
+## Partitioned cross-validation: UCV averaged over m = 2 random subsamples
+h.pcv(x, m = 2)
+
 ## 6. Several criteria on one ggplot2 figure ----------------------------------
 p <- plot(h.ucv(x))
 p$plot + lines(h.bcv(x), color = "darkred") + lines(h.mcv(x), color = "darkorange")

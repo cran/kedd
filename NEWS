@@ -1,3 +1,7 @@
+Version 2.0.2: 2026-11-20    o Version 2.0.2 released.
+                             o New bandwidth selector h.pcv(): Partitioned
+                               Cross-Validation (Marron 1987).
+                             o Other minor bug fixes: R (>= 4.6.0).
 Version 2.0.1: 2026-11-12    o Version 2.0.1 released.
                              o Other minor bug fixes: R (>= 4.6.0).
 Version 2.0.0: 2026-11-01    o Version 2.0.0 released.
@@ -30,5 +34,3 @@ Version 1.0.2: 2015-01-28    o Version 1.0.2 released.
                              o Other minor bug fixes: R (>= 3.1.2).
 Version 1.0.1: 2014-08-18    o Version 1.0.1 released.
                              o Other minor bug fixes: R (>= 2.15.1).
-
-						   

@@ -76,7 +76,7 @@ h.mlcv(x, kernel = "gaussian", lower, upper, tol, nthreads = 0L)
   Amel Henider \email{amel.henider@univ-tam.dz} and
   Iago Giné-Vázquez \email{iago.gin-vaz@protonmail.com}}
 \seealso{
-  \code{\linkS4class{bandwidth}}, \code{\link{h.ucv}}, \code{\link{h.amise}}, \code{\link{h.scv}},
+  \code{\linkS4class{bandwidth}}, \code{\link{h.ucv}}, \code{\link{h.amise}}, \code{\link{h.scv}}, \code{\link{h.pcv}},
   \code{\link{dkde}}.
 }
 \examples{

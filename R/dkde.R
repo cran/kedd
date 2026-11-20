@@ -58,11 +58,18 @@ dkde <- function(x = NULL, data, h, deriv.order = 0L,
   data <- data[!is.na(data)]
   n    <- as.integer(length(data))
   if (n < 2L) stop("'data' must have at least 2 observations.")
+  if (r < 0L) stop("'deriv.order' must be a non-negative integer.")
+  if (!.admissible(kernel, r, "DKDE"))
+    warning("deriv.order is above the maximum order of dkde for this kernel: the ",
+            "estimate is not the derivative of the density estimate (see ?kedd, ",
+            "section 'Maximum derivative order').")
   if (missing(h) || is.null(h)) {
     bw <- h.ucv(data, deriv.order = r, kernel = kernel, nthreads = nthreads)
     h  <- bw@h
+    if (is.na(h))
+      stop("no UCV bandwidth for this kernel and deriv.order; give 'h'.")
   }
-  if (!is.numeric(h) || length(h) != 1L || h <= 0)
+  if (!is.numeric(h) || length(h) != 1L || is.na(h) || h <= 0)
     stop("'h' must be a positive scalar.")
   if (is.null(x))
     x <- seq(min(data) - 3 * h, max(data) + 3 * h, length.out = 512L)

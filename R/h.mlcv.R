@@ -25,7 +25,7 @@
 h.mlcv <- function(x, kernel = "gaussian",
                    lower, upper, tol,
                    nthreads = 0L) {
-  v <- .check_bw_args(x, deriv.order = 0L, kernel, nthreads)
+  v <- .check_bw_args(x, deriv.order = 0L, kernel, nthreads, "MLCV")
   hos <- .hos(v$kernel, 0L, v$x)
   if (missing(lower)) lower <- 0.01 * hos
   if (missing(upper)) upper <- 2.0  * hos

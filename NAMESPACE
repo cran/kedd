@@ -18,7 +18,7 @@ exportClasses(bandwidth, dkde, kfun, kconv)
 exportMethods(show, plot, lines, "$")
 
 ## Bandwidth selectors
-export(h.ucv, h.bcv, h.ccv, h.mcv, h.tcv, h.amise, h.mlcv, h.scv)
+export(h.ucv, h.bcv, h.ccv, h.mcv, h.tcv, h.amise, h.mlcv, h.scv, h.pcv)
 
 ## Kernel evaluators
 export(kernel.fun, kernel.conv, kernel.pow)

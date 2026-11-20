@@ -37,23 +37,25 @@ kernel.pow(s = 2, t = 2)
   integer (\eqn{t \le 10}), a recurrence otherwise; derivatives are available
   up to order 16.
 
-  \eqn{R(K^{(r)})} is finite only when \eqn{2r < 2t+1} and, for a non-integer
-  \eqn{s}, \eqn{2r < 2s+1} (otherwise \eqn{K^{(r)}} is not square integrable
+  \eqn{R(K^{(r)})} is finite only when \eqn{2r < 2t+1} and, unless \eqn{s} is
+  an even integer, \eqn{2r < 2s+1} (otherwise \eqn{K^{(r)}} is not square integrable
   at \eqn{|x| = 1} or at \eqn{0}).  Bandwidth selectors return \code{NA} with a
   warning for such derivative orders, as for the other finite-support kernels.
 
-  \bold{Maximum derivative order.} \eqn{K^{(r)} \ne 0} up to
-  \eqn{r = \min(st, 16)}{r = min(st, 16)} when \eqn{s} and \eqn{t} are
-  integers (16 otherwise) in \code{\link{kernel.fun}},
-  \code{\link{kernel.conv}} and \code{\link{dkde}}. With \eqn{r^*}{r*} the
-  largest integer \eqn{r < t + 1/2} (with \eqn{2r \le st}{2r <= st} for integer
-  \eqn{s} and \eqn{t}, and \eqn{r < s + 1/2} unless
-  \eqn{s} is an even integer), the maximum is \eqn{\min(r^*, 6)}{min(r*, 6)} for
-  \code{\link{h.ucv}}, \code{\link{h.bcv}}, \code{\link{h.tcv}} and
-  \code{\link{h.amise}}, \eqn{\min(r^*-1, 6)}{min(r*-1, 6)} for
-  \code{\link{h.mcv}} and \eqn{\min(r^*-2, 6)}{min(r*-2, 6)} for
-  \code{\link{h.ccv}}. For example \code{pow(2,3)}: 6, 3, 2, 1;
-  \code{pow(2,8)}: 16, 6, 6, 6; \code{pow(1.5,2.5)}: 16, 1, 0, not available.
+  \bold{Maximum derivative order.} The regularity of \eqn{K_{s,t}} is
+  \eqn{q = \min(\lceil t + 1 \rceil - 1, \lceil s + 1 \rceil - 1)}{q = min(ceiling(t + 1) - 1, ceiling(s + 1) - 1)},
+  the term in \eqn{s} being dropped when \eqn{s} is an even integer
+  (\eqn{q = t} for an integer \eqn{t}): for \eqn{m \le q} the pointwise
+  derivative \eqn{K^{(m)}} is the derivative of \eqn{K}. A criterion that
+  evaluates \eqn{K^{(m)}} needs \eqn{m \le q}: \eqn{r \le q} for
+  \code{\link{dkde}} and \code{\link{h.amise}}, \eqn{2r \le q} for
+  \code{\link{h.ucv}} and \code{\link{h.tcv}}, \eqn{2r + 2 \le q} for
+  \code{\link{h.mcv}}, \eqn{r + 2 \le q} for BCV1 and \eqn{2r + 4 \le q} for
+  BCV2 and \code{\link{h.ccv}}, with \eqn{K^{(r)}} square integrable; the
+  selectors are capped at \eqn{r = 6} and \code{dkde} at \eqn{r = 16}. For
+  example \code{pow(2,4)}: \eqn{q = 4} and 4, 4, 2, 1, 2, 0;
+  \code{pow(2,3)}: \eqn{q = 3} and 3, 3, 1, 0, 1, not available. See
+  \code{\link{kedd-package}}, section \sQuote{Maximum derivative order}.
 }
 \value{
   A character string \code{"pow(s,t)"}.

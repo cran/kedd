@@ -12,7 +12,7 @@
 
 <meta name="author" content="Arsalane Chouaib Guidoum, Amel Henider and Iago Giné-Vázquez" />
 
-<meta name="date" content="2026-11-11" />
+<meta name="date" content="2026-11-20" />
 
 <title>kedd: kernel estimation of a density and its derivatives</title>
 
@@ -343,7 +343,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 its derivatives</h1>
 <h4 class="author">Arsalane Chouaib Guidoum, Amel Henider and Iago
 Giné-Vázquez</h4>
-<h4 class="date">2026-11-11</h4>
+<h4 class="date">2026-11-20</h4>
 
 
 
@@ -375,10 +375,10 @@ about.</p>
 kernels and the power family Pow(s,t);</li>
 <li><code>dkde()</code> — the estimator <span class="math inline">\(\hat
 f_h^{(r)}\)</span>;</li>
-<li>eight data-driven bandwidth selectors: <code>h.amise()</code>,
+<li>nine data-driven bandwidth selectors: <code>h.amise()</code>,
 <code>h.ucv()</code>, <code>h.bcv()</code>, <code>h.ccv()</code>,
 <code>h.mcv()</code>, <code>h.tcv()</code>, <code>h.scv()</code>,
-<code>h.mlcv()</code>.</li>
+<code>h.pcv()</code>, <code>h.mlcv()</code>.</li>
 </ul>
 <p>All results are S4 objects with <code>show()</code> and
 <strong>ggplot2</strong> <code>plot()</code> methods, and the <span class="math inline">\(O(n^2)\)</span> criteria run in C++ (Rcpp) in
@@ -390,7 +390,7 @@ parallel (OpenMP).</p>
 <h3>2.1 The kernels</h3>
 <p>Ten named kernels and the power family Pow(s,t) (section 2.2) are
 available in every function through the argument <code>kernel</code>. “r
-max” is the highest derivative order that is not identically zero.</p>
+max” is the highest order of the pointwise derivative <span class="math inline">\(K^{(r)}\)</span> that is not identically zero.</p>
 <table>
 <colgroup>
 <col width="21%" />
@@ -484,99 +484,132 @@ x\rvert}{\sqrt2}+\frac{\pi}{4}\big)\)</span></td>
 </table>
 <p>For <code>pow(s,t)</code>, <span class="math inline">\(\min(st,
 16)\)</span> applies when <span class="math inline">\(s\)</span> and
-<span class="math inline">\(t\)</span> are integers (16 otherwise). The
-bandwidth selectors need <span class="math inline">\(R(K^{(r)}) &lt;
-\infty\)</span> (and MCV, CCV use <span class="math inline">\(K^{(r+1)}\)</span>, <span class="math inline">\(K^{(r+2)}\)</span>), so their maximum order is
-lower. Above it they return <code>h = NA</code> with a warning; “—”
-means not available even at <span class="math inline">\(r =
+<span class="math inline">\(t\)</span> are integers (16 otherwise).</p>
+<p>The regularity <span class="math inline">\(q\)</span> of a kernel is
+the largest <span class="math inline">\(m\)</span> such that the
+pointwise derivative <span class="math inline">\(K^{(m)}\)</span> is the
+derivative of <span class="math inline">\(K\)</span> in the sense of
+distributions (<span class="math inline">\(K^{(m-1)}\)</span> absolutely
+continuous). For <span class="math inline">\(m &gt; q\)</span>, <span class="math inline">\(K^{(m)}\)</span> misses the Dirac masses at the
+jumps of <span class="math inline">\(K^{(q)}\)</span>, and a criterion
+that evaluates it at the pairwise differences no longer estimates its
+target. Each criterion therefore restricts <span class="math inline">\(r\)</span>: <span class="math inline">\(r \le
+q\)</span> for <code>dkde</code> and <code>h.amise</code>, <span class="math inline">\(2r \le q\)</span> for UCV and TCV (<span class="math inline">\(K^{(2r)}\)</span>), <span class="math inline">\(2r
++ 2 \le q\)</span> for MCV, <span class="math inline">\(r + 2 \le
+q\)</span> for BCV1 (convolution of <span class="math inline">\(K^{(r+2)}\)</span>) and <span class="math inline">\(2r + 4 \le q\)</span> for BCV2 and CCV. <span class="math inline">\(K^{(r)}\)</span> (<span class="math inline">\(K^{(r+2)}\)</span> for BCV1) must also be square
+integrable, and the selectors are capped at <span class="math inline">\(r = 8\)</span> (logistic) and <span class="math inline">\(r = 6\)</span> (Pow), the derivative orders
+implemented being 20 and 16. Above the limit the selectors return
+<code>h = NA</code> with a warning, and <code>dkde()</code> gives a
+warning; “—” means not available even at <span class="math inline">\(r =
 0\)</span>:</p>
-<table>
+<table style="width:100%;">
 <colgroup>
-<col width="16%" />
-<col width="27%" />
-<col width="27%" />
-<col width="27%" />
+<col width="7%" />
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th>kernel</th>
-<th align="center"><code>h.ucv</code>, <code>h.bcv</code>,
-<code>h.tcv</code>, <code>h.amise</code></th>
+<th align="center"><span class="math inline">\(q\)</span></th>
+<th align="center"><code>dkde</code></th>
+<th align="center"><code>h.amise</code></th>
+<th align="center"><code>h.ucv</code>, <code>h.tcv</code></th>
 <th align="center"><code>h.mcv</code></th>
-<th align="center"><code>h.ccv</code></th>
+<th align="center">BCV1</th>
+<th align="center">BCV2, <code>h.ccv</code></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>gaussian</code>, <code>silverman</code></td>
+<td><code>gaussian</code></td>
+<td align="center"><span class="math inline">\(\infty\)</span></td>
+<td align="center">any</td>
+<td align="center">any</td>
+<td align="center">any</td>
 <td align="center">any</td>
 <td align="center">any</td>
 <td align="center">any</td>
 </tr>
 <tr class="even">
-<td><code>cosine</code></td>
-<td align="center">1</td>
-<td align="center">0</td>
-<td align="center">—</td>
-</tr>
-<tr class="odd">
 <td><code>logistic</code></td>
+<td align="center"><span class="math inline">\(\infty\)</span></td>
+<td align="center">20</td>
 <td align="center">8</td>
 <td align="center">8</td>
 <td align="center">8</td>
-</tr>
-<tr class="even">
-<td><code>epanechnikov</code></td>
-<td align="center">1</td>
-<td align="center">0</td>
-<td align="center">—</td>
+<td align="center">8</td>
+<td align="center">8</td>
 </tr>
 <tr class="odd">
-<td><code>uniform</code></td>
-<td align="center">0</td>
-<td align="center">—</td>
-<td align="center">—</td>
+<td><code>silverman</code></td>
+<td align="center">3</td>
+<td align="center">3</td>
+<td align="center">(*)</td>
+<td align="center">1</td>
+<td align="center">(*)</td>
+<td align="center">(*)</td>
+<td align="center">(*)</td>
 </tr>
 <tr class="even">
-<td><code>triangular</code></td>
+<td><code>triweight</code>, <code>tricube</code></td>
+<td align="center">3</td>
+<td align="center">3</td>
+<td align="center">3</td>
+<td align="center">1</td>
 <td align="center">0</td>
-<td align="center">—</td>
+<td align="center">1</td>
 <td align="center">—</td>
 </tr>
 <tr class="odd">
 <td><code>biweight</code></td>
 <td align="center">2</td>
+<td align="center">2</td>
+<td align="center">2</td>
 <td align="center">1</td>
 <td align="center">0</td>
+<td align="center">0</td>
+<td align="center">—</td>
 </tr>
 <tr class="even">
-<td><code>triweight</code></td>
-<td align="center">3</td>
-<td align="center">2</td>
+<td><code>epanechnikov</code>, <code>triangular</code>,
+<code>cosine</code></td>
 <td align="center">1</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">—</td>
+<td align="center">—</td>
+<td align="center">—</td>
 </tr>
 <tr class="odd">
-<td><code>tricube</code></td>
-<td align="center">3</td>
-<td align="center">2</td>
-<td align="center">1</td>
-</tr>
-<tr class="even">
-<td><code>pow(s,t)</code></td>
-<td align="center"><span class="math inline">\(\min(r^\ast,
-6)\)</span></td>
-<td align="center"><span class="math inline">\(\min(r^\ast-1,
-6)\)</span></td>
-<td align="center"><span class="math inline">\(\min(r^\ast-2,
-6)\)</span></td>
+<td><code>uniform</code></td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">—</td>
+<td align="center">—</td>
+<td align="center">—</td>
 </tr>
 </tbody>
 </table>
-<p>Here <span class="math inline">\(r^\ast\)</span> is the largest
-integer <span class="math inline">\(r &lt; t + \frac12\)</span> (with
-<span class="math inline">\(2r \le st\)</span> when <span class="math inline">\(s\)</span> and <span class="math inline">\(t\)</span> are integers, and <span class="math inline">\(r &lt; s + \frac12\)</span> when <span class="math inline">\(s\)</span> is not an even integer);
-e.g. <code>pow(2,3)</code>: 3, 2, 1. <code>h.scv</code> (Gaussian
-kernel) has no limit and <code>h.mlcv</code> is for <span class="math inline">\(r = 0\)</span> only.</p>
+<p>(*) The Silverman kernel is of order 4 (<span class="math inline">\(\mu_2(K) = 0\)</span>): <code>h.amise()</code>
+returns the value of the Gaussian kernel with a warning, and BCV1, BCV2,
+MCV and CCV, built on the bias expansion of a second-order kernel, are
+not defined for it. For <code>pow(s,t)</code>, <span class="math inline">\(q = \lceil t + 1 \rceil - 1\)</span> (<span class="math inline">\(q = t\)</span> for an integer <span class="math inline">\(t\)</span>) from <span class="math inline">\(|x| =
+1\)</span>, and <span class="math inline">\(q = \lceil s + 1 \rceil -
+1\)</span> from <span class="math inline">\(x = 0\)</span> unless <span class="math inline">\(s\)</span> is an even integer; <span class="math inline">\(q\)</span> is the smaller of the two. For example
+<code>pow(2,4)</code>: <span class="math inline">\(q = 4\)</span> and 4,
+4, 2, 1, 2, 0; <code>pow(1.5,2.5)</code>: <span class="math inline">\(q
+= 2\)</span> and 1, 1, 1, 0, —, —. <code>h.scv</code> (Gaussian kernel)
+has no limit and <code>h.mlcv</code> is for <span class="math inline">\(r = 0\)</span> only; <code>h.pcv</code> has the
+limits of its criterion.</p>
 <p><code>kernel.fun()</code> evaluates <span class="math inline">\(K^{(r)}\)</span> on a grid (or at given points)
 and returns an object of class <code>kfun</code>:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>kf <span class="ot">&lt;-</span> <span class="fu">kernel.fun</span>(<span class="at">kernel =</span> <span class="st">&quot;biweight&quot;</span>, <span class="at">deriv.order =</span> <span class="dv">1</span><span class="dt">L</span>)</span>
@@ -713,7 +746,8 @@ bandwidths, against the true density (dashed):</p>
 <h2>4. Bandwidth selectors</h2>
 <p>All selectors return an object of class <code>bandwidth</code> (slots
 <code>h</code>, <code>min.obj</code>, <code>hos</code>,
-<code>method</code>, …). Writing <span class="math inline">\(\psi_h(u) =
+<code>method</code>, …, and for PCV <code>criterion</code> and
+<code>groups</code>). Writing <span class="math inline">\(\psi_h(u) =
 u/h\)</span> for the scaled differences <span class="math inline">\(X_j
 - X_i\)</span>, the criteria minimised are:</p>
 <ul>
@@ -741,6 +775,15 @@ term).</li>
 cross-validation (Gaussian kernel): the squared bias is estimated from a
 Gaussian pilot <span class="math inline">\(\tilde f_g\)</span>, which
 gives a closed form in terms of <span class="math inline">\(\phi^{(2r)}\)</span> for any <span class="math inline">\(r\)</span>.</li>
+<li><strong>PCV</strong> (<code>h.pcv</code>) — partitioned
+cross-validation (Marron, 1987): the sample is partitioned at random
+into <code>m</code> subsamples, a score (<code>criterion = &quot;UCV&quot;</code>
+by default, or TCV, MCV, CCV, BCV1, BCV2) is computed in each subsample
+at the bandwidth <span class="math inline">\(h\,m^{1/(2r+5)}\)</span>
+suited to its size, and <span class="math inline">\(h\)</span> minimises
+the average; the across-sample variability is reduced and the cost
+divided by about <code>m</code>; with <code>nrep &gt; 1</code> the score
+is also averaged over <code>nrep</code> random partitions.</li>
 <li><strong>MLCV</strong> (<code>h.mlcv</code>) — maximum-likelihood
 (leave-one-out) cross-validation, density only.</li>
 </ul>
@@ -773,35 +816,40 @@ f^{(r)})^2\)</span> measures the quality of each selected bandwidth:</p>
 <span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>}</span>
 <span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>sel <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">AMISE =</span> h.amise, <span class="at">UCV =</span> h.ucv, <span class="at">BCV1 =</span> h.bcv,</span>
 <span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>            <span class="at">BCV2 =</span> <span class="cf">function</span>(x, ...) <span class="fu">h.bcv</span>(x, <span class="at">whichbcv =</span> <span class="dv">2</span>, ...),</span>
-<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>            <span class="at">CCV =</span> h.ccv, <span class="at">MCV =</span> h.mcv, <span class="at">TCV =</span> h.tcv, <span class="at">SCV =</span> h.scv)</span>
-<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>tab <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>, <span class="cf">function</span>(r) {</span>
-<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>  h <span class="ot">&lt;-</span> <span class="fu">sapply</span>(sel, <span class="cf">function</span>(f) <span class="fu">f</span>(x, <span class="at">deriv.order =</span> r)<span class="sc">@</span>h)</span>
-<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fu">rbind</span>(<span class="at">h =</span> h, <span class="at">ISE =</span> <span class="fu">sapply</span>(h, ise, <span class="at">r =</span> r)))</span>
-<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>})</span>
-<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="co">#&gt; Warning in f(x, deriv.order = r): minimum occurred at one end of the range.</span></span>
-<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="fu">dimnames</span>(tab) <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">paste</span>(<span class="fu">rep</span>(<span class="fu">names</span>(sel), <span class="at">each =</span> <span class="dv">2</span>), <span class="fu">c</span>(<span class="st">&quot;h&quot;</span>, <span class="st">&quot;ISE&quot;</span>)),</span>
-<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a>                      <span class="fu">c</span>(<span class="st">&quot;r = 0&quot;</span>, <span class="st">&quot;r = 1&quot;</span>))</span>
-<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="fu">round</span>(tab, <span class="dv">4</span>)</span>
-<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a><span class="co">#&gt;            r = 0  r = 1</span></span>
-<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a><span class="co">#&gt; AMISE h   0.4953 0.6997</span></span>
-<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a><span class="co">#&gt; AMISE ISE 0.0138 0.2181</span></span>
-<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a><span class="co">#&gt; UCV h     0.2349 0.3205</span></span>
-<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a><span class="co">#&gt; UCV ISE   0.0012 0.0299</span></span>
-<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a><span class="co">#&gt; BCV1 h    0.2217 1.3993</span></span>
-<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a><span class="co">#&gt; BCV1 ISE  0.0012 0.3920</span></span>
-<span id="cb14-23"><a href="#cb14-23" tabindex="-1"></a><span class="co">#&gt; BCV2 h    0.1984 0.1969</span></span>
-<span id="cb14-24"><a href="#cb14-24" tabindex="-1"></a><span class="co">#&gt; BCV2 ISE  0.0012 0.0299</span></span>
-<span id="cb14-25"><a href="#cb14-25" tabindex="-1"></a><span class="co">#&gt; CCV h     0.2002 0.1950</span></span>
-<span id="cb14-26"><a href="#cb14-26" tabindex="-1"></a><span class="co">#&gt; CCV ISE   0.0012 0.0309</span></span>
-<span id="cb14-27"><a href="#cb14-27" tabindex="-1"></a><span class="co">#&gt; MCV h     0.2482 0.2145</span></span>
-<span id="cb14-28"><a href="#cb14-28" tabindex="-1"></a><span class="co">#&gt; MCV ISE   0.0013 0.0237</span></span>
-<span id="cb14-29"><a href="#cb14-29" tabindex="-1"></a><span class="co">#&gt; TCV h     0.2801 0.4943</span></span>
-<span id="cb14-30"><a href="#cb14-30" tabindex="-1"></a><span class="co">#&gt; TCV ISE   0.0018 0.1038</span></span>
-<span id="cb14-31"><a href="#cb14-31" tabindex="-1"></a><span class="co">#&gt; SCV h     0.3035 0.3685</span></span>
-<span id="cb14-32"><a href="#cb14-32" tabindex="-1"></a><span class="co">#&gt; SCV ISE   0.0024 0.0450</span></span>
-<span id="cb14-33"><a href="#cb14-33" tabindex="-1"></a><span class="fu">c</span>(<span class="at">MLCV =</span> <span class="fu">h.mlcv</span>(x)<span class="sc">@</span>h)   <span class="co"># density only</span></span>
-<span id="cb14-34"><a href="#cb14-34" tabindex="-1"></a><span class="co">#&gt;      MLCV </span></span>
-<span id="cb14-35"><a href="#cb14-35" tabindex="-1"></a><span class="co">#&gt; 0.2371343</span></span></code></pre></div>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>            <span class="at">CCV =</span> h.ccv, <span class="at">MCV =</span> h.mcv, <span class="at">TCV =</span> h.tcv, <span class="at">SCV =</span> h.scv,</span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>            <span class="at">PCV =</span> <span class="cf">function</span>(x, ...) <span class="fu">h.pcv</span>(x, <span class="at">m =</span> <span class="dv">2</span>, <span class="at">nrep =</span> <span class="dv">5</span>, ...))</span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co"># reproducible random partitions of PCV (UCV in 2 subsamples, 5 partitions)</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>tab <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>, <span class="cf">function</span>(r) {</span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>  h <span class="ot">&lt;-</span> <span class="fu">sapply</span>(sel, <span class="cf">function</span>(f) <span class="fu">f</span>(x, <span class="at">deriv.order =</span> r)<span class="sc">@</span>h)</span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fu">rbind</span>(<span class="at">h =</span> h, <span class="at">ISE =</span> <span class="fu">sapply</span>(h, ise, <span class="at">r =</span> r)))</span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a>})</span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="co">#&gt; Warning in f(x, deriv.order = r): minimum occurred at one end of the range.</span></span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a><span class="fu">dimnames</span>(tab) <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">paste</span>(<span class="fu">rep</span>(<span class="fu">names</span>(sel), <span class="at">each =</span> <span class="dv">2</span>), <span class="fu">c</span>(<span class="st">&quot;h&quot;</span>, <span class="st">&quot;ISE&quot;</span>)),</span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a>                      <span class="fu">c</span>(<span class="st">&quot;r = 0&quot;</span>, <span class="st">&quot;r = 1&quot;</span>))</span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a><span class="fu">round</span>(tab, <span class="dv">4</span>)</span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a><span class="co">#&gt;            r = 0  r = 1</span></span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a><span class="co">#&gt; AMISE h   0.4953 0.6997</span></span>
+<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a><span class="co">#&gt; AMISE ISE 0.0138 0.2181</span></span>
+<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a><span class="co">#&gt; UCV h     0.2349 0.3205</span></span>
+<span id="cb14-23"><a href="#cb14-23" tabindex="-1"></a><span class="co">#&gt; UCV ISE   0.0012 0.0299</span></span>
+<span id="cb14-24"><a href="#cb14-24" tabindex="-1"></a><span class="co">#&gt; BCV1 h    0.2217 1.3993</span></span>
+<span id="cb14-25"><a href="#cb14-25" tabindex="-1"></a><span class="co">#&gt; BCV1 ISE  0.0012 0.3920</span></span>
+<span id="cb14-26"><a href="#cb14-26" tabindex="-1"></a><span class="co">#&gt; BCV2 h    0.1984 0.1969</span></span>
+<span id="cb14-27"><a href="#cb14-27" tabindex="-1"></a><span class="co">#&gt; BCV2 ISE  0.0012 0.0299</span></span>
+<span id="cb14-28"><a href="#cb14-28" tabindex="-1"></a><span class="co">#&gt; CCV h     0.2002 0.1950</span></span>
+<span id="cb14-29"><a href="#cb14-29" tabindex="-1"></a><span class="co">#&gt; CCV ISE   0.0012 0.0309</span></span>
+<span id="cb14-30"><a href="#cb14-30" tabindex="-1"></a><span class="co">#&gt; MCV h     0.2482 0.2145</span></span>
+<span id="cb14-31"><a href="#cb14-31" tabindex="-1"></a><span class="co">#&gt; MCV ISE   0.0013 0.0237</span></span>
+<span id="cb14-32"><a href="#cb14-32" tabindex="-1"></a><span class="co">#&gt; TCV h     0.2801 0.4943</span></span>
+<span id="cb14-33"><a href="#cb14-33" tabindex="-1"></a><span class="co">#&gt; TCV ISE   0.0018 0.1038</span></span>
+<span id="cb14-34"><a href="#cb14-34" tabindex="-1"></a><span class="co">#&gt; SCV h     0.3035 0.3685</span></span>
+<span id="cb14-35"><a href="#cb14-35" tabindex="-1"></a><span class="co">#&gt; SCV ISE   0.0024 0.0450</span></span>
+<span id="cb14-36"><a href="#cb14-36" tabindex="-1"></a><span class="co">#&gt; PCV h     0.2379 0.2683</span></span>
+<span id="cb14-37"><a href="#cb14-37" tabindex="-1"></a><span class="co">#&gt; PCV ISE   0.0012 0.0205</span></span>
+<span id="cb14-38"><a href="#cb14-38" tabindex="-1"></a><span class="fu">c</span>(<span class="at">MLCV =</span> <span class="fu">h.mlcv</span>(x)<span class="sc">@</span>h)   <span class="co"># density only</span></span>
+<span id="cb14-39"><a href="#cb14-39" tabindex="-1"></a><span class="co">#&gt;      MLCV </span></span>
+<span id="cb14-40"><a href="#cb14-40" tabindex="-1"></a><span class="co">#&gt; 0.2371343</span></span></code></pre></div>
 <p>Two well-known behaviours show up in such comparisons:</p>
 <ul>
 <li><strong>UCV</strong> is unbiased but highly variable, and tends to
@@ -843,26 +891,31 @@ them convenient benchmarks. The claw density, for instance, is hard to
 estimate: the five narrow peaks need a small bandwidth.</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>f_claw <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fl">0.5</span> <span class="sc">*</span> <span class="fu">dnorm</span>(x) <span class="sc">+</span></span>
 <span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>  <span class="fu">rowSums</span>(<span class="fu">sapply</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">4</span>, <span class="cf">function</span>(l) <span class="fl">0.1</span> <span class="sc">*</span> <span class="fu">dnorm</span>(x, l <span class="sc">/</span> <span class="dv">2</span> <span class="sc">-</span> <span class="dv">1</span>, <span class="fl">0.1</span>)))</span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>bw_claw <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">list</span>(<span class="at">UCV =</span> h.ucv, <span class="at">BCV1 =</span> h.bcv, <span class="at">MCV =</span> h.mcv, <span class="at">SCV =</span> h.scv,</span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>                       <span class="at">AMISE =</span> h.amise), <span class="cf">function</span>(f) <span class="fu">suppressWarnings</span>(<span class="fu">f</span>(claw))<span class="sc">@</span>h)</span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="fu">round</span>(bw_claw, <span class="dv">4</span>)</span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="co">#&gt;    UCV   BCV1    MCV    SCV  AMISE </span></span>
-<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="co">#&gt; 0.0588 0.3744 0.3922 0.3315 0.3158</span></span>
-<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">quiet</span>(<span class="fu">plot</span>(<span class="fu">dkde</span>(<span class="at">data =</span> claw, <span class="at">h =</span> bw_claw[[<span class="st">&quot;UCV&quot;</span>]])))</span>
-<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a>p <span class="sc">+</span> ggplot2<span class="sc">::</span><span class="fu">stat_function</span>(<span class="at">fun =</span> f_claw, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>)</span></code></pre></div>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>bw_claw <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">list</span>(<span class="at">UCV =</span> h.ucv, <span class="at">BCV1 =</span> h.bcv, <span class="at">MCV =</span> h.mcv, <span class="at">SCV =</span> h.scv,</span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>                       <span class="at">PCV =</span> <span class="cf">function</span>(s) <span class="fu">h.pcv</span>(s, <span class="at">m =</span> <span class="dv">2</span>, <span class="at">nrep =</span> <span class="dv">5</span>), <span class="at">AMISE =</span> h.amise),</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>                  <span class="cf">function</span>(f) <span class="fu">suppressWarnings</span>(<span class="fu">f</span>(claw))<span class="sc">@</span>h)</span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="fu">round</span>(bw_claw, <span class="dv">4</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co">#&gt;    UCV   BCV1    MCV    SCV    PCV  AMISE </span></span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="co">#&gt; 0.0588 0.3744 0.3922 0.3315 0.0733 0.3158</span></span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">quiet</span>(<span class="fu">plot</span>(<span class="fu">dkde</span>(<span class="at">data =</span> claw, <span class="at">h =</span> bw_claw[[<span class="st">&quot;UCV&quot;</span>]])))</span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a>p <span class="sc">+</span> ggplot2<span class="sc">::</span><span class="fu">stat_function</span>(<span class="at">fun =</span> f_claw, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>)</span></code></pre></div>
 <p><img role="img" aria-label src="data:image/png;base64,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" alt style="display: block; margin: auto;" /></p>
 <p>The same selectors on the five samples:</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>samples <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">kurtotic =</span> kurtotic, <span class="at">outlier =</span> outlier, <span class="at">bimodal =</span> bimodal,</span>
 <span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>                <span class="at">trimodal =</span> trimodal, <span class="at">claw =</span> claw)</span>
-<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">sapply</span>(samples, <span class="cf">function</span>(s)</span>
-<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>  <span class="fu">sapply</span>(<span class="fu">list</span>(<span class="at">AMISE =</span> h.amise, <span class="at">UCV =</span> h.ucv, <span class="at">BCV1 =</span> h.bcv, <span class="at">MCV =</span> h.mcv, <span class="at">SCV =</span> h.scv),</span>
-<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>         <span class="cf">function</span>(f) <span class="fu">suppressWarnings</span>(<span class="fu">f</span>(s))<span class="sc">@</span>h)), <span class="dv">4</span>)</span>
-<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a><span class="co">#&gt;       kurtotic outlier bimodal trimodal   claw</span></span>
-<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a><span class="co">#&gt; AMISE   0.3530  0.0795  0.6443   0.4814 0.3158</span></span>
-<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a><span class="co">#&gt; UCV     0.0524  0.0332  0.2103   0.1003 0.0588</span></span>
-<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a><span class="co">#&gt; BCV1    0.6189  0.0356  0.2246   0.4359 0.3744</span></span>
-<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a><span class="co">#&gt; MCV     0.7061  0.0377  0.2402   0.5001 0.3922</span></span>
-<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a><span class="co">#&gt; SCV     0.2445  0.0492  0.3656   0.4695 0.3315</span></span></code></pre></div>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">sapply</span>(samples, <span class="cf">function</span>(s)</span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>  <span class="fu">sapply</span>(<span class="fu">list</span>(<span class="at">AMISE =</span> h.amise, <span class="at">UCV =</span> h.ucv, <span class="at">BCV1 =</span> h.bcv, <span class="at">MCV =</span> h.mcv, <span class="at">SCV =</span> h.scv,</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>              <span class="at">PCV =</span> <span class="cf">function</span>(s) <span class="fu">h.pcv</span>(s, <span class="at">m =</span> <span class="dv">2</span>, <span class="at">nrep =</span> <span class="dv">5</span>)),</span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>         <span class="cf">function</span>(f) <span class="fu">suppressWarnings</span>(<span class="fu">f</span>(s))<span class="sc">@</span>h)), <span class="dv">4</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a><span class="co">#&gt;       kurtotic outlier bimodal trimodal   claw</span></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a><span class="co">#&gt; AMISE   0.3530  0.0795  0.6443   0.4814 0.3158</span></span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a><span class="co">#&gt; UCV     0.0524  0.0332  0.2103   0.1003 0.0588</span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a><span class="co">#&gt; BCV1    0.6189  0.0356  0.2246   0.4359 0.3744</span></span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a><span class="co">#&gt; MCV     0.7061  0.0377  0.2402   0.5001 0.3922</span></span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a><span class="co">#&gt; SCV     0.2445  0.0492  0.3656   0.4695 0.3315</span></span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a><span class="co">#&gt; PCV     0.0576  0.0332  0.2193   0.4022 0.0739</span></span></code></pre></div>
 </div>
 <div id="parallel-computation" class="section level2">
 <h2>6. Parallel computation</h2>
@@ -884,16 +937,16 @@ actually gets. The results do not depend on <code>nthreads</code>, only
 the computing time does:</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">c</span>(<span class="at">all =</span> <span class="fu">Cpp_omp_threads</span>(<span class="dv">0</span><span class="dt">L</span>), <span class="at">two =</span> <span class="fu">Cpp_omp_threads</span>(<span class="dv">2</span><span class="dt">L</span>))</span>
 <span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="co">#&gt; all two </span></span>
-<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="co">#&gt;  12   2</span></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="co">#&gt;   2   2</span></span>
 <span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1500</span>)</span>
 <span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="fu">system.time</span>(h_seq <span class="ot">&lt;-</span> <span class="fu">h.ucv</span>(y, <span class="at">nthreads =</span> <span class="dv">1</span><span class="dt">L</span>)<span class="sc">@</span>h)</span>
-<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="co">#&gt;    user  system elapsed </span></span>
-<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="co">#&gt;    1.05    0.00    1.03</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="co">#&gt; utilisateur     système      écoulé </span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="co">#&gt;        1.06        0.00        1.08</span></span>
 <span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a><span class="fu">system.time</span>(h_par <span class="ot">&lt;-</span> <span class="fu">h.ucv</span>(y, <span class="at">nthreads =</span> <span class="dv">0</span><span class="dt">L</span>)<span class="sc">@</span>h)</span>
-<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a><span class="co">#&gt;    user  system elapsed </span></span>
-<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a><span class="co">#&gt;    1.14    0.23    0.22</span></span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a><span class="co">#&gt; utilisateur     système      écoulé </span></span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a><span class="co">#&gt;        1.21        0.00        0.84</span></span>
 <span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a><span class="fu">all.equal</span>(h_seq, h_par)</span>
-<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Mean relative difference: 1.519555e-08&quot;</span></span></code></pre></div>
+<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 </div>
 <div id="summary-of-functions" class="section level2">
 <h2>7. Summary of functions</h2>
@@ -944,27 +997,32 @@ the computing time does:</p>
 <td><code>bandwidth</code></td>
 </tr>
 <tr class="odd">
+<td><code>h.pcv(x, m, criterion, nrep, deriv.order, kernel, lower, upper, tol, nthreads)</code></td>
+<td>partitioned CV</td>
+<td><code>bandwidth</code></td>
+</tr>
+<tr class="even">
 <td><code>h.mlcv(x, kernel, lower, upper, tol, nthreads)</code></td>
 <td>likelihood CV (density)</td>
 <td><code>bandwidth</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>show()</code>, <code>plot()</code></td>
 <td>print / ggplot2 figure</td>
 <td>—</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>lines(&lt;bandwidth&gt;)</code></td>
 <td>criterion curve as a ggplot2 layer</td>
 <td>layer</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>kurtotic</code>, <code>outlier</code>, <code>bimodal</code>,
 <code>trimodal</code>, <code>claw</code></td>
 <td>example samples</td>
 <td>numeric</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>Cpp_kernel_constants()</code>, <code>Cpp_omp_threads()</code>,
 <code>Cpp_*()</code></td>
 <td>low-level C++ routines (<code>?&quot;kedd-lowlevel&quot;</code>)</td>
@@ -1002,9 +1060,11 @@ stepwise discrimination analysis program using density estimation.
 <li>Hall, P., Marron, J. S. and Park, B. U. (1992). Smoothed
 cross-validation. <em>Probability Theory and Related Fields</em>, 92,
 1–20.</li>
-<li>Jones, M. C. and Kappenman, R. F. (1991). On a class of kernel
+<li>Jones, M. C. and Kappenman, R. F. (1992). On a class of kernel
 density estimate bandwidth selectors. <em>Scandinavian Journal of
 Statistics</em>, 19, 337–349.</li>
+<li>Marron, J. S. (1987). Partitioned cross-validation. <em>Econometric
+Reviews</em>, 6, 271–283.</li>
 <li>Marron, J. S. and Wand, M. P. (1992). Exact mean integrated squared
 error. <em>The Annals of Statistics</em>, 20, 712–736.</li>
 <li>Rudemo, M. (1982). Empirical choice of histograms and kernel density

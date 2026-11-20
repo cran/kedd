@@ -12,12 +12,13 @@ h.mcv(x, deriv.order = 0L, kernel = "gaussian",
 }
 \arguments{
   \item{x}{numeric vector of data values.}
-  \item{deriv.order}{non-negative integer: derivative order \eqn{r}. MCV uses
-    \eqn{K^{(r+1)}}, so the maximum \eqn{r} is: any for Gaussian and
-    Silverman; cosine 0; logistic 8; Epanechnikov 0; biweight 1; triweight 2;
-    tricube 2; \code{pow(s,t)} \eqn{\min(r^*-1, 6)}{min(r*-1, 6)} (see
-    \code{\link{h.ucv}} for \eqn{r^*}{r*}); not available for uniform and
-    triangular. Above it \code{h = NA} is returned with a warning. See
+  \item{deriv.order}{non-negative integer: derivative order \eqn{r}. MCV evaluates
+    \eqn{K^{(2r+2)}} at the pairwise differences, so \eqn{2r + 2 \le q},
+    where \eqn{q} is the regularity of the kernel. Maximum \eqn{r}: any for
+    Gaussian; logistic 8; biweight, triweight and tricube 0;
+    \code{pow(s,t)} \eqn{\lfloor q/2 \rfloor - 1}{floor(q/2) - 1}, at most 6;
+    not available for Epanechnikov, uniform, triangular and cosine, nor for
+    Silverman (order 4, \eqn{\mu_2(K) = 0}{mu2(K) = 0}). Above it \code{h = NA} is returned with a warning. See
     \code{\link{kedd-package}}, section \sQuote{Maximum derivative order}.}
   \item{kernel}{character string giving the kernel; one of
     \code{"gaussian"} (default), \code{"epanechnikov"}, \code{"uniform"},
@@ -91,7 +92,7 @@ h.mcv(x, deriv.order = 0L, kernel = "gaussian",
   Iago Giné-Vázquez \email{iago.gin-vaz@protonmail.com}}
 \seealso{
   \code{\linkS4class{bandwidth}}, \code{\link{h.ucv}}, \code{\link{h.bcv}},
-  \code{\link{h.ccv}}, \code{\link{h.tcv}}, \code{\link{h.scv}}, \code{\link{h.amise}},
+  \code{\link{h.ccv}}, \code{\link{h.tcv}}, \code{\link{h.scv}}, \code{\link{h.pcv}}, \code{\link{h.amise}},
   \code{\link{kernel.conv}}, \code{\link{kernel.fun}}.
 }
 \examples{

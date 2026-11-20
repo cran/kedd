@@ -21,10 +21,10 @@ bibentry(
   author  = c(person("Arsalane Chouaib", "Guidoum"), person("Amel", "Henider"),
               person("Iago", "Giné-Vázquez")),
   year    = "2026",
-  note    = "R package version 2.0.1",
+  note    = "R package version 2.0.2",
   url     = "https://github.com/ac-guidoum/kedd",
   textVersion = paste(
     "Guidoum, A. C., Henider, A. and Giné-Vázquez, I. (2026). kedd: Kernel Estimator and",
-    "Bandwidth Selection for Density and Its Derivatives. R package version 2.0.1,",
+    "Bandwidth Selection for Density and Its Derivatives. R package version 2.0.2,",
     "https://github.com/ac-guidoum/kedd")
 )

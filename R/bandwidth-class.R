@@ -9,8 +9,13 @@ setClass("bandwidth",
     h           = "numeric",
     min.obj     = "numeric",
     hos         = "numeric",
-    method      = "character"
-  )
+    method      = "character",
+    criterion   = "character",
+    groups      = "integer"
+  ),
+  ## criterion and groups are used by PCV only: the criterion computed in each subsample
+  ## and the subsample of each observation, for each partition one after the other
+  prototype(criterion = character(0), groups = integer(0))
 )
 
 setValidity("bandwidth", function(object) {
@@ -20,12 +25,22 @@ setValidity("bandwidth", function(object) {
     return("'method' must be a single character string.")
   if (length(object@deriv.order) != 1L || object@deriv.order < 0L)
     return("'deriv.order' must be a non-negative integer.")
+  if (length(object@groups) > 0L &&
+      (length(object@data) == 0L || length(object@groups) %% length(object@data) != 0L))
+    return("'groups' must give the subsample of each observation in each partition.")
   TRUE
 })
 
 ## show method
 setMethod("show", "bandwidth", function(object) {
   cat("\nCall: ", object@method, " bandwidth selector\n", sep = "")
+  if (object@method == "PCV" && length(object@criterion) == 1L)
+    cat("Criterion   :", object@criterion, "\n")
+  if (length(object@groups) > 0L) {
+    nrep <- length(object@groups) %/% length(object@data)
+    cat("Subsamples  :", max(object@groups),
+        if (nrep > 1L) paste0("(", nrep, " random partitions)") else "", "\n")
+  }
   cat("Kernel      :", object@kernel, "\n")
   cat("Deriv. order:", object@deriv.order, "\n")
   cat("Bandwidth  h:", format(object@h, digits = 6), "\n")
@@ -40,6 +55,8 @@ setMethod("show", "bandwidth", function(object) {
     stop("AMISE bandwidths come from a closed-form rule: there is no criterion curve.")
   if (bw@method == "MLCV")
     return(vapply(h, .mlcv_obj, numeric(1), kernel = bw@kernel, x = bw@data))
+  if (bw@method == "PCV")
+    return(.pcv_obj(h, bw@criterion, bw@kernel, bw@deriv.order, bw@data, bw@groups))
   as.numeric(Cpp_plot_cv(bw@method, h, bw@kernel, bw@deriv.order, bw@data))
 }
 
@@ -76,11 +93,14 @@ setMethod("plot", "bandwidth",
       TCV  = "Trimmed Cross-Validation",
       SCV  = "Smoothed Cross-Validation",
       AMISE = "Asymptotic MISE",
-      MLCV  = "Maximum-Likelihood CV"
+      MLCV  = "Maximum-Likelihood CV",
+      PCV   = "Partitioned Cross-Validation"
     )
     method_label <- if (!is.null(method_labels[x@method]) &&
                         !is.na(method_labels[x@method]))
                       method_labels[[x@method]] else x@method
+    if (x@method == "PCV" && length(x@criterion) == 1L)
+      method_label <- paste0(method_label, " (", x@criterion, ")")
     kernel_label <- tools::toTitleCase(x@kernel)
 
     ## Build h grid

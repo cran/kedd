@@ -12,15 +12,13 @@ h.ucv(x, deriv.order = 0L, kernel = "gaussian",
 }
 \arguments{
   \item{x}{numeric vector of data values.}
-  \item{deriv.order}{non-negative integer: derivative order \eqn{r}. Maximum
-    \eqn{r} for this selector: any for Gaussian and Silverman; cosine 1;
-    logistic 8; Epanechnikov 1; uniform 0; triangular 0; biweight 2;
-    triweight 3; tricube 3; \code{pow(s,t)} \eqn{\min(r^*, 6)}{min(r*, 6)}, where
-    \eqn{r^*}{r*} is the largest integer \eqn{r < t + 1/2} (and
-    \eqn{r < s + 1/2} if \eqn{s} is not an even integer, and \eqn{2r \le st}{2r <= st}
-    if \eqn{s} and \eqn{t} are integers). Above it \code{h = NA}
-    is returned with a warning. See \code{\link{kedd-package}}, section
-    \sQuote{Maximum derivative order}.}
+  \item{deriv.order}{non-negative integer: derivative order \eqn{r}. The criterion
+    evaluates \eqn{K^{(2r)}} at the pairwise differences, so \eqn{2r \le q},
+    where \eqn{q} is the regularity of the kernel. Maximum \eqn{r}: any for
+    Gaussian; logistic 8; biweight, triweight, tricube and Silverman 1;
+    Epanechnikov, uniform, triangular and cosine 0; \code{pow(s,t)}
+    \eqn{\lfloor q/2 \rfloor}{floor(q/2)}, at most 6. Above it \code{h = NA} is returned with a warning. See
+    \code{\link{kedd-package}}, section \sQuote{Maximum derivative order}.}
   \item{kernel}{character string giving the kernel; one of
     \code{"gaussian"} (default), \code{"epanechnikov"}, \code{"uniform"},
     \code{"triangular"}, \code{"biweight"}, \code{"triweight"},
@@ -100,7 +98,7 @@ h.ucv(x, deriv.order = 0L, kernel = "gaussian",
   Iago Giné-Vázquez \email{iago.gin-vaz@protonmail.com}}
 \seealso{
   \code{\linkS4class{bandwidth}}, \code{\link{h.bcv}}, \code{\link{h.ccv}},
-  \code{\link{h.mcv}}, \code{\link{h.tcv}}, \code{\link{h.scv}}, \code{\link{h.amise}},
+  \code{\link{h.mcv}}, \code{\link{h.tcv}}, \code{\link{h.scv}}, \code{\link{h.pcv}}, \code{\link{h.amise}},
   \code{\link{kernel.conv}}, \code{\link{kernel.fun}}, \code{\link{dkde}}.
 }
 \examples{

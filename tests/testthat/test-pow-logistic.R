@@ -171,7 +171,13 @@ test_that("tous les selecteurs : pow(2,2) == biweight", {
     AMISE = function(k) h.amise(xs, kernel = k),
     MLCV = function(k) h.mlcv(xs, kernel = k)
   )
-  for (m in names(sel)) {
+  ## BCV2 et CCV (K'''' pour r = 0) ne sont pas admissibles pour le biweight (q = 2)
+  for (m in c("BCV2", "CCV")) {
+    expect_warning(a <- sel[[m]]("biweight"), m)
+    expect_warning(b <- sel[[m]]("pow(2,2)"), m)
+    expect_true(is.na(a@h) && is.na(b@h))
+  }
+  for (m in setdiff(names(sel), c("BCV2", "CCV"))) {
     a <- sel[[m]]("biweight"); b <- sel[[m]]("pow(2,2)")
     expect_equal(b@method, m)
     expect_equal(b@kernel, "pow(2,2)")
@@ -207,28 +213,30 @@ test_that("pow(s,t) et noyau nomme : memes ordres maximaux pour les selecteurs",
     b <- is.na(suppressWarnings(sel[[nm]](xs, deriv.order = r, kernel = pow_equiv[[k]]))@h)
     expect_identical(b, a, label = paste(nm, pow_equiv[[k]], "r =", r))
   }
-  ## tricube = pow(3,3) : UCV 3, MCV 2, CCV 1
-  expect_false(is.na(suppressWarnings(h.ucv(xs, deriv.order = 3L, kernel = "tricube"))@h))
-  expect_warning(h.ucv(xs, deriv.order = 4L, kernel = "tricube"), "maximum order")
-  expect_warning(h.mcv(xs, deriv.order = 3L, kernel = "tricube"), "maximum order")
-  expect_warning(h.ccv(xs, deriv.order = 2L, kernel = "tricube"), "maximum order")
+  ## tricube = pow(3,3), q = 3 : UCV 1, MCV 0, CCV indisponible
+  expect_false(is.na(suppressWarnings(h.ucv(xs, deriv.order = 1L, kernel = "tricube"))@h))
+  expect_warning(h.ucv(xs, deriv.order = 2L, kernel = "tricube"), "maximum order")
+  expect_false(is.na(suppressWarnings(h.mcv(xs, kernel = "tricube"))@h))
+  expect_warning(h.mcv(xs, deriv.order = 1L, kernel = "tricube"), "maximum order")
+  expect_warning(h.ccv(xs, kernel = "tricube"), "maximum order")
 })
 
-test_that("pow(s,t) avec s impair : r < s + 1/2", {
-  ## pow(1,4) : |x| non derivable en 0, donc r <= 1 (r <= 2 par t et st seuls)
-  expect_false(is.na(suppressWarnings(h.ucv(xs, deriv.order = 1L, kernel = "pow(1,4)"))@h))
-  expect_warning(h.ucv(xs, deriv.order = 2L, kernel = "pow(1,4)"), "maximum order")
+test_that("pow(s,t) avec s impair : regularite limitee en 0", {
+  ## pow(1,4) : |x| non derivable en 0, donc q = 1 et UCV r = 0 seulement
+  expect_false(is.na(suppressWarnings(h.ucv(xs, kernel = "pow(1,4)"))@h))
+  expect_warning(h.ucv(xs, deriv.order = 1L, kernel = "pow(1,4)"), "maximum order")
+  expect_false(is.na(suppressWarnings(h.amise(xs, deriv.order = 1L, kernel = "pow(1,4)"))@h))
   ## s pair : pas de restriction en 0
   expect_false(is.na(suppressWarnings(h.ucv(xs, deriv.order = 2L, kernel = "pow(2,4)"))@h))
 })
 
-test_that("cosinus : UCV r <= 1, MCV r = 0, CCV indisponible", {
-  expect_false(is.na(suppressWarnings(h.ucv(xs, deriv.order = 1L, kernel = "cosine"))@h))
-  expect_warning(h.ucv(xs, deriv.order = 2L, kernel = "cosine"), "maximum order")
-  expect_warning(h.bcv(xs, deriv.order = 2L, kernel = "cosine"), "maximum order")
-  expect_false(is.na(suppressWarnings(h.mcv(xs, kernel = "cosine"))@h))
-  expect_warning(h.mcv(xs, deriv.order = 1L, kernel = "cosine"), "maximum order")
+test_that("cosinus (q = 1) : UCV r = 0, MCV, BCV et CCV indisponibles", {
+  expect_false(is.na(suppressWarnings(h.ucv(xs, kernel = "cosine"))@h))
+  expect_warning(h.ucv(xs, deriv.order = 1L, kernel = "cosine"), "maximum order")
+  expect_warning(h.bcv(xs, kernel = "cosine"), "BCV1")
+  expect_warning(h.mcv(xs, kernel = "cosine"), "maximum order")
   expect_warning(h.ccv(xs, kernel = "cosine"), "maximum order")
+  expect_false(is.na(suppressWarnings(h.amise(xs, deriv.order = 1L, kernel = "cosine"))@h))
 })
 
 test_that("logistique : R(K^(r)) = |B_{2r+2}| (nombres de Bernoulli)", {

@@ -10,7 +10,7 @@
   An S4 class returned by all bandwidth selector functions in \pkg{kedd}
   (\code{\link{h.ucv}}, \code{\link{h.bcv}}, \code{\link{h.ccv}},
   \code{\link{h.mcv}}, \code{\link{h.tcv}}, \code{\link{h.scv}},
-  \code{\link{h.amise}}, \code{\link{h.mlcv}}).  It stores the selected bandwidth together with
+  \code{\link{h.amise}}, \code{\link{h.mlcv}}, \code{\link{h.pcv}}).  It stores the selected bandwidth together with
   the data, kernel, derivative order, and optimisation details.
 }
 \section{Objects from the Class}{
@@ -39,13 +39,19 @@
     \item{\code{method}:}{Object of class \code{"character"}.  The
       selector used: one of \code{"UCV"}, \code{"BCV1"}, \code{"BCV2"},
       \code{"CCV"}, \code{"MCV"}, \code{"TCV"}, \code{"SCV"},
-      \code{"AMISE"}, \code{"MLCV"}.}
+      \code{"AMISE"}, \code{"MLCV"}, \code{"PCV"}.}
+    \item{\code{criterion}:}{Object of class \code{"character"}.  For
+      \code{"PCV"}, the criterion computed in each subsample; empty otherwise.}
+    \item{\code{groups}:}{Object of class \code{"integer"}.  For
+      \code{"PCV"}, the subsample of each observation, for each random
+      partition one after the other; empty otherwise.}
   }
 }
 \section{Methods}{
   \describe{
-    \item{\code{show(object)}}{Prints a compact summary: method, kernel,
-      derivative order, selected bandwidth, minimum criterion.}
+    \item{\code{show(object)}}{Prints a compact summary: method (and, for
+      PCV, the criterion and the number of subsamples), kernel, derivative order,
+      selected bandwidth, minimum criterion.}
     \item{\code{plot(x, h = NULL, type = "o", n.points = 100L,
       log_scale_x = FALSE, show.min = TRUE, show.hos = FALSE, ...)}}{Draws
       the cross-validation curve over a grid of bandwidths with \pkg{ggplot2}
@@ -68,7 +74,7 @@
 \seealso{
   \code{\link{h.ucv}}, \code{\link{h.bcv}}, \code{\link{h.ccv}},
   \code{\link{h.mcv}}, \code{\link{h.tcv}}, \code{\link{h.scv}},
-  \code{\link{h.amise}}, \code{\link{h.mlcv}}, \code{\link{dkde}}.
+  \code{\link{h.pcv}}, \code{\link{h.amise}}, \code{\link{h.mlcv}}, \code{\link{dkde}}.
 }
 \examples{
 x <- rnorm(100)

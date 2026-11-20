@@ -14,7 +14,8 @@ h.scv(x, g = NULL, deriv.order = 0L, kernel = "gaussian",
 \arguments{
   \item{x}{numeric vector of data values.}
   \item{g}{pilot bandwidth (positive number).  If \code{NULL} (default),
-    \eqn{g = \hat{\sigma}\,0.9266\,n^{-2/13}} (Hall et al. 1992, eq. 4.2).}
+    \eqn{g = \hat{\sigma}\,0.9266\,n^{-2/13}} (Hall et al. 1992, eq. 4.2),
+    whatever \code{deriv.order}.}
   \item{deriv.order}{non-negative integer: derivative order \eqn{r}; no upper
     limit (Gaussian kernel). See \code{\link{kedd-package}}, section
     \sQuote{Maximum derivative order}.}
@@ -48,8 +49,9 @@ h.scv(x, g = NULL, deriv.order = 0L, kernel = "gaussian",
   [((K_h - delta) * f_g)^(r)]^2 = (-1)^r int u u^(2r)}.
   For \eqn{r = 0} it is the criterion of Hall, Marron and Park (1992).
 
-  The default pilot bandwidth is the density pilot of Hall et al.; for
-  derivatives a pilot can be supplied through \code{g}.
+  The default pilot bandwidth is the density pilot of Hall et al., the same
+  for every \eqn{r}; it is not optimal for derivatives, for which a pilot
+  can be supplied through \code{g}.
 }
 \value{
   An S4 object of class \code{\linkS4class{bandwidth}} with
@@ -64,7 +66,7 @@ h.scv(x, g = NULL, deriv.order = 0L, kernel = "gaussian",
   Amel Henider \email{amel.henider@univ-tam.dz} and
   Iago Giné-Vázquez \email{iago.gin-vaz@protonmail.com}}
 \seealso{
-  \code{\link{h.ucv}}, \code{\link{h.bcv}}, \code{\linkS4class{bandwidth}}.
+  \code{\link{h.ucv}}, \code{\link{h.bcv}}, \code{\link{h.pcv}}, \code{\linkS4class{bandwidth}}.
 }
 \examples{
 x <- rnorm(200)
